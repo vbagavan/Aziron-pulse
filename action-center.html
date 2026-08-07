@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Action center moved · Pulse</title>
+<script>
+/* Action center merged into the Pull requests workspace (verb-first tabs).
+   Preserve any hash; default to the personal action tab. */
+(function(){
+  var h = location.hash || '';
+  var map = {'#ready':'#ready','#review':'#review','#all':'#all','#action':'#action'};
+  location.replace('pull-request-analysis.html' + (map[h] || '#action'));
+})();
+</script>
+<style>
+body{font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  color:#0f172a;background:#f8fafc;margin:0;display:grid;place-items:center;min-height:100vh;padding:24px}
+.card{max-width:460px;text-align:center;background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:28px}
+a{color:#3443f9}
+</style>
+</head>
+<body>
+  <main class="card">
+    <h1 style="font-size:20px;margin:0 0 8px">Action center has moved</h1>
+    <p style="margin:0 0 16px;color:#475569">It is now the <strong>Needs your action</strong> tab of the Pull requests workspace, alongside Needs your review and Ready to merge.</p>
+    <p style="margin:0"><a href="pull-request-analysis.html#action">Continue to Pull requests &rarr;</a></p>
+  </main>
+</body>
+</html>

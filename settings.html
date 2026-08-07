@@ -1,0 +1,2594 @@
+<!DOCTYPE html>
+<html lang="en" data-pstate="default">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>/* theme, applied before first paint so there is no flash */
+(function(){try{var t=localStorage.getItem('pulseTheme');
+document.documentElement.dataset.theme=(t==='dark'||t==='light')?t:
+(window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');}catch(e){}})();</script>
+<title>Settings · Pulse</title>
+<style>
+/* ============ PULSE DESIGN SYSTEM — copy this whole <style> verbatim ============ */
+:root{
+  /* Aziron theme — palette mirrors stg01.aziro.com (.light); semantic hues are
+     stepped to -600/-700 so every foreground clears 4.5:1 on white. */
+  --bg:#ffffff; --bg-subtle:#f8fafc; --bg-inset:#f1f5f9;
+  --fg:#0f172a; --fg-muted:#475569; --fg-subtle:#64748b;
+  --border:#e2e8f0; --border-muted:#eef2f7;
+  --accent:#3443f9; --accent-hover:#2836d4; --accent-subtle:#e8edff;
+  --accent-line:rgba(52,67,249,.28); --accent-chip:#3443f9;
+  --success:#047857; --success-subtle:#d1fae5;
+  --danger:#b91c1c; --danger-subtle:#fee2e2;
+  --attention:#b45309; --attention-subtle:#fef3c7;
+  --attest:#7e22ce; --attest-subtle:#f5eaff;
+  --neutral:#475569; --neutral-subtle:#f1f5f9;
+  --font-sans:'Inter',system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans",Helvetica,Arial,sans-serif;
+  --font-mono:'Space Mono',ui-monospace,"SF Mono","Cascadia Code",Menlo,Consolas,monospace;
+  --on-fill:#ffffff;                 /* text on a saturated accent/success/danger fill */
+  --inverse-bg:#0f172a; --inverse-fg:#ffffff;   /* toasts + tooltips */
+  --warn-line:#fcd34d; --error-line:#fecaca;    /* banner hairlines */
+  --shimmer:rgba(255,255,255,.7);
+  --scrim:rgba(15,23,42,.45);
+  --shadow-sm:0 1px 2px 0 rgba(0,0,0,.05);
+  --shadow-overlay:0 8px 24px rgba(15,23,42,.12);
+  --r:6px; --r-lg:10px;
+  --topbar-h:48px; --rail-w:48px; --rail-w-open:224px; --maxw:1200px;
+  color-scheme:light;
+}
+/* ---------- Dark theme (Aziron [data-theme="dark"]) ----------
+   Same token names, flipped values. Semantic hues are lifted to their -400
+   step so they read on a #0d1626 canvas, and --on-fill goes dark because the
+   lifted fills are too light to carry white text. */
+html[data-theme="dark"]{
+  --bg:#0d1626; --bg-subtle:#141f38; --bg-inset:#1b2540;
+  --fg:#e8eefc; --fg-muted:#c3cee2; --fg-subtle:#8fa2c4;
+  --border:#1d2a48; --border-muted:#16203a;
+  --accent:#5b7cff; --accent-hover:#7a96ff; --accent-subtle:#1b2c5e;
+  --accent-line:rgba(122,150,255,.38); --accent-chip:#9db2ff;
+  --success:#34d399; --success-subtle:#0c3b2c;
+  --danger:#ff6b6b; --danger-subtle:#43181c;
+  --attention:#fbbf24; --attention-subtle:#3f2c07;
+  --attest:#c99cff; --attest-subtle:#2f2057;
+  --neutral:#c3cee2; --neutral-subtle:#1b2540;
+  --on-fill:#0b1322;
+  --inverse-bg:#e8eefc; --inverse-fg:#0b1322;
+  --warn-line:#7c5310; --error-line:#7f2427;
+  --shimmer:rgba(255,255,255,.06);
+  --scrim:rgba(2,6,16,.66);
+  --shadow-sm:0 1px 2px 0 rgba(0,0,0,.4);
+  --shadow-overlay:0 8px 24px rgba(0,0,0,.5);
+  color-scheme:dark;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{font:13px/1.5 var(--font-sans);color:var(--fg);background:var(--bg)}
+::selection{background:var(--accent-subtle)}
+:focus{outline:none}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:2px}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+h1{font-size:24px;font-weight:600;line-height:1.25}
+h2{font-size:16px;font-weight:600;line-height:1.25}
+h3{font-size:14px;font-weight:600;line-height:1.25}
+.mono{font-family:var(--font-mono);font-size:12px}
+.muted{color:var(--fg-muted)} .subtle{color:var(--fg-subtle)}
+.small{font-size:12px}
+[hidden]{display:none!important}
+/* ---------- Aziron product rail (platform chrome) ---------- */
+.app{display:flex;align-items:flex-start;min-height:100vh}
+.mainwrap{flex:1;min-width:0;display:flex;flex-direction:column;min-height:100vh}
+.rail{position:sticky;top:0;height:100vh;flex:none;width:var(--rail-w);display:flex;flex-direction:column;padding:8px;background:var(--bg-subtle);color:var(--fg);border-right:1px solid var(--border);z-index:29;transition:width .2s ease}
+.rail[data-expanded="true"]{width:var(--rail-w-open)}
+.raillogo{display:flex;align-items:center;justify-content:center;gap:10px;height:36px;flex:none;border:none;background:none;color:inherit;cursor:pointer;padding:0 4px;overflow:hidden;white-space:nowrap}
+.raillogo svg{flex:none}
+.rail[data-expanded="true"] .raillogo{justify-content:flex-start}
+.rail[data-expanded="true"] .raillogo::after{content:"Aziron";font:600 14px var(--font-sans)}
+.railscroll{flex:1;min-height:0;overflow-y:auto;scrollbar-width:none;display:flex;flex-direction:column}
+.railscroll::-webkit-scrollbar{display:none}
+.railgrp{display:flex;flex-direction:column;gap:4px;padding-top:12px}
+.railbtn{display:flex;align-items:center;justify-content:center;gap:10px;min-height:40px;width:100%;padding:8px;border:1px solid transparent;border-radius:var(--r);background:none;color:var(--fg);cursor:pointer;overflow:hidden;white-space:nowrap;transition:background-color .15s ease,color .15s ease}
+.railbtn svg{flex:none;width:16px;height:16px;stroke:currentColor;fill:none}
+.railbtn:hover:not([aria-current="page"]),.railbtn:focus-visible:not([aria-current="page"]){background:var(--bg-inset);color:var(--fg);text-decoration:none}
+.railbtn[aria-current="page"]{background:var(--accent-subtle);color:var(--accent-chip);font-weight:600;position:relative}
+.railbtn[aria-current="page"]:hover,.railbtn[aria-current="page"]:focus-visible{background:var(--accent-subtle);color:var(--accent-chip)}
+.rail[data-expanded="false"] .railbtn[data-tip]::after{display:none}
+.rail-tooltip{position:fixed;z-index:80;transform:translateY(-50%);padding:4px 8px;border-radius:4px;background:var(--inverse-bg);color:var(--inverse-fg);font:11px var(--font-sans);white-space:nowrap;pointer-events:none;box-shadow:var(--shadow-sm)}
+.railbtn[aria-current="page"]::before{content:"";position:absolute;left:-8px;top:6px;bottom:6px;width:3px;border-radius:2px;background:var(--accent)}
+.rail[data-expanded="true"] .railbtn{justify-content:flex-start;padding:10px}
+.rail[data-expanded="true"] .railbtn::after{content:attr(data-label);font:600 13px var(--font-sans);overflow:hidden;text-overflow:ellipsis}
+.rail[data-expanded="true"] .railgrp::before{content:attr(aria-label);padding:4px 8px 2px;color:var(--fg-muted);font:700 10px var(--font-sans);letter-spacing:.06em;text-transform:uppercase}
+/* ---------- Shell ---------- */
+.topbar{position:sticky;top:0;z-index:40;height:var(--topbar-h);display:flex;align-items:center;gap:12px;padding:0 16px;background:var(--bg);border-bottom:1px solid var(--border)}
+.brand{display:flex;align-items:center;gap:8px;font-weight:600;font-size:14px;color:var(--fg)}
+.brand:hover{text-decoration:none}
+.brand svg{flex:none}
+.crumbs{display:flex;align-items:center;gap:6px;font-size:13px;min-width:0;flex:1}
+.crumbs a{color:var(--fg-muted)} .crumbs a:hover{color:var(--accent)}
+.crumbs .sep{color:var(--fg-subtle)} .crumbs .cur{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.topbar-actions{display:flex;align-items:center;gap:8px;margin-left:auto}
+.searchbtn{display:flex;align-items:center;gap:8px;height:30px;padding:0 10px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg);color:var(--fg-subtle);font-size:12px;cursor:pointer;min-width:180px}
+.searchbtn:hover{background:var(--bg-inset);border-color:var(--fg-subtle)}
+.searchbtn kbd{margin-left:auto;font:11px var(--font-mono);border:1px solid var(--border);border-radius:4px;padding:0 4px;background:var(--bg-subtle)}
+.avatar{width:28px;height:28px;border-radius:50%;background:var(--accent);color:var(--on-fill);display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex:none}
+.avatar.sm{width:20px;height:20px;font-size:9px}
+.layout{display:flex;flex:1;min-height:calc(100vh - var(--topbar-h))}
+.content{flex:1;min-width:0;padding:24px 36px;display:flex;flex-direction:column}
+.container{width:100%;max-width:none;margin:0;flex:1}
+.pagehead{display:flex;align-items:flex-start;gap:16px;margin-bottom:24px;flex-wrap:wrap}
+.pagehead .ttl{flex:1;min-width:240px}
+.pagehead p{color:var(--fg-muted);margin-top:4px;font-size:13px}
+.pagehead .actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.section{margin-bottom:24px}
+.section>h2{margin-bottom:12px}
+footer.pfoot{max-width:none;margin:32px 0 0;width:100%;padding-top:16px;border-top:1px solid var(--border-muted);display:flex;align-items:center;gap:16px;font-size:12px;color:var(--fg-subtle)}
+footer.pfoot .flinks{margin-left:auto;display:flex;gap:16px;align-items:center}
+/* ---------- Buttons & controls ---------- */
+.btn{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 12px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg-subtle);color:var(--fg);font:600 13px var(--font-sans);cursor:pointer;white-space:nowrap;box-shadow:var(--shadow-sm)}
+.btn:hover{background:var(--bg-inset);border-color:var(--fg-subtle)}
+.btn:active{background:var(--border-muted)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--on-fill)}
+.btn.primary:hover{background:var(--accent-hover);border-color:var(--accent-hover)}
+.btn.danger{color:var(--danger)}
+.btn.danger:hover{background:var(--danger);border-color:var(--danger);color:var(--on-fill)}
+.btn.invisible{background:transparent;border-color:transparent;box-shadow:none;color:var(--accent)}
+.btn.invisible:hover{background:var(--accent-subtle)}
+.btn.sm{height:26px;padding:0 8px;font-size:12px}
+.btn[disabled],.btn[aria-disabled="true"]{opacity:.5;cursor:not-allowed;pointer-events:none}
+.icon-btn{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border:1px solid transparent;border-radius:var(--r);background:transparent;color:var(--fg-muted);cursor:pointer}
+.icon-btn:hover{background:var(--bg-subtle);color:var(--fg)}
+.input,.select,textarea.input{height:32px;padding:0 10px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg);font:13px var(--font-sans);color:var(--fg);width:100%}
+textarea.input{height:auto;padding:8px 10px;resize:vertical;min-height:72px}
+.input:focus-visible,.select:focus-visible,textarea.input:focus-visible{outline:2px solid var(--accent);outline-offset:-1px}
+.input[aria-invalid="true"]{border-color:var(--danger)}
+.field{display:flex;flex-direction:column;gap:4px;margin-bottom:16px}
+.field>label{font-weight:600;font-size:13px}
+.field .hint{font-size:12px;color:var(--fg-muted)}
+.field .err{font-size:12px;color:var(--danger);display:flex;gap:4px;align-items:center}
+.select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22m6%209%206%206%206-6%22%20%2F%3E%3C%2Fsvg%3E");background-repeat:no-repeat;background-position:right 8px center;background-size:12px 12px;padding-right:28px;cursor:pointer}
+.checkbox,.radio{display:flex;gap:8px;align-items:flex-start;cursor:pointer;font-size:13px}
+.checkbox input,.radio input{accent-color:var(--accent);width:14px;height:14px;margin-top:2px;flex:none;cursor:pointer}
+.switch{position:relative;display:inline-flex;align-items:center;cursor:pointer}
+.switch input{position:absolute;opacity:0;width:100%;height:100%;cursor:pointer}
+.switch .track{width:36px;height:20px;border-radius:999px;background:var(--bg-inset);border:1px solid var(--border);transition:background .15s;position:relative}
+.switch .track::after{content:"";position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:var(--on-fill);border:1px solid var(--border);transition:left .15s}
+.switch input:checked+.track{background:var(--accent);border-color:var(--accent)}
+.switch input:checked+.track::after{left:17px;border-color:var(--accent)}
+.switch input:focus-visible+.track{outline:2px solid var(--accent);outline-offset:2px}
+.segmented{display:inline-flex;border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+.segmented button{height:30px;padding:0 12px;border:none;background:var(--bg);font:600 12px var(--font-sans);color:var(--fg-muted);cursor:pointer;border-right:1px solid var(--border)}
+.segmented button:last-child{border-right:none}
+.segmented button[aria-pressed="true"]{background:var(--accent-subtle);color:var(--accent-chip)}
+/* ---------- Theme toggle ---------- */
+#themeBtn .ic-moon{display:none}
+html[data-theme="dark"] #themeBtn .ic-sun{display:none}
+html[data-theme="dark"] #themeBtn .ic-moon{display:inline}
+/* ---------- Tabs ---------- */
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--border);margin-bottom:16px;overflow-x:auto}
+.tabs [role="tab"]{padding:8px 12px;border:none;background:none;font:13px var(--font-sans);color:var(--fg-muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;display:flex;gap:6px;align-items:center}
+.tabs [role="tab"]:hover{color:var(--fg)}
+.tabs [role="tab"][aria-selected="true"]{color:var(--fg);font-weight:600;border-bottom-color:var(--accent)}
+.tabs .cnt{font:11px var(--font-mono);background:var(--bg-inset);border-radius:999px;padding:0 6px}
+/* ---------- Cards / stats ---------- */
+.card{border:1px solid var(--border);border-radius:var(--r);background:var(--bg);box-shadow:var(--shadow-sm)}
+.card>.card-h{padding:12px 16px;border-bottom:1px solid var(--border-muted);display:flex;align-items:center;gap:8px}
+.card>.card-h h2,.card>.card-h h3{flex:1}
+.card>.card-b{padding:16px}
+.cardgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px}
+.statrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:24px}
+.stat{border:1px solid var(--border);border-radius:var(--r);padding:12px 16px;background:var(--bg);min-width:0}
+.stat .lbl{font-size:12px;color:var(--fg-muted)}
+.stat .val{font:600 22px var(--font-mono);margin-top:2px;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.stat .delta{font:11px var(--font-mono)}
+.delta.up{color:var(--success)} .delta.down{color:var(--danger)}
+.kv{display:grid;grid-template-columns:max-content 1fr;gap:6px 16px;font-size:13px}
+.kv dt{color:var(--fg-muted)} .kv dd{font-family:var(--font-mono);font-size:12px;overflow-wrap:anywhere;min-width:0}
+/* ---------- Badges / chips ---------- */
+.label{display:inline-flex;align-items:center;height:20px;padding:0 8px;border-radius:999px;font:600 11px var(--font-sans);border:1px solid transparent}
+.label.neutral{background:var(--neutral-subtle);color:var(--neutral)}
+.label.success{background:var(--success-subtle);color:var(--success)}
+.label.danger{background:var(--danger-subtle);color:var(--danger)}
+.label.attention{background:var(--attention-subtle);color:var(--attention)}
+.label.attest{background:var(--attest-subtle);color:var(--attest)}
+.label.accent{background:var(--accent-subtle);color:var(--accent-chip)}
+.label.outline{background:var(--bg);border-color:var(--border);color:var(--fg-muted)}
+.verdict{display:inline-flex;align-items:center;gap:5px;height:22px;padding:0 8px;border-radius:999px;font:600 11px var(--font-mono);white-space:nowrap}
+.verdict::before{content:"";width:12px;height:12px;flex:none;background:currentColor;-webkit-mask:var(--verdict-icon) center/contain no-repeat;mask:var(--verdict-icon) center/contain no-repeat}
+.verdict.passed{background:var(--success-subtle);color:var(--success);--verdict-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%0A%20%20%3Cpath%20d%3D%22M20%206%209%2017l-5-5%22%20%2F%3E%0A%3C%2Fsvg%3E")}
+.verdict.failed{background:var(--danger-subtle);color:var(--danger);--verdict-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%0A%20%20%3Cpath%20d%3D%22M18%206%206%2018%22%20%2F%3E%0A%20%20%3Cpath%20d%3D%22m6%206%2012%2012%22%20%2F%3E%0A%3C%2Fsvg%3E")}
+.verdict.advisory{background:var(--attention-subtle);color:var(--attention);--verdict-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%0A%20%20%3Cpath%20d%3D%22m21.73%2018-8-14a2%202%200%200%200-3.48%200l-8%2014A2%202%200%200%200%204%2021h16a2%202%200%200%200%201.73-3%22%20%2F%3E%0A%20%20%3Cpath%20d%3D%22M12%209v4%22%20%2F%3E%0A%20%20%3Cpath%20d%3D%22M12%2017h.01%22%20%2F%3E%0A%3C%2Fsvg%3E")}
+.verdict.refused{background:var(--attest-subtle);color:var(--attest);--verdict-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%0A%20%20%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%2210%22%20%2F%3E%0A%20%20%3Cline%20x1%3D%229%22%20x2%3D%2215%22%20y1%3D%2215%22%20y2%3D%229%22%20%2F%3E%0A%3C%2Fsvg%3E")}
+.mode{display:inline-flex;align-items:center;gap:5px;font:600 11px var(--font-sans)}
+.mode::before{content:"";width:8px;height:8px;border-radius:50%}
+.mode.shadow{color:var(--neutral)} .mode.shadow::before{background:var(--neutral)}
+.mode.advisory{color:var(--attention)} .mode.advisory::before{background:var(--attention)}
+.mode.enforce{color:var(--success)} .mode.enforce::before{background:var(--success)}
+.grade{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:var(--r);font:700 14px var(--font-mono);flex:none}
+.grade.lg{width:48px;height:48px;font-size:26px;border-radius:var(--r-lg)}
+.grade.g-a{background:var(--success-subtle);color:var(--success)}
+.grade.g-b{background:var(--accent-subtle);color:var(--accent-chip)}
+.grade.g-c{background:var(--attention-subtle);color:var(--attention)}
+.grade.g-d{background:var(--danger-subtle);color:var(--danger)}
+.grade.g-none{background:var(--bg-inset);color:var(--fg-subtle)}
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+/* ---------- Attestation receipt ---------- */
+.receipt{position:relative;border:1px solid var(--border);border-radius:var(--r);background:var(--bg-subtle);padding:16px;font-family:var(--font-mono);font-size:12px;overflow:hidden}
+.receipt::before,.receipt::after{content:"";position:absolute;left:12px;right:12px;height:0;border-top:1px dashed var(--border)}
+.receipt::before{top:6px} .receipt::after{bottom:6px}
+.receipt .wm{position:absolute;right:-10px;bottom:-18px;opacity:.05;pointer-events:none}
+.receipt .rrow{display:flex;justify-content:space-between;gap:16px;padding:3px 0}
+.receipt .rrow span:first-child{color:var(--fg-muted)}
+.receipt .sig{word-break:break-all;color:var(--attest);font-weight:600}
+/* ---------- Tables ---------- */
+.tblwrap{border:1px solid var(--border);border-radius:var(--r);overflow-x:auto;background:var(--bg)}
+table.tbl{width:100%;border-collapse:collapse;font-size:13px;min-width:560px}
+.tbl th{position:sticky;top:0;background:var(--bg-subtle);text-align:left;font-weight:600;font-size:12px;color:var(--fg-muted);padding:8px 12px;border-bottom:1px solid var(--border);white-space:nowrap;z-index:1}
+.tbl th[data-sort]{cursor:pointer;user-select:none}
+.tbl th[data-sort]:hover{color:var(--fg)}
+.tbl th[data-sort]::after{content:"↕";margin-left:4px;opacity:.4;font-size:10px}
+.tbl th[aria-sort="ascending"]::after{content:"↑";opacity:1}
+.tbl th[aria-sort="descending"]::after{content:"↓";opacity:1}
+.tbl td{padding:8px 12px;border-bottom:1px solid var(--border-muted);vertical-align:middle}
+.tbl tbody tr:last-child td{border-bottom:none}
+.tbl tbody tr{transition:background .1s}
+.tbl tbody tr:hover{background:var(--bg-subtle)}
+.tbl tbody tr.rowlink{cursor:pointer}
+.tbl tbody tr[aria-selected="true"]{background:var(--accent-subtle)}
+.tbl .num{font-family:var(--font-mono);font-size:12px;text-align:right}
+.tbl .id{font-family:var(--font-mono);font-size:12px}
+.bulkbar{display:flex;align-items:center;gap:12px;padding:8px 12px;background:var(--accent-subtle);border:1px solid var(--accent);border-radius:var(--r);margin-bottom:8px;font-size:13px}
+.pager{display:flex;align-items:center;gap:4px;justify-content:center;margin-top:16px}
+.pager button{min-width:30px;height:30px;padding:0 8px;border:1px solid transparent;border-radius:var(--r);background:none;font:13px var(--font-sans);color:var(--accent);cursor:pointer}
+.pager button:hover{background:var(--bg-subtle);border-color:var(--border)}
+.pager button[aria-current="page"]{background:var(--accent);color:var(--on-fill);font-weight:600}
+.pager button[disabled]{color:var(--fg-subtle);cursor:default}
+/* ---------- Filter bar ---------- */
+.filterbar{display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
+.filterbar .input{width:220px;flex:none}
+.filterbar .select{width:auto;flex:none}
+.filterbar .spacer{flex:1}
+/* ---------- Menus / dropdowns ---------- */
+.menuwrap{position:relative;display:inline-block}
+.menu{position:absolute;right:0;top:calc(100% + 4px);min-width:180px;background:var(--bg);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--shadow-overlay);padding:4px;z-index:60}
+.menu[hidden]{display:none}
+.menu button,.menu a{display:flex;width:100%;align-items:center;gap:8px;padding:6px 10px;border:none;background:none;border-radius:4px;font:13px var(--font-sans);color:var(--fg);cursor:pointer;text-align:left}
+.menu button:hover,.menu a:hover,.menu .focus{background:var(--bg-subtle);text-decoration:none}
+.menu .danger{color:var(--danger)}
+.menu hr{border:none;border-top:1px solid var(--border-muted);margin:4px 0}
+/* ---------- Banners / alerts ---------- */
+.banner{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg-subtle);font-size:13px;margin-bottom:16px}
+.banner.info{border-color:var(--accent-line);background:var(--accent-subtle)}
+.banner.warn{border-color:var(--warn-line);background:var(--attention-subtle)}
+.banner.error{border-color:var(--error-line);background:var(--danger-subtle)}
+.banner .x{margin-left:auto}
+/* ---------- Empty / error / restricted ---------- */
+.empty,.errbox,.restricted{border:1px dashed var(--border);border-radius:var(--r);padding:48px 24px;text-align:center;color:var(--fg-muted)}
+.empty svg,.errbox svg,.restricted svg{opacity:.35;margin-bottom:12px}
+.empty :is(h2,h3),.errbox :is(h2,h3),.restricted :is(h2,h3){color:var(--fg);margin-bottom:4px;font-size:14px}
+.empty p,.errbox p,.restricted p{max-width:420px;margin:0 auto 16px}
+.errbox{border-style:solid;border-color:var(--error-line)}
+/* ---------- Skeletons ---------- */
+.skel{position:relative;overflow:hidden;background:var(--bg-inset);border-radius:4px;color:transparent!important;pointer-events:none;user-select:none}
+.skel::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,var(--shimmer),transparent);animation:shimmer 1.4s infinite}
+@keyframes shimmer{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
+.skel-line{height:12px;margin:6px 0}
+.skel-block{height:80px;border-radius:var(--r)}
+/* ---------- Overlays ---------- */
+.overlay{position:fixed;inset:0;background:var(--scrim);z-index:80;display:flex;align-items:flex-start;justify-content:center;padding:10vh 16px 16px}
+.overlay[hidden]{display:none}
+.modal{background:var(--bg);border-radius:var(--r-lg);box-shadow:var(--shadow-overlay);width:100%;max-width:520px;max-height:80vh;display:flex;flex-direction:column}
+.modal .m-h{display:flex;align-items:center;gap:8px;padding:16px;border-bottom:1px solid var(--border-muted)}
+.modal .m-h h2{flex:1;font-size:14px}
+.modal .m-b{padding:16px;overflow-y:auto}
+.modal .m-f{display:flex;justify-content:flex-end;gap:8px;padding:12px 16px;border-top:1px solid var(--border-muted)}
+.drawerlay{position:fixed;inset:0;background:var(--scrim);z-index:80}
+.drawerlay[hidden]{display:none}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:480px;max-width:92vw;background:var(--bg);box-shadow:var(--shadow-overlay);z-index:81;display:flex;flex-direction:column;transform:translateX(0)}
+.drawer .m-h{display:flex;align-items:center;gap:8px;padding:16px;border-bottom:1px solid var(--border-muted)}
+.drawer .m-h h2{flex:1;font-size:14px}
+.drawer .m-b{padding:16px;overflow-y:auto;flex:1}
+/* ---------- Toasts ---------- */
+.toasts{position:fixed;left:16px;bottom:16px;z-index:100;display:flex;flex-direction:column;gap:8px}
+.toast{display:flex;align-items:center;gap:10px;background:var(--inverse-bg);color:var(--inverse-fg);border-radius:var(--r);padding:10px 14px;font-size:13px;box-shadow:var(--shadow-overlay);animation:toastin .18s ease-out;max-width:360px}
+.toast.success{background:var(--success);color:var(--on-fill)} .toast.danger{background:var(--danger);color:var(--on-fill)}
+.toast button{background:none;border:none;color:currentColor;font-weight:600;cursor:pointer;font-size:12px;text-decoration:underline}
+@keyframes toastin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+/* ---------- Tooltips ---------- */
+[data-tip]{position:relative}
+[data-tip]:not(.railbtn):hover::after,[data-tip]:not(.railbtn):focus-visible::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:var(--inverse-bg);color:var(--inverse-fg);font:11px var(--font-sans);padding:4px 8px;border-radius:4px;white-space:nowrap;z-index:70;pointer-events:none}
+/* ---------- Code ---------- */
+.codeblock{position:relative;background:var(--bg-subtle);border:1px solid var(--border);border-radius:var(--r);padding:12px;font:12px/1.6 var(--font-mono);overflow-x:auto;white-space:pre}
+.codeblock .copybtn{position:absolute;top:6px;right:6px}
+/* ---------- Charts (inline SVG helpers) ---------- */
+.spark{vertical-align:middle}
+.spark polyline{fill:none;stroke:var(--accent);stroke-width:1.5}
+.spark .fillpath{fill:var(--accent-subtle);stroke:none}
+.barrow{display:flex;align-items:center;gap:8px;font-size:12px;margin:4px 0}
+.barrow .bar{height:8px;border-radius:4px;background:var(--accent)}
+.barrow .blbl{width:120px;color:var(--fg-muted);flex:none}
+.barrow .bval{font-family:var(--font-mono);color:var(--fg-muted)}
+/* ---------- Timeline / stepper ---------- */
+.stepper{display:flex;gap:0;font-size:12px;overflow-x:auto}
+.step{flex:1;min-width:96px;text-align:center;position:relative;padding-top:20px;color:var(--fg-muted)}
+.step::before{content:"";position:absolute;top:6px;left:50%;transform:translateX(-50%);width:12px;height:12px;border-radius:50%;background:var(--bg);border:2px solid var(--border);z-index:1}
+.step::after{content:"";position:absolute;top:11px;left:calc(-50% + 8px);right:calc(50% + 8px);height:2px;background:var(--border)}
+.step:first-child::after{display:none}
+.step.done{color:var(--fg)} .step.done::before{background:var(--success);border-color:var(--success)}
+.step.done::after{background:var(--success)}
+.step.active::before{border-color:var(--accent);background:var(--accent-subtle)}
+/* ---------- Activity feed ---------- */
+.feed{list-style:none}
+.feed li{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--border-muted);font-size:13px}
+.feed li:last-child{border-bottom:none}
+.feed .ficon{width:28px;height:28px;border-radius:50%;background:var(--bg-inset);display:flex;align-items:center;justify-content:center;flex:none;color:var(--fg-muted)}
+.feed time{color:var(--fg-subtle);font:11px var(--font-mono);margin-left:auto;flex:none}
+/* ---------- Load stagger ---------- */
+@media (prefers-reduced-motion:no-preference){
+  /* Fill "backwards", never "both": a lingering fill keeps a transform on each child,
+     making it a stacking context that traps open menus below later siblings. */
+  .container>*{animation:rise .3s ease-out backwards}
+  .container>*:nth-child(2){animation-delay:.06s}.container>*:nth-child(3){animation-delay:.12s}
+  .container>*:nth-child(4){animation-delay:.18s}.container>*:nth-child(5){animation-delay:.24s}
+  @keyframes rise{from{opacity:0;transform:translateY(2px)}to{opacity:1;transform:none}}
+}
+@media (prefers-reduced-motion:reduce){.skel::after{animation:none}.toast{animation:none}}
+/* ---------- Command palette ---------- */
+.palette{max-width:560px;margin-top:0}
+.palette input{width:100%;height:44px;border:none;border-bottom:1px solid var(--border);padding:0 16px;font:14px var(--font-sans);border-radius:var(--r-lg) var(--r-lg) 0 0}
+.palette input:focus-visible{outline:none;box-shadow:inset 0 -2px 0 var(--accent)}
+.palette ul{list-style:none;max-height:320px;overflow-y:auto;padding:6px}
+.palette li a{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:var(--r);color:var(--fg);font-size:13px}
+.palette li a:hover,.palette li.focus a{background:var(--bg-subtle);text-decoration:none}
+.palette li .grp{margin-left:auto;font-size:11px;color:var(--fg-subtle)}
+.sccols{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:24px}
+.scgrp{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--fg-subtle);margin:0 0 8px}
+.sclist{display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 12px;margin:0 0 16px;font-size:12px}
+.sclist dt{white-space:nowrap}
+.sclist dd{margin:0;color:var(--fg-muted);overflow-wrap:anywhere}
+.repoctx{margin-left:2px;min-width:0}
+@media (max-width:900px){.repobtn{max-width:150px}}
+@media (max-width:640px){.repoctx{display:none}}
+html.surface-vscode .repoctx{display:none}
+.repobtn{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 8px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg);color:var(--fg-muted);font:600 12px var(--font-sans);cursor:pointer;max-width:230px}
+.repobtn:hover{background:var(--bg-inset);border-color:var(--fg-subtle);color:var(--fg)}
+.repobtn span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:var(--font-mono);font-size:11px}
+.repomenu{min-width:250px;max-height:340px;overflow:auto;left:0;right:auto}
+.repofilterwrap{padding:6px 6px 4px;position:sticky;top:0;background:var(--bg)}
+.repofilter{height:28px;font-size:12px}
+.repomenu .ritem{display:flex;align-items:center;gap:8px;width:100%;padding:6px 10px;border:none;background:none;border-radius:4px;font:12px var(--font-sans);color:var(--fg);cursor:pointer;text-align:left}
+.repomenu .ritem:hover{background:var(--bg-subtle)}
+.repomenu .ritem .rname{font-family:var(--font-mono);font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.repomenu .ritem .rmode{margin-left:auto;font-size:10px;color:var(--fg-subtle)}
+.repomenu .rsep{border:none;border-top:1px solid var(--border-muted);margin:4px 0}
+.belldot{position:absolute;top:5px;right:6px;width:8px;height:8px;border-radius:50%;background:var(--danger);border:2px solid var(--bg)}
+.bellwrap{position:relative;display:inline-flex}
+.palette .etype{font:10px var(--font-mono);color:var(--fg-subtle);border:1px solid var(--border);border-radius:4px;padding:0 4px;margin-right:8px;flex:none}
+.ctxbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg-subtle);margin-bottom:16px}
+.wstabs{display:flex;gap:2px;border-bottom:1px solid var(--border);margin:-4px 0 20px;overflow-x:auto;scrollbar-width:none}
+.wstabs::-webkit-scrollbar{display:none}
+.wstabs a{display:inline-flex;align-items:center;gap:7px;padding:8px 12px;border-bottom:2px solid transparent;margin-bottom:-1px;color:var(--fg-muted);font:13px var(--font-sans);white-space:nowrap;border-radius:var(--r) var(--r) 0 0}
+.wstabs a:hover{background:var(--bg-subtle);color:var(--fg);text-decoration:none}
+.wstabs a[aria-current="page"]{color:var(--fg);font-weight:600;border-bottom-color:var(--accent)}
+.wstabs a svg{color:var(--fg-subtle);flex:none}
+.wstabs a[aria-current="page"] svg{color:var(--accent)}
+.wstabs .cnt{font:11px var(--font-mono);background:var(--bg-inset);border-radius:999px;padding:0 6px;color:var(--fg-muted)}
+html.surface-vscode .wstabs a{padding:6px 9px;font-size:12px}
+.ctxbar .ctxlbl{font:600 10px var(--font-sans);letter-spacing:.08em;text-transform:uppercase;color:var(--fg-subtle);padding-right:2px}
+.ctxbar .select{width:auto;height:28px;font-size:12px;background-color:var(--bg)}
+.ctxbar .ctxspacer{flex:1}
+.ctxfresh{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--fg-muted)}
+.ctxfresh::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--success)}
+.livechip{display:inline-flex;align-items:center;gap:5px;height:20px;padding:0 8px;border-radius:999px;background:var(--attention-subtle);color:var(--attention);font:600 10px var(--font-mono);white-space:nowrap}
+.livechip::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.mdef{border:none;background:none;color:var(--fg-subtle);cursor:help;font:600 10px var(--font-sans);width:16px;height:16px;border:1px solid var(--border);border-radius:50%;line-height:1;padding:0;flex:none}
+.mdef:hover{color:var(--accent);border-color:var(--accent)}
+.stat .lbl{display:flex;align-items:center;gap:6px}
+.syshealth{margin:8px 6px 0;padding:8px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg);font-size:11px;color:var(--fg-muted)}
+.syshealth b{display:flex;align-items:center;gap:6px;color:var(--fg);font-size:11px}
+.syshealth b::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--success)}
+.syshealth span{display:block;margin-top:4px;font-family:var(--font-mono);font-size:10px}
+html[data-rail-open="0"] .syshealth{display:none}
+/* ---------- State switcher ---------- */
+.stpanel{position:fixed;right:16px;bottom:16px;z-index:99;background:var(--bg);border:1px solid var(--border);border-radius:var(--r-lg);box-shadow:var(--shadow-overlay);padding:12px;width:200px;font-size:12px}
+.stpanel[hidden]{display:none}
+.stpanel h3{font-size:12px;margin-bottom:8px}
+.stpanel .radio{padding:3px 0}
+/* ---------- Sidebar drawer (tablet) + Panel mode (VS Code) ---------- */
+.pageselect{display:none}
+@media (max-width:1012px){
+  /* the rail is the only nav now, so it stays reachable — expanded it overlays the page */
+  .rail[data-expanded="true"]{position:fixed;box-shadow:var(--shadow-overlay)}
+}
+@media (max-width:640px){ .searchbtn{min-width:0} .searchbtn .sbtxt,.searchbtn kbd{display:none} .col-optional{display:none} .statrow{grid-template-columns:repeat(2,minmax(0,1fr))} .kv{grid-template-columns:1fr;gap:2px 0} .kv dt{margin-top:6px} }
+html.surface-vscode{--topbar-h:40px}
+html.surface-vscode body{font-size:12px}
+html.surface-vscode .topbar{padding:0 8px;gap:8px}
+html.surface-vscode .crumbs,html.surface-vscode .searchbtn{display:none}
+html.surface-vscode .rail,html.surface-vscode .railtoggle{display:none}
+html.surface-vscode .pageselect{display:block;flex:1;max-width:280px}
+html.surface-vscode .content{padding:12px 36px}
+html.surface-vscode h1{font-size:18px}
+html.surface-vscode .pagehead{margin-bottom:16px}
+html.surface-vscode .col-optional{display:none}
+html.surface-vscode .statrow{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+html.surface-vscode .tbl th,html.surface-vscode .tbl td{padding:6px 8px}
+html.surface-vscode .drawer{width:100%;max-width:100%}
+</style>
+<style>
+/* ============ settings.html page styles ============ */
+.setcard{max-width:680px}
+.avatar.xl{width:64px;height:64px;font-size:22px}
+.avatarrow{display:flex;align-items:center;gap:16px;margin-bottom:20px;flex-wrap:wrap}
+.input.monoval{font-family:var(--font-mono);font-size:12px}
+.input.numin{width:120px;font-family:var(--font-mono);font-size:12px;flex:none}
+.numline{display:flex;align-items:center;gap:8px}
+.numline .unit{font:12px var(--font-mono);color:var(--fg-muted)}
+.radiostack{display:flex;flex-direction:column;gap:10px}
+.radiostack .radio .rt{font-weight:600}
+.radiostack .radio .rd{display:block;font-size:12px;color:var(--fg-muted);font-weight:400}
+.savebar{display:flex;justify-content:flex-end;gap:8px;padding-top:16px;border-top:1px solid var(--border-muted);margin-top:8px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.chip{display:inline-flex;align-items:center;gap:4px;height:24px;padding:0 4px 0 10px;background:var(--bg-inset);border:1px solid var(--border);border-radius:999px;font:12px var(--font-mono)}
+.chip button{border:none;background:none;cursor:pointer;color:var(--fg-muted);font-size:11px;width:16px;height:16px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;padding:0}
+.chip button:hover{background:var(--danger-subtle);color:var(--danger)}
+.chip button[disabled]{opacity:.4;cursor:not-allowed}
+.chiprow{display:flex;gap:8px;max-width:420px}
+.chiprow .input{font-family:var(--font-mono);font-size:12px}
+.dzcard{border:1px solid var(--error-line);border-radius:var(--r);background:var(--bg);max-width:680px}
+.dzrow{display:flex;align-items:center;gap:16px;padding:16px;border-bottom:1px solid var(--border-muted);flex-wrap:wrap}
+.dzrow:last-child{border-bottom:none}
+.dzrow .dzt{flex:1;min-width:240px}
+/* GitHub parity: inline user chip (avatar + handle) */
+.uchip{display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+.uchip>.avatar{width:16px;height:16px;font-size:8px;line-height:1;font-family:var(--font-sans)}
+.dzrow .dzt p{font-size:12px;color:var(--fg-muted);margin-top:2px}
+.pane>.section>h2{margin-bottom:4px}
+.pane .sectionsub{font-size:12px;color:var(--fg-muted);margin-bottom:12px}
+.pane .setcard+.setcard{margin-top:16px}
+.chip .cv{overflow-wrap:anywhere}
+#yamlBlock{max-width:680px}
+/* ============ GitHub parity: micro-conventions ============ */
+/* Row titles are real links — cmd-click, middle-click and "Copy link address" all work. */
+a.rowtitle{color:var(--fg);font-weight:600;text-decoration:none}
+a.rowtitle:hover,a.rowtitle:focus-visible{color:var(--accent);text-decoration:underline}
+a.rowtitle.mono{font-family:var(--font-mono);font-size:12px;font-weight:500}
+/* People are links: initials avatar + @handle, titled with name and role. */
+a.user{color:var(--fg);font-weight:600;text-decoration:none}
+a.user:hover,a.user:focus-visible{color:var(--accent);text-decoration:underline}
+/* Copyable identifiers — the icon reveals on hover/focus and flips to a check. */
+.copyable{display:inline-flex;align-items:center;gap:2px;max-width:100%;vertical-align:middle}
+.copyable>.cp{width:20px;height:20px;border-radius:4px;flex:none;opacity:0}
+.copyable:hover>.cp,.copyable>.cp:focus-visible,.copyable>.cp.done{opacity:1}
+.copyable>.cp.done{color:var(--success)}
+@media (hover:none){.copyable>.cp{opacity:1}}
+/* Persistent flash banner — stays until dismissed, unlike the 4s toast. */
+.banner.success{border-color:var(--success);background:var(--success-subtle)}
+.banner.flash{margin-bottom:12px}
+.banner.flash .fico{flex:none;font-weight:700}
+.banner.flash.success .fico{color:var(--success)}
+.banner.flash.warn .fico{color:var(--attention)}
+.banner.flash.error .fico{color:var(--danger)}
+.banner.flash .fmsg{flex:1;min-width:0}
+.banner.flash .x{width:24px;height:24px;flex:none}
+/* Type-the-name confirmation field inside the shared confirm dialog. */
+.pxcn{margin-top:12px}
+.pxcn label{display:block;font-size:12px;color:var(--fg-muted);margin-bottom:6px}
+.pxcn .input{font-family:var(--font-mono);font-size:12px}
+/* Long identifiers must be able to wrap inside their copy wrapper. */
+.copyable>a,.copyable>span{min-width:0;overflow-wrap:anywhere}
+/* The same weight as a linked handle, for handles that sit inside another link. */
+.uchip .user{font-weight:600}
+.avatar.bot{background:var(--attest)}
+/* ============ Change-safety pattern (present on every pane) ============ */
+/* Scope + blast radius + the two rehearsal actions, above the controls they govern. */
+.settoolbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:8px 12px;margin-bottom:16px;
+  border:1px solid var(--border);border-radius:var(--r);background:var(--bg-subtle)}
+.settoolbar p{flex:1;min-width:180px;font-size:12px;color:var(--fg-muted);overflow-wrap:anywhere}
+.settoolbar .right{display:flex;gap:8px;flex-wrap:wrap}
+.scopepill{display:inline-flex;align-items:center;gap:5px;height:22px;padding:0 10px;border-radius:999px;
+  background:var(--accent-subtle);color:var(--accent-chip);font:600 11px var(--font-mono);white-space:nowrap}
+.pane>.chgsafe{margin-top:16px}
+/* A policy row: statement on the left, the control that changes it on the right. */
+.polrow{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border-muted);flex-wrap:wrap}
+.polrow:first-child{padding-top:0}
+.polrow:last-child{border-bottom:none;padding-bottom:0}
+.polrow .pt{flex:1;min-width:200px}
+.polrow .pt strong{display:block;font-size:13px}
+.polrow .pt span{display:block;margin-top:2px;font-size:12px;color:var(--fg-muted);overflow-wrap:anywhere}
+.polrow .pc{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.polrow .pc .select{width:auto;min-width:200px;max-width:100%}
+.polrow .pc .input.numin{margin:0}
+.polrow .pc .unit{font:12px var(--font-mono);color:var(--fg-muted)}
+/* ============ Integration / adapter cards (Code scanning, Unit testing) ============ */
+.intgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(268px,100%),1fr));gap:12px}
+.intcard{display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;min-width:0;padding:12px;
+  border:1px solid var(--border);border-radius:var(--r);background:var(--bg)}
+.intcard[data-status="connected"]{border-color:var(--accent-line)}
+.intmark{width:32px;height:32px;border-radius:var(--r);flex:none;display:flex;align-items:center;justify-content:center;
+  background:var(--bg-inset);border:1px solid var(--border);color:var(--fg-muted);font:700 11px var(--font-mono)}
+.intcard[data-status="connected"] .intmark{background:var(--accent-subtle);border-color:var(--accent-line);color:var(--accent-chip)}
+.intbody{min-width:0}
+.intbody h3{font-size:13px}
+.intbody p{margin:2px 0 8px;font-size:12px;color:var(--fg-muted);overflow-wrap:anywhere}
+.capchips{display:flex;flex-wrap:wrap;gap:4px}
+.capchip{padding:1px 8px;border:1px solid var(--border);border-radius:999px;background:var(--bg-inset);
+  color:var(--fg-muted);font:11px var(--font-mono);white-space:nowrap}
+.intfoot{display:flex;align-items:center;gap:8px;margin-top:10px;flex-wrap:wrap}
+.intfoot .btn{margin-left:auto}
+/* Side-by-side fields that collapse to one column well before 420px. */
+.formgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(240px,100%),1fr));gap:0 16px}
+.formgrid .field.full{grid-column:1/-1}
+.card.wide{max-width:none}
+.hdnote{font:11px var(--font-mono);color:var(--fg-subtle);white-space:nowrap}
+.testline{margin-top:12px;font-size:12px;color:var(--fg-muted);overflow-wrap:anywhere}
+.testline.ok{color:var(--success)}
+.testline.bad{color:var(--danger)}
+</style>
+<style id="aziron-expanded-sidebar">
+/* Full Aziron navigation — contextual labels stay visible on every Enterprise page. */
+.rail{--az-rail-hover:#e9eef4;--az-rail-active:#dce3ec;--az-rail-active-fg:#172033;width:56px;padding:8px 6px;background:#f1f4f7;color:#1d2533;border-right-color:#d9e0e8}
+html[data-theme="dark"] .rail{--az-rail-hover:#1b2943;--az-rail-active:#223452;--az-rail-active-fg:#e8eefc;background:#101a2e;color:#e8eefc;border-right-color:#20304d}
+.rail[data-expanded="true"]{width:256px}
+.raillogo{height:52px;justify-content:center;padding:4px 0;gap:10px}
+.raillogo svg{width:32px;height:32px}
+.raillogo::after{content:none}.rail[data-expanded="true"] .raillogo{justify-content:flex-start;padding:4px 8px}.rail[data-expanded="true"] .raillogo::after{content:"Aziron";font:700 20px/1 var(--font-sans);letter-spacing:-.03em;color:inherit}
+.railscroll{padding-bottom:8px}
+.railgrp{gap:2px;padding-top:10px}
+.railgrp::before{content:none}.rail[data-expanded="true"] .railgrp::before{content:attr(aria-label);height:32px;padding:4px 8px 2px;display:flex;align-items:center;color:#64748b;font:700 12px/1 var(--font-sans);letter-spacing:.08em;text-transform:uppercase}
+html[data-theme="dark"] .railgrp::before{color:#9aabc6}
+.railbtn{justify-content:center;gap:0;min-height:32px;height:32px;width:40px;margin:0 auto;padding:0;border-radius:6px;color:inherit;font-size:14px}.rail[data-expanded="true"] .railbtn{justify-content:flex-start;gap:8px;width:100%;margin:0;padding:0 8px}
+.railbtn svg{width:16px;height:16px}
+.railbtn::after{content:none}.rail[data-expanded="true"] .railbtn::after{content:attr(data-label);font:500 14px/1 var(--font-sans);overflow:hidden;text-overflow:ellipsis}
+.railbtn:hover:not([aria-current="page"]),.railbtn:focus-visible:not([aria-current="page"]){background:var(--az-rail-hover);color:var(--az-rail-active-fg)}
+.railbtn[aria-current="page"],.railbtn[aria-current="page"]:hover,.railbtn[aria-current="page"]:focus-visible{background:var(--az-rail-active);color:var(--az-rail-active-fg);box-shadow:none}
+.railbtn[aria-current="page"]::before{display:none}
+@media(max-width:900px){.rail{position:fixed;transform:translateX(-105%);width:256px;padding:8px;box-shadow:var(--shadow-overlay)}.rail[data-expanded="true"]{position:fixed;transform:translateX(0);width:256px}.railtoggle{display:grid}}
+</style><style id="aziron-reference-topbar">
+/* Compact header patterned after the Pulse run workspace. */
+.topbar{height:56px;padding:0 20px;gap:10px;background:var(--bg)}
+.topbar .brand,.topbar .pageselect{display:none!important}
+.topbar .repoctx{display:block;position:relative;min-width:0}.topbar .repobtn{height:36px;max-width:210px;border-radius:8px;background:var(--bg);font-size:14px}
+.topbar .crumbs{flex:0 0 auto;gap:8px;font-size:14px}
+.topbar .crumbs a{color:var(--fg-muted);text-decoration:none}
+.topbar .crumbs .sep{color:var(--fg-subtle)}
+.topbar-live{display:inline-flex;align-items:center;gap:6px;height:22px;padding:0 9px;border-radius:999px;background:var(--success-subtle);color:var(--success);font:12px var(--font-mono);white-space:nowrap;margin-left:auto}
+.topbar-live::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--success);box-shadow:0 0 0 3px color-mix(in srgb,var(--success) 16%,transparent)}
+.topbar-actions{gap:10px;margin-left:0}
+.topbar .searchbtn{height:36px;min-width:300px;border-radius:8px;background:var(--bg);font-size:14px}
+.topbar .searchbtn kbd{font-size:10px}
+.reference-estate{display:inline-flex;align-items:center;gap:7px;height:36px;padding:0 11px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--fg);font:600 14px var(--font-sans);white-space:nowrap}
+.reference-estate::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--success);box-shadow:0 0 0 3px var(--success-subtle)}
+.reference-estate svg{width:12px;height:12px;color:var(--fg-subtle)}
+.reference-start{height:36px;padding:0 14px;border-radius:8px;box-shadow:var(--shadow-sm)}
+.reference-more{width:36px;height:36px;border-color:var(--border);background:var(--bg)}
+.reference-divider{width:1px;height:24px;background:var(--border);margin:0 2px}
+.reference-language{display:inline-flex;align-items:center;gap:4px;height:32px;padding:0 2px;border:0;background:transparent;color:var(--fg-muted);font:13px var(--font-sans)}
+.reference-language svg{width:15px;height:15px}
+.topbar .bellwrap{display:inline-flex;position:relative}.topbar .avatar{border-radius:8px;background:var(--accent-subtle);color:var(--accent-chip)}
+@media(max-width:1350px){.reference-estate,.reference-language,.reference-divider{display:none}.topbar .searchbtn{min-width:220px}}
+@media(max-width:1100px){.topbar-live{display:none}.topbar .searchbtn{min-width:180px}}
+@media(max-width:900px){.topbar .repoctx{display:none}}
+@media(max-width:760px){.topbar .searchbtn{min-width:0}.reference-more{display:none}.reference-start{padding:0 10px}.reference-start .reference-start-label{display:none}}
+</style></head>
+<body>
+<a href="#main" class="btn sm" style="position:absolute;left:-9999px;top:8px;z-index:200" onfocus="this.style.left='8px'" onblur="this.style.left='-9999px'">Skip to content</a>
+
+<div class="app">
+<aside class="rail" id="rail" data-expanded="false" aria-label="Aziron products">
+  <button type="button" class="raillogo" id="railLogo" aria-label="Aziron workspace">
+    <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><rect x="1" y="1" width="22" height="22" rx="6" fill="var(--accent)"/><path d="M12 6.5 16.8 17h-2.2l-.9-2.1H10.3L9.4 17H7.2Zm0 3.7-1.1 2.9h2.2Z" fill="var(--on-fill)"/></svg>
+  </button>
+  <div class="railscroll">
+    <nav class="railgrp" aria-label="Pulse">
+          <a class="railbtn" href="index.html" data-label="Overview" aria-label="Overview" data-tip="Overview"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-house" aria-hidden="true"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8" /> <path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /></svg></a>
+          <a class="railbtn" href="pull-request-analysis.html" data-label="Pull requests" aria-label="Pull requests" data-tip="Pull requests"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-git-pull-request" aria-hidden="true"><circle cx="18" cy="18" r="3" /> <circle cx="6" cy="6" r="3" /> <path d="M13 6h3a2 2 0 0 1 2 2v7" /> <line x1="6" x2="6" y1="9" y2="21" /></svg></a>
+        </nav>
+    <nav class="railgrp" aria-label="Verify">
+          <a class="railbtn" data-ws="runs" href="runs.html" data-label="Runs" aria-label="Runs" data-tip="Runs"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-play" aria-hidden="true"><circle cx="12" cy="12" r="10" /> <polygon points="10 8 16 12 10 16 10 8" /></svg></a>
+          <a class="railbtn" data-ws="quality" href="findings.html" data-label="Quality" aria-label="Quality" data-tip="Quality"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-alert" aria-hidden="true"><circle cx="12" cy="12" r="10" /> <line x1="12" x2="12" y1="8" y2="12" /> <line x1="12" x2="12.01" y1="16" y2="16" /></svg></a>
+        </nav>
+    <nav class="railgrp" aria-label="Understand">
+          <a class="railbtn" data-ws="insights" href="risk-model.html" data-label="Insights" aria-label="Insights" data-tip="Insights"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trending-up" aria-hidden="true"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17" /> <polyline points="16 7 22 7 22 13" /></svg></a>
+          <a class="railbtn" href="security.html" data-label="Security" aria-label="Security" data-tip="Security"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-lock" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2" ry="2" /> <path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg></a>
+        </nav>
+    <nav class="railgrp" aria-label="Configure">
+          <a class="railbtn" data-ws="estate" href="repositories.html" data-label="Repositories" aria-label="Repositories" data-tip="Repositories"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-folder-git-2" aria-hidden="true"><path d="M9 20H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H20a2 2 0 0 1 2 2v5" /> <circle cx="13" cy="12" r="2" /> <path d="M18 19c-2.8 0-5-2.2-5-5v8" /> <circle cx="20" cy="19" r="2" /></svg></a>
+          <a class="railbtn" data-ws="org" href="settings.html" data-label="Settings" aria-label="Settings" data-tip="Settings"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-settings" aria-hidden="true"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" /> <circle cx="12" cy="12" r="3" /></svg></a>
+        </nav>
+  </div>
+</aside>
+<div class="mainwrap">
+<header class="topbar">
+  <button class="icon-btn railtoggle" id="railToggle" aria-label="Expand Aziron navigation" aria-controls="rail" aria-expanded="false" data-tip="Aziron navigation">
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-panel-left" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2" /> <path d="M9 3v18" /></svg>
+  </button>
+  <div class="menuwrap repoctx">
+      <button class="repobtn" id="repoCtxBtn" aria-haspopup="menu" aria-expanded="false" aria-label="Repository context">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-folder-git-2" aria-hidden="true"><path d="M9 20H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H20a2 2 0 0 1 2 2v5" /> <circle cx="13" cy="12" r="2" /> <path d="M18 19c-2.8 0-5-2.2-5-5v8" /> <circle cx="20" cy="19" r="2" /></svg>
+        <span id="repoCtxLabel">All repositories</span>
+        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
+      </button>
+      <div class="menu repomenu" id="repoCtxMenu" role="menu" hidden>
+        <div class="repofilterwrap"><input class="input repofilter" id="repoCtxFilter" type="search" placeholder="Find a repository…" aria-label="Find a repository"></div>
+        <div id="repoCtxList"></div>
+      </div>
+    </div>
+    <a class="brand" href="index.html" aria-label="Pulse home">
+    <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 22 21H2Z" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round"/><path d="M8.5 15.5h7" stroke="var(--accent)" stroke-width="2" stroke-linecap="round"/></svg>
+    Pulse
+  </a>
+  <select class="select pageselect" id="pageSelect" aria-label="Go to page"></select>
+  <nav class="crumbs" aria-label="Breadcrumb">
+    <a href="index.html">Aziron</a><span class="sep">/</span><span class="cur" aria-current="page">Settings</span>
+  </nav>
+  <div class="topbar-actions">
+    <button class="searchbtn" id="paletteBtn" aria-label="Search — opens command palette">
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search" aria-hidden="true"><circle cx="11" cy="11" r="8" /> <path d="m21 21-4.3-4.3" /></svg>
+      <span class="sbtxt">Search or jump to…</span><kbd>⌘K</kbd>
+    </button>
+    <button class="icon-btn" id="themeBtn" aria-label="Switch to dark theme" aria-pressed="false" data-tip="Theme">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ic-sun lucide lucide-sun" aria-hidden="true"><circle cx="12" cy="12" r="4" /> <path d="M12 2v2" /> <path d="M12 20v2" /> <path d="m4.93 4.93 1.41 1.41" /> <path d="m17.66 17.66 1.41 1.41" /> <path d="M2 12h2" /> <path d="M20 12h2" /> <path d="m6.34 17.66-1.41 1.41" /> <path d="m19.07 4.93-1.41 1.41" /></svg>
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ic-moon lucide lucide-moon" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" /></svg>
+    </button>
+    <div class="menuwrap">
+      <button class="icon-btn" id="createBtn" aria-haspopup="menu" aria-expanded="false" aria-label="Create new" data-tip="Create new">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus" aria-hidden="true"><path d="M5 12h14" /> <path d="M12 5v14" /></svg>
+      </button>
+      <div class="menu" id="createMenu" role="menu" hidden>
+        <a role="menuitem" href="repositories.html">Connect repository</a>
+        <button role="menuitem" onclick="PS.startRun()">Start a verification run</button>
+        <a role="menuitem" href="pull-request-analysis.html">Verify a pull request</a>
+        <a role="menuitem" href="action-center.html">Open action queue</a>
+        <hr><a role="menuitem" href="team-management.html">Invite teammate</a>
+        <a role="menuitem" href="reports.html">Share a report</a>
+      </div>
+    </div>
+    <span class="bellwrap"><a class="icon-btn" href="notifications.html" aria-label="Notifications — 3 unread" data-tip="Notifications">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-bell" aria-hidden="true"><path d="M10.268 21a2 2 0 0 0 3.464 0" /> <path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326" /></svg>
+    </a><span class="belldot" id="bellDot" aria-hidden="true"></span></span>
+    <div class="menuwrap">
+      <button class="icon-btn" id="userMenuBtn" aria-haspopup="menu" aria-expanded="false" aria-label="Account menu — Dominic Adams">
+        <span class="avatar">DA</span>
+      </button>
+      <div class="menu" id="userMenu" role="menu" hidden>
+        <span style="display:block;padding:6px 10px" class="small muted">Signed in as <strong>@dominic</strong></span>
+        <hr><a role="menuitem" href="pull-request-analysis.html">Your pull requests</a>
+        <a role="menuitem" href="findings.html">Your findings</a>
+        <a role="menuitem" href="repositories.html">Your repositories</a>
+        <hr><a role="menuitem" href="settings.html">Settings</a>
+        <a role="menuitem" href="prototype-guide.html">Prototype guide</a>
+        <hr><a role="menuitem" href="onboarding.html#signin">Sign out</a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="layout">
+
+  <main class="content" id="main">
+    <div class="container">
+      <div class="pagehead">
+        <div class="ttl">
+          <h1>Settings</h1>
+          <p>Personal and workspace configuration for the Aziron workspace — verification behavior, defaults, and agent access.</p>
+        </div>
+        <div class="actions">
+          <button class="btn primary" id="saveAllBtn">Save changes</button>
+        </div>
+      </div>
+
+      <nav class="wstabs" aria-label="Workspace sections">
+        <a href="settings.html" aria-current="page">Settings</a>
+        <a href="team-management.html">Team</a>
+        <a href="integrations.html">Integrations</a>
+        <a href="notifications.html">Notifications</a>
+      </nav>
+
+
+      <div data-state="restricted">
+        <div class="banner warn" role="status">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-lock" style="flex:none;margin-top:2px" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2" ry="2" /> <path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
+          <div>
+            <strong>Read-only view.</strong> Your role (Analyst) can browse settings but not change them.
+            Ask an Admin — <a href="team-management.html">Sarah Okafor or Dominic Adams</a> — to make changes.
+          </div>
+          <button class="btn sm x" onclick="PS.toast('Access request sent to Sarah Okafor','success')">Request access</button>
+        </div>
+      </div>
+
+      <div data-state="default restricted" id="settingsBody">
+        <div class="tabs" role="tablist" aria-label="Settings sections" data-tabs-hash="1">
+          <button role="tab" data-tab="profile" aria-controls="pane-profile" aria-selected="true">Profile</button>
+          <button role="tab" data-tab="workspace" aria-controls="pane-workspace" aria-selected="false">Workspace</button>
+          <button role="tab" data-tab="repo-defaults" aria-controls="pane-repo-defaults" aria-selected="false">Repository defaults</button>
+          <button role="tab" data-tab="verification" aria-controls="pane-verification" aria-selected="false">Verification</button>
+          <button role="tab" data-tab="code-scanning" aria-controls="pane-code-scanning" aria-selected="false">Code scanning <span class="cnt" id="csTabCnt">1</span></button>
+          <button role="tab" data-tab="unit-testing" aria-controls="pane-unit-testing" aria-selected="false">Unit testing</button>
+          <button role="tab" data-tab="security-policy" aria-controls="pane-security-policy" aria-selected="false">Security policy</button>
+          <button role="tab" data-tab="runners" aria-controls="pane-runners" aria-selected="false">Runners <span class="cnt">3</span></button>
+          <button role="tab" data-tab="agents" aria-controls="pane-agents" aria-selected="false">Agents <span class="cnt" id="patCnt">2</span></button>
+          <button role="tab" data-tab="governance" aria-controls="pane-governance" aria-selected="false">Governance &amp; audit</button>
+          <button role="tab" data-tab="danger" aria-controls="pane-danger" aria-selected="false">Danger zone</button>
+        </div>
+
+        <!-- ============ Profile ============ -->
+        <div class="pane" id="pane-profile" role="tabpanel" aria-label="Profile settings">
+          <div class="paneflash" id="flash-profile"></div>
+          <div class="card setcard">
+            <div class="card-h"><h2>Profile</h2><span class="label accent">Admin</span></div>
+            <div class="card-b">
+              <div class="avatarrow">
+                <span class="avatar xl" aria-hidden="true">DA</span>
+                <div>
+                  <button class="btn sm" onclick="PS.toast('Avatar upload is stubbed in this prototype')">Upload avatar</button>
+                  <div class="hint small muted" style="margin-top:4px">PNG or JPG, square, up to 1&nbsp;MB.</div>
+                </div>
+              </div>
+              <div class="field">
+                <label for="pfName">Full name</label>
+                <input class="input" id="pfName" value="Dominic Adams" autocomplete="name">
+              </div>
+              <div class="field">
+                <label for="pfEmail">Email</label>
+                <input class="input" id="pfEmail" type="email" value="dominic@aziro.com" autocomplete="email">
+                <span class="hint">Verdicts and refusal alerts you follow are delivered here — tune them in <a href="notifications.html">Notifications</a>.</span>
+              </div>
+              <div class="field">
+                <label for="pfHandle">Handle</label>
+                <span class="copyable" style="width:100%"><input class="input monoval" id="pfHandle" value="@dominic" readonly aria-describedby="pfHandleHint"><button type="button" class="icon-btn cp copybtn" data-copy="@dominic" data-copy-label="Handle copied" aria-label="Copy your handle @dominic"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-copy" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2" ry="2" /> <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" /></svg></button></span>
+                <span class="hint" id="pfHandleHint">Handles are fixed once created — they appear on attestation activity and finding threads.</span>
+              </div>
+              <div class="savebar">
+                <button class="btn primary" data-savetab="profile">Save profile</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ============ Workspace ============ -->
+        <div class="pane" id="pane-workspace" role="tabpanel" aria-label="Workspace settings" hidden>
+          <div class="paneflash" id="flash-workspace"></div>
+          <div class="card setcard">
+            <div class="card-h"><h2>Workspace</h2><span class="mono muted">aziron</span></div>
+            <div class="card-b">
+              <div class="field">
+                <label for="wsName">Workspace name</label>
+                <input class="input" id="wsName" value="Aziron">
+              </div>
+              <div class="field">
+                <label for="wsSlug">Slug</label>
+                <input class="input monoval" id="wsSlug" value="aziron" readonly aria-describedby="wsSlugHint">
+                <span class="hint" id="wsSlugHint">Used in attestation receipts and report URLs. Fixed after creation.</span>
+              </div>
+              <fieldset class="field" style="border:none">
+                <legend style="font-weight:600;font-size:13px;margin-bottom:6px">Default enforcement mode for new repositories</legend>
+                <div class="radiostack" role="radiogroup" aria-label="Default enforcement mode">
+                  <label class="radio"><input type="radio" name="wsMode" value="shadow" checked>
+                    <span><span class="rt"><span class="mode shadow">Shadow</span></span>
+                    <span class="rd">Runs and attests silently — nothing is reported to pull requests yet.</span></span></label>
+                  <label class="radio"><input type="radio" name="wsMode" value="advisory">
+                    <span><span class="rt"><span class="mode advisory">Advisory</span></span>
+                    <span class="rd">Verdicts appear on pull requests but never block a merge.</span></span></label>
+                  <label class="radio"><input type="radio" name="wsMode" value="enforce">
+                    <span><span class="rt"><span class="mode enforce">Enforce</span></span>
+                    <span class="rd">Failed verdicts block merges. New repositories rarely start here.</span></span></label>
+                </div>
+                <span class="hint" style="margin-top:6px">Repositories graduate Shadow → Advisory → Enforce in <a href="rollout.html">Rollout</a>. Current estate: <span class="mono">5</span> Enforce · <span class="mono">7</span> Advisory · <span class="mono">6</span> Shadow.</span>
+              </fieldset>
+              <fieldset class="field" style="border:none">
+                <legend style="font-weight:600;font-size:13px;margin-bottom:6px">Baseline diffing default</legend>
+                <div class="radiostack" role="radiogroup" aria-label="Baseline diffing default">
+                  <label class="radio"><input type="radio" name="wsBaseline" value="baseline" checked>
+                    <span><span class="rt">Baseline</span>
+                    <span class="rd">Compare each run against the merge-base only. Fast, precise for single pull requests.</span></span></label>
+                  <label class="radio"><input type="radio" name="wsBaseline" value="broad">
+                    <span><span class="rt">Broad</span>
+                    <span class="rd">Also diff across stacked pull requests — a failure introduced earlier in a stack stays <em>pre-existing</em>, not <em>new</em>.</span></span></label>
+                </div>
+                <span class="hint" style="margin-top:6px">Teams working in stacked PRs should prefer Broad; F-2381-style baseline-new calls depend on this setting.</span>
+              </fieldset>
+              <div class="savebar">
+                <button class="btn primary" data-savetab="workspace">Save workspace</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ============ Repository defaults ============ -->
+        <div class="pane" id="pane-repo-defaults" role="tabpanel" aria-label="Repository defaults" hidden>
+          <div class="paneflash" id="flash-repo-defaults"></div>
+          <div class="card setcard">
+            <div class="card-h"><h2>Repository defaults</h2></div>
+            <div class="card-b">
+              <p class="muted" style="margin-bottom:16px">Applied to newly connected repositories. Each of the <a href="repositories.html">18 repositories</a> can override these in its own settings.</p>
+              <div class="field">
+                <label for="tpInput">Test patterns</label>
+                <span class="hint" style="margin-bottom:6px">Globs Pulse treats as executable test files during selection.</span>
+                <div class="chips" id="tpChips" role="list" aria-label="Test patterns"></div>
+                <div class="chiprow">
+                  <input class="input" id="tpInput" placeholder="e.g. **/*_test.go" aria-label="Add test pattern">
+                  <button class="btn" id="tpAdd">Add</button>
+                </div>
+              </div>
+              <div class="field">
+                <label for="exInput">Exclude globs</label>
+                <span class="hint" style="margin-bottom:6px">Paths never selected or counted toward coverage.</span>
+                <div class="chips" id="exChips" role="list" aria-label="Exclude globs"></div>
+                <div class="chiprow">
+                  <input class="input" id="exInput" placeholder="e.g. vendor/**" aria-label="Add exclude glob">
+                  <button class="btn" id="exAdd">Add</button>
+                </div>
+              </div>
+              <div class="savebar">
+                <button class="btn primary" data-savetab="repo-defaults">Save defaults</button>
+              </div>
+            </div>
+          </div>
+          <div class="card setcard">
+            <div class="card-h"><h2>Configuration as code</h2><span class="mono muted">pulse.yaml</span></div>
+            <div class="card-b">
+              <p class="muted" style="margin-bottom:8px">A <span class="mono">pulse.yaml</span> at a repository root overrides these dashboard defaults; org-level settings are inherited from the <span class="mono">aziron/pulse-config</span> repository.</p>
+              <p class="muted" style="margin-bottom:16px">Precedence: repo <span class="mono">pulse.yaml</span> → org <span class="mono">pulse-config</span> → dashboard → built-ins.</p>
+              <div class="codeblock" id="yamlBlock"><span id="yamlText"></span><button class="btn sm copybtn" id="yamlCopyBtn" aria-label="Copy pulse.yaml">Copy</button></div>
+              <p class="hint" style="margin-top:8px" id="yamlHint">Generated from the current <a href="#verification">Verification</a>, <a href="#workspace">Workspace</a>, <a href="#unit-testing">Unit testing</a> and <a href="#security-policy">Security policy</a> tabs — edits there update this file live.</p>
+              <div class="savebar">
+                <button class="btn" id="yamlDownloadBtn">Download pulse.yaml</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ============ Verification ============ -->
+        <div class="pane" id="pane-verification" role="tabpanel" aria-label="Verification settings" hidden>
+          <div class="paneflash" id="flash-verification"></div>
+          <div class="card setcard">
+            <div class="card-h"><h2>Verification</h2></div>
+            <div class="card-b">
+              <div class="field">
+                <label for="vfSelTarget">Selection target</label>
+                <div class="numline">
+                  <input class="input numin" id="vfSelTarget" type="number" value="40" min="10" max="100" step="1" aria-describedby="vfSelHint">
+                  <span class="unit">% of suite</span>
+                </div>
+                <span class="hint" id="vfSelHint">Upper bound on the share of tests selected per run. Run <span class="mono">06cb9564</span> selected 37.6% (1,284 of 3,412).</span>
+              </div>
+              <div class="field">
+                <label for="vfReplay">Shadow replay sample</label>
+                <div class="numline">
+                  <input class="input numin" id="vfReplay" type="number" value="12" min="0" max="100" step="1" aria-describedby="vfReplayHint">
+                  <span class="unit">tests / run</span>
+                </div>
+                <span class="hint" id="vfReplayHint">Unselected tests replayed in shadow each run to prove selection recall. Proofs live in <a href="reliability.html#shadow-replay">Reliability</a>.</span>
+              </div>
+              <div class="field">
+                <label for="vfRecall">Recall threshold</label>
+                <div class="numline">
+                  <input class="input numin" id="vfRecall" type="number" value="99.0" min="90" max="100" step="0.1" aria-describedby="vfRecallHint">
+                  <span class="unit">%</span>
+                </div>
+                <span class="hint" id="vfRecallHint">Runs below this recall fail selection safety. 30-day estate recall: <span class="mono">99.2%</span>.</span>
+              </div>
+              <div class="field">
+                <label class="switch" style="gap:10px">
+                  <input type="checkbox" id="vfAttest" checked aria-describedby="vfAttestHint">
+                  <span class="track" aria-hidden="true"></span>
+                  <span style="font-weight:600;margin-left:10px">Attestation required</span>
+                </label>
+                <span class="hint" id="vfAttestHint">Every verdict must be signed by <span class="mono">pulse-auditor</span>. When evidence is incomplete the auditor may <strong>refuse</strong> to attest — a refusal is a first-class verdict, never a pass (7 refusals in the last 30 days).</span>
+              </div>
+              <div class="savebar">
+                <button class="btn invisible" id="vfReset">Reset to defaults</button>
+                <button class="btn primary" data-savetab="verification">Save verification</button>
+              </div>
+            </div>
+          </div>
+          <div class="card setcard">
+            <div class="card-h"><h2>Deep verify</h2><span class="mono muted">~28 min</span></div>
+            <div class="card-b">
+              <p class="muted" style="margin-bottom:16px">Runs the FULL suite (<span class="mono">3,412</span> tests) with 5× replay sampling and strict attestation — for changes where a missed regression is expensive. ~28 min.</p>
+              <div class="field">
+                <label for="dvMode">Mode</label>
+                <select class="select" id="dvMode" aria-describedby="dvModeHint" style="max-width:280px">
+                  <option value="disabled">Disabled</option>
+                  <option value="manual" selected>Manual — default</option>
+                  <option value="automatic">Automatic</option>
+                </select>
+                <span class="hint" id="dvModeHint">Manual adds a "Deep verify" action on runs and pull requests; Automatic queues the full suite whenever a change touches a risk path.</span>
+              </div>
+              <div class="field" id="dvPathsField" hidden>
+                <label for="dvInput">Risk paths</label>
+                <span class="hint" style="margin-bottom:6px">Changes touching these globs are queued for deep verification automatically.</span>
+                <div class="chips" id="dvChips" role="list" aria-label="Risk paths"></div>
+                <div class="chiprow">
+                  <input class="input" id="dvInput" placeholder="e.g. **/auth/**" aria-label="Add risk path">
+                  <button class="btn" id="dvAdd">Add</button>
+                </div>
+              </div>
+              <div class="field" style="margin-bottom:0">
+                <label class="switch" style="gap:10px">
+                  <input type="checkbox" id="dvAi" aria-describedby="dvAiHint">
+                  <span class="track" aria-hidden="true"></span>
+                  <span style="font-weight:600;margin-left:10px">Verify AI-authored changes at deep tier</span>
+                </label>
+                <span class="hint" id="dvAiHint">Runs flagged ≥<span class="mono">60%</span> AI-authored are queued for deep verify — authorship comes from commit attribution; see <a href="combined-analysis.html">Combined</a>.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ============ Code scanning ============ -->
+        <div class="pane" id="pane-code-scanning" role="tabpanel" aria-label="Code scanning" hidden>
+          <div class="paneflash" id="flash-code-scanning"></div>
+          <div class="card wide">
+            <div class="card-h"><h2>Code scanning integrations</h2>
+              <span class="label success" id="csConnected" aria-live="polite">1 connected</span></div>
+            <div class="card-b">
+              <p class="muted" style="margin-bottom:12px">External scanner results are imported into the same evidence model as Pulse verdicts — each keeps tool, rule, branch, commit, location, fingerprint and a link to its raw source, and appears in <a href="findings.html">Findings</a> with its origin attributed. An imported result never becomes a verdict on its own: a verdict still requires executed evidence.</p>
+              <div class="intgrid" id="csGrid">
+                <article class="intcard" data-provider="native" data-status="connected">
+                  <span class="intmark" aria-hidden="true">P</span>
+                  <div class="intbody">
+                    <h3>Pulse native</h3>
+                    <p>Executed pull-request review, native SAST and secret detection, signed by <span class="mono">pulse-auditor</span>.</p>
+                    <div class="capchips"><span class="capchip">PR review</span><span class="capchip">SAST</span><span class="capchip">Secrets</span></div>
+                    <div class="intfoot"><span class="label success intstate">Connected</span>
+                      <button class="btn sm intbtn">Manage</button></div>
+                  </div>
+                </article>
+                <article class="intcard" data-provider="sonarqube" data-status="available">
+                  <span class="intmark" aria-hidden="true">SQ</span>
+                  <div class="intbody">
+                    <h3>SonarQube</h3>
+                    <p>Import quality gates, vulnerabilities, hotspots and coverage from SonarQube Server or Cloud.</p>
+                    <div class="capchips"><span class="capchip">Quality gate</span><span class="capchip">Coverage</span><span class="capchip">SAST</span></div>
+                    <div class="intfoot"><span class="label outline intstate">Available</span>
+                      <button class="btn sm intbtn">Add</button></div>
+                  </div>
+                </article>
+                <article class="intcard" data-provider="snyk" data-status="available">
+                  <span class="intmark" aria-hidden="true">SK</span>
+                  <div class="intbody">
+                    <h3>Snyk Code</h3>
+                    <p>Normalize code and dependency results, keeping fix metadata and reachable call paths.</p>
+                    <div class="capchips"><span class="capchip">SAST</span><span class="capchip">SCA</span><span class="capchip">Fix advice</span></div>
+                    <div class="intfoot"><span class="label outline intstate">Available</span>
+                      <button class="btn sm intbtn">Add</button></div>
+                  </div>
+                </article>
+                <article class="intcard" data-provider="semgrep" data-status="available">
+                  <span class="intmark" aria-hidden="true">SG</span>
+                  <div class="intbody">
+                    <h3>Semgrep</h3>
+                    <p>Ingest managed or self-hosted rule results over SARIF 2.1 or the Semgrep API.</p>
+                    <div class="capchips"><span class="capchip">SAST</span><span class="capchip">Secrets</span><span class="capchip">SARIF</span></div>
+                    <div class="intfoot"><span class="label outline intstate">Available</span>
+                      <button class="btn sm intbtn">Add</button></div>
+                  </div>
+                </article>
+                <article class="intcard" data-provider="checkmarx" data-status="available">
+                  <span class="intmark" aria-hidden="true">CX</span>
+                  <div class="intbody">
+                    <h3>Checkmarx</h3>
+                    <p>Map enterprise scanner results onto repositories, owners and merge gates.</p>
+                    <div class="capchips"><span class="capchip">SAST</span><span class="capchip">SCA</span><span class="capchip">Policy</span></div>
+                    <div class="intfoot"><span class="label outline intstate">Available</span>
+                      <button class="btn sm intbtn">Add</button></div>
+                  </div>
+                </article>
+                <article class="intcard" data-provider="sarif" data-status="available">
+                  <span class="intmark" aria-hidden="true">{}</span>
+                  <div class="intbody">
+                    <h3>Generic SARIF / webhook</h3>
+                    <p>Connect any tool that emits SARIF 2.1 or posts the Pulse finding contract from CI.</p>
+                    <div class="capchips"><span class="capchip">Custom tools</span><span class="capchip">CI upload</span><span class="capchip">Webhook</span></div>
+                    <div class="intfoot"><span class="label outline intstate">Available</span>
+                      <button class="btn sm intbtn">Add</button></div>
+                  </div>
+                </article>
+              </div>
+            </div>
+          </div>
+          <div class="card wide" id="csFormCard" style="margin-top:16px">
+            <div class="card-h"><h2 id="csFormTtl">Add SonarQube</h2>
+              <span class="label accent" id="csFormState">Draft</span></div>
+            <div class="card-b">
+              <p class="muted" style="margin-bottom:16px" id="csFormLede">Credentials are held in the Aziron secret vault. Pulse stores a masked reference and connection health only — the secret value is never returned to the browser.</p>
+              <div class="formgrid">
+                <div class="field full">
+                  <label for="csUrl" id="csUrlLbl">Server URL</label>
+                  <input class="input monoval" id="csUrl" type="url" value="https://sonarqube.aziron.dev" aria-describedby="csUrlHint">
+                  <span class="hint" id="csUrlHint">SonarQube Server address or the SonarQube Cloud organization endpoint.</span>
+                </div>
+                <div class="field">
+                  <label for="csMapping">Project mapping</label>
+                  <select class="select" id="csMapping" aria-describedby="csMappingHint">
+                    <option value="slug" selected>Map by repository slug — automatic</option>
+                    <option value="manual">Map project keys manually</option>
+                  </select>
+                  <span class="hint" id="csMappingHint">Automatic mapping matches all <span class="mono">18</span> repositories by name.</span>
+                </div>
+                <div class="field">
+                  <label for="csCredential">Credential</label>
+                  <input class="input monoval" id="csCredential" value="vault:sonarqube/pulse-token" aria-describedby="csCredHint">
+                  <span class="hint" id="csCredHint">A vault reference, not a token. Stored in the secret vault — never returned to the browser or written to <span class="mono">pulse.yaml</span>.</span>
+                </div>
+                <div class="field full" id="csKeysField" hidden>
+                  <label for="csKeys">Project keys</label>
+                  <textarea class="input monoval" id="csKeys" rows="4" aria-describedby="csKeysHint">gateway-api = aziron_gateway-api
+sentinel-auth = aziron_sentinel-auth
+orion-web = aziron_orion-web</textarea>
+                  <span class="hint" id="csKeysHint">One <span class="mono">repository = project-key</span> pair per line. Repositories without a pair are skipped, never silently passed.</span>
+                </div>
+                <div class="field">
+                  <label for="csSync">Sync strategy</label>
+                  <select class="select" id="csSync" aria-describedby="csSyncHint">
+                    <option value="webhook" selected>Webhook + nightly reconciliation</option>
+                    <option value="ci">CI callback only</option>
+                    <option value="poll">Scheduled polling — every 30 minutes</option>
+                  </select>
+                  <span class="hint" id="csSyncHint">Reconciliation re-reads the last 24 hours so a dropped webhook cannot leave a stale result on a pull request.</span>
+                </div>
+                <div class="field">
+                  <label for="csGate" id="csGateLbl">Quality-gate behavior</label>
+                  <select class="select" id="csGate" aria-describedby="csGateHint">
+                    <option value="blocking" selected>Blocking — a failed gate blocks merge</option>
+                    <option value="informational">Informational — surfaced on the pull request only</option>
+                  </select>
+                  <span class="hint" id="csGateHint">Blocking applies only where the repository is in <span class="mode enforce">Enforce</span> (5 of 18). Advisory and Shadow repositories always report without blocking.</span>
+                </div>
+              </div>
+              <p class="testline" id="csTestLine" role="status" aria-live="polite">Connection not tested yet.</p>
+              <div class="savebar">
+                <button class="btn" id="csTestBtn">Test connection</button>
+                <button class="btn primary" id="csSaveBtn">Save integration</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ============ Unit testing ============ -->
+        <div class="pane" id="pane-unit-testing" role="tabpanel" aria-label="Unit testing" hidden>
+          <div class="paneflash" id="flash-unit-testing"></div>
+          <div class="card wide">
+            <div class="card-h"><h2>Framework adapters</h2>
+              <span class="hdnote" id="utAdapterNote" aria-live="polite">12 of 18 repositories mapped</span>
+              <button class="btn sm" id="utDetectBtn">Detect frameworks</button></div>
+            <div class="card-b">
+              <p class="muted" style="margin-bottom:12px">An adapter tells Pulse how to select, execute and read results for a repository. Unsupported and zero-test repositories stay explicitly <em>unavailable</em> — they are never reported as passing. <span class="mono">vault-core</span> is missing an adapter; 5 repositories run through a per-repository command adapter.</p>
+              <div class="intgrid" id="utGrid">
+                <article class="intcard" data-adapter="vitest" data-status="connected">
+                  <span class="intmark" aria-hidden="true">VJ</span>
+                  <div class="intbody">
+                    <h3>Vitest / Jest</h3>
+                    <p>JavaScript and TypeScript suites; results read as JUnit XML, coverage as LCOV.</p>
+                    <div class="capchips"><span class="capchip">JUnit XML</span><span class="capchip">LCOV</span><span class="capchip">Changed tests</span></div>
+                    <div class="intfoot"><span class="label success intstate">3 repositories</span>
+                      <button class="btn sm utbtn">Configure</button></div>
+                  </div>
+                </article>
+                <article class="intcard" data-adapter="pytest" data-status="connected">
+                  <span class="intmark" aria-hidden="true">PY</span>
+                  <div class="intbody">
+                    <h3>pytest</h3>
+                    <p>Python suites with <span class="mono">coverage.py</span> line and branch data, plus failure classification.</p>
+                    <div class="capchips"><span class="capchip">JUnit XML</span><span class="capchip">coverage.py</span><span class="capchip">Flakes</span></div>
+                    <div class="intfoot"><span class="label success intstate">5 repositories</span>
+                      <button class="btn sm utbtn">Configure</button></div>
+                  </div>
+                </article>
+                <article class="intcard" data-adapter="gotest" data-status="connected">
+                  <span class="intmark" aria-hidden="true">GO</span>
+                  <div class="intbody">
+                    <h3>Go test</h3>
+                    <p>Package-aware selection with <span class="mono">coverprofile</span> output — the adapter behind run <span class="mono">06cb9564</span>.</p>
+                    <div class="capchips"><span class="capchip">go test</span><span class="capchip">coverprofile</span><span class="capchip">Packages</span></div>
+                    <div class="intfoot"><span class="label success intstate">4 repositories</span>
+                      <button class="btn sm utbtn">Configure</button></div>
+                  </div>
+                </article>
+                <article class="intcard" data-adapter="junit" data-status="available">
+                  <span class="intmark" aria-hidden="true">JV</span>
+                  <div class="intbody">
+                    <h3>JUnit</h3>
+                    <p>Maven and Gradle results through standard XML reports, coverage through JaCoCo.</p>
+                    <div class="capchips"><span class="capchip">JUnit XML</span><span class="capchip">JaCoCo</span><span class="capchip">Gradle</span></div>
+                    <div class="intfoot"><span class="label attention intstate">vault-core unmapped</span>
+                      <button class="btn sm utbtn">Configure</button></div>
+                  </div>
+                </article>
+              </div>
+            </div>
+          </div>
+          <div class="card wide" style="margin-top:16px">
+            <div class="card-h"><h2>Unit-test gates</h2><span class="hdnote">applies where the repository is in Enforce</span></div>
+            <div class="card-b">
+              <p class="muted" style="margin-bottom:12px">A gate applies only when the evidence behind it is fresh and complete. Missing evidence produces an <em>unavailable</em> result and an owner review — never a silent pass. Signals are explained in <a href="unit-test-analysis.html">Unit tests</a>.</p>
+              <div class="polrow">
+                <div class="pt"><strong>Block on change-induced failure</strong>
+                  <span>Only failures the baseline classifies as <em>new</em> block a merge; pre-existing and inherited failures are reported instead.</span></div>
+                <div class="pc"><label class="switch"><input type="checkbox" id="utBlockNew" checked aria-label="Block on change-induced failure"><span class="track" aria-hidden="true"></span></label></div>
+              </div>
+              <div class="polrow">
+                <div class="pt"><strong>Classification confidence</strong>
+                  <span>Below this, a failure is reported without blocking. <span class="mono">TestRetryBudgetExhaustion</span> in run <span class="mono">a3f81c02</span> classified new at <span class="mono">0.94</span>.</span></div>
+                <div class="pc"><input class="input numin" id="utConfidence" type="number" value="0.85" min="0.50" max="1" step="0.01" aria-label="Minimum classification confidence"><span class="unit">confidence</span></div>
+              </div>
+              <div class="polrow">
+                <div class="pt"><strong>Changed-lines coverage</strong>
+                  <span>Required on lines the change touches, for application repositories. Estate coverage today: line <span class="mono">78.4%</span> · branch <span class="mono">71.2%</span> · composite <span class="mono">75.6%</span>.</span></div>
+                <div class="pc"><input class="input numin" id="utCovMin" type="number" value="80" min="0" max="100" step="1" aria-label="Changed-lines coverage minimum"><span class="unit">%</span></div>
+              </div>
+              <div class="polrow">
+                <div class="pt"><strong>Flake handling</strong>
+                  <span><span class="mono">41</span> flakes quarantined in the last 30 days · <span class="mono">23</span> open on the <a href="reliability.html">flake docket</a>.</span></div>
+                <div class="pc"><select class="select" id="utFlake" aria-label="Flake handling">
+                  <option value="quarantine-replay" selected>Quarantine known flakes · 1 replay for new</option>
+                  <option value="quarantine">Quarantine known flakes only</option>
+                  <option value="none">No automatic quarantine</option>
+                </select></div>
+              </div>
+              <div class="polrow">
+                <div class="pt"><strong>Zero-test result</strong>
+                  <span>What happens when a repository or changed package executes no tests at all.</span></div>
+                <div class="pc"><select class="select" id="utZero" aria-label="Zero-test result">
+                  <option value="review" selected>Mark unavailable · request owner review</option>
+                  <option value="unavailable">Mark unavailable only</option>
+                  <option value="block">Block merge until a suite exists</option>
+                </select></div>
+              </div>
+              <div class="savebar">
+                <button class="btn primary" data-savetab="unit-testing">Save unit-test policy</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ============ Security policy ============ -->
+        <div class="pane" id="pane-security-policy" role="tabpanel" aria-label="Security policy" hidden>
+          <div class="paneflash" id="flash-security-policy"></div>
+          <div class="card wide">
+            <div class="card-h"><h2>Security sources</h2><span class="hdnote">deduplicated on import</span></div>
+            <div class="card-b">
+              <p class="muted" style="margin-bottom:12px">Sources are enabled independently. Pulse deduplicates across them and keeps every source observation, so a finding seen by two tools stays one finding with two attributions. Current telemetry lives in <a href="security.html">Security</a>.</p>
+              <div class="polrow">
+                <div class="pt"><strong>Pulse native SAST</strong>
+                  <span>Code paths and high-confidence vulnerability patterns, confirmed against executed evidence.</span></div>
+                <div class="pc"><label class="switch"><input type="checkbox" id="secSast" checked aria-label="Pulse native SAST"><span class="track" aria-hidden="true"></span></label></div>
+              </div>
+              <div class="polrow">
+                <div class="pt"><strong>Dependency scanning</strong>
+                  <span>Direct and transitive package alerts. <span class="mono">14</span> open — 2 critical reachable, 5 unreachable, 7 low.</span></div>
+                <div class="pc"><label class="switch"><input type="checkbox" id="secDeps" checked aria-label="Dependency scanning"><span class="track" aria-hidden="true"></span></label></div>
+              </div>
+              <div class="polrow">
+                <div class="pt"><strong>Secret detection</strong>
+                  <span>Verified secrets after path and test-fixture allowlists. <span class="mono">3</span> candidates — 2 dismissed as fixtures, 1 open in <span class="mono">nimbus-infra</span>.</span></div>
+                <div class="pc"><label class="switch"><input type="checkbox" id="secSecrets" checked aria-label="Secret detection"><span class="track" aria-hidden="true"></span></label></div>
+              </div>
+              <div class="polrow">
+                <div class="pt"><strong>External scanners</strong>
+                  <span id="secExtSub">No external scanner connected. Imported results must carry tool, rule, branch, commit and fingerprint provenance before they can gate a merge.</span></div>
+                <div class="pc"><span class="label outline" id="secExtState">Not connected</span>
+                  <button class="btn sm" id="secExtBtn">Manage in Code scanning</button></div>
+              </div>
+            </div>
+          </div>
+          <div class="card wide" style="margin-top:16px">
+            <div class="card-h"><h2>Merge-gate policy</h2><span class="hdnote">5 of 18 repositories in Enforce</span></div>
+            <div class="card-b">
+              <p class="muted" style="margin-bottom:16px">Reachability and exploitability may raise a finding's priority but never lower a critical one. Where a repository is in <span class="mode shadow">Shadow</span> or <span class="mode advisory">Advisory</span>, these results report without blocking.</p>
+              <div class="formgrid">
+                <div class="field">
+                  <label for="secBlockAt">Block merge at</label>
+                  <select class="select" id="secBlockAt" aria-describedby="secBlockHint">
+                    <option value="critical-high" selected>Critical and high</option>
+                    <option value="critical">Critical only</option>
+                    <option value="advisory">Advisory — never blocking</option>
+                  </select>
+                  <span class="hint" id="secBlockHint">Severity is assigned at import and re-checked on every run.</span>
+                </div>
+                <div class="field">
+                  <label for="secMaxAge">Maximum finding age</label>
+                  <select class="select" id="secMaxAge" aria-describedby="secAgeHint">
+                    <option value="7">7 days</option>
+                    <option value="14" selected>14 days</option>
+                    <option value="30">30 days</option>
+                  </select>
+                  <span class="hint" id="secAgeHint">An unresolved finding older than this starts blocking, even below the severity threshold.</span>
+                </div>
+                <div class="field">
+                  <label for="secHotspot">Hotspot review</label>
+                  <select class="select" id="secHotspot" aria-describedby="secHotspotHint">
+                    <option value="required" selected>Required — reviewed status</option>
+                    <option value="informational">Informational</option>
+                  </select>
+                  <span class="hint" id="secHotspotHint">A hotspot needs a human decision; Pulse records who reviewed it and when.</span>
+                </div>
+                <div class="field">
+                  <label for="secDedupe">Deduplication</label>
+                  <select class="select" id="secDedupe" aria-describedby="secDedupeHint">
+                    <option value="fingerprint-location-rule" selected>Fingerprint + location + rule</option>
+                    <option value="fingerprint">Exact fingerprint only</option>
+                  </select>
+                  <span class="hint" id="secDedupeHint">Wider keys merge the same finding across tools; the narrow key keeps them separate.</span>
+                </div>
+              </div>
+              <div class="savebar">
+                <button class="btn primary" data-savetab="security-policy">Save security policy</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ============ Runners ============ -->
+        <div class="pane" id="pane-runners" role="tabpanel" aria-label="Runners" hidden>
+          <div class="paneflash" id="flash-runners"></div>
+          <div class="statrow">
+            <div class="stat" data-metric="runnersHealthy">
+              <div class="lbl">Healthy runners</div>
+              <div class="val">3 <span class="delta">3 environments</span></div>
+            </div>
+            <div class="stat" data-metric="warmHit">
+              <div class="lbl">Warm-pool hit rate</div>
+              <div class="val">84% <span class="delta up">+6 pts</span></div>
+            </div>
+            <div class="stat" data-metric="meanRun">
+              <div class="lbl">Mean run time</div>
+              <div class="val">5m 08s</div>
+            </div>
+          </div>
+          <div class="card wide">
+            <div class="card-h"><h2>Live runners</h2><span class="livechip">Live · now</span>
+              <span class="hdnote" id="rnSlots" aria-live="polite">4 of 16 slots in use</span></div>
+            <div class="card-b">
+              <div class="tblwrap">
+                <table class="tbl" aria-label="Live runners">
+                  <thead><tr>
+                    <th data-sort>Runner</th><th>Environment</th>
+                    <th class="col-optional">Frameworks</th>
+                    <th class="col-optional" data-sort="num">Warm</th>
+                    <th data-sort="num">In use</th><th>Status</th><th><span class="small">Actions</span></th>
+                  </tr></thead>
+                  <tbody id="rnTbody">
+                    <tr data-runner="rnr-lin-01" data-slots="6" data-used="3">
+                      <td class="id">rnr-lin-01</td>
+                      <td>linux-x64 · 8 vCPU</td>
+                      <td class="col-optional"><span class="mono">go · python · node</span></td>
+                      <td class="num col-optional">4</td>
+                      <td class="num rnused">3 / 6</td>
+                      <td><span class="label success rnstate">Busy · 3 runs</span></td>
+                      <td><button class="btn sm rndrain">Drain</button></td>
+                    </tr>
+                    <tr data-runner="rnr-lin-02" data-slots="6" data-used="0">
+                      <td class="id">rnr-lin-02</td>
+                      <td>linux-x64 · 8 vCPU</td>
+                      <td class="col-optional"><span class="mono">go · node · rust</span></td>
+                      <td class="num col-optional">4</td>
+                      <td class="num rnused">0 / 6</td>
+                      <td><span class="label neutral rnstate">Idle</span></td>
+                      <td><button class="btn sm rndrain">Drain</button></td>
+                    </tr>
+                    <tr data-runner="rnr-arm-01" data-slots="4" data-used="1">
+                      <td class="id">rnr-arm-01</td>
+                      <td>linux-arm64 · 4 vCPU</td>
+                      <td class="col-optional"><span class="mono">java · kotlin · terraform</span></td>
+                      <td class="num col-optional">2</td>
+                      <td class="num rnused">1 / 4</td>
+                      <td><span class="label success rnstate">Busy · 1 run</span></td>
+                      <td><button class="btn sm rndrain">Drain</button></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <p class="hint small muted" style="margin-top:8px">Draining stops new work from being scheduled; runs already executing finish and stay attested. Capacity here is independent of the date range above — the panel always reports now.</p>
+            </div>
+          </div>
+          <div class="card wide" style="margin-top:16px">
+            <div class="card-h"><h2>Execution capacity</h2></div>
+            <div class="card-b">
+              <div class="formgrid">
+                <div class="field">
+                  <label for="rnWarm">Warm pool size</label>
+                  <div class="numline"><input class="input numin" id="rnWarm" type="number" value="4" min="0" max="20" step="1" aria-describedby="rnWarmHint"><span class="unit">per environment</span></div>
+                  <span class="hint" id="rnWarmHint">Pre-warmed containers hold the toolchain and dependency cache. Today's hit rate: <span class="mono">84%</span>.</span>
+                </div>
+                <div class="field">
+                  <label for="rnIdle">Warm pool idle timeout</label>
+                  <div class="numline"><input class="input numin" id="rnIdle" type="number" value="15" min="1" max="120" step="1" aria-describedby="rnIdleHint"><span class="unit">minutes</span></div>
+                  <span class="hint" id="rnIdleHint">A container older than this is recycled so a stale toolchain can never verify a change.</span>
+                </div>
+                <div class="field">
+                  <label for="rnConc">Concurrent run limit</label>
+                  <div class="numline"><input class="input numin" id="rnConc" type="number" value="16" min="1" max="64" step="1" aria-describedby="rnConcHint"><span class="unit">runs</span></div>
+                  <span class="hint" id="rnConcHint">Across all runners. Current capacity is <span class="mono">16</span> slots — 6 + 6 + 4.</span>
+                </div>
+                <div class="field">
+                  <label for="rnQueue">Queue behavior</label>
+                  <select class="select" id="rnQueue" aria-describedby="rnQueueHint">
+                    <option value="warn" selected>Queue · warn after a 5-minute wait</option>
+                    <option value="quiet">Queue quietly</option>
+                    <option value="overflow">Overflow to on-demand capacity</option>
+                  </select>
+                  <span class="hint" id="rnQueueHint">A warned run appears in <a href="action-center.html">Action center</a> as waiting on capacity, never as a failure.</span>
+                </div>
+              </div>
+              <div class="savebar">
+                <button class="btn primary" data-savetab="runners">Save runner settings</button>
+              </div>
+            </div>
+          </div>
+          <div class="card wide" style="margin-top:16px">
+            <div class="card-h"><h2>Framework capability</h2>
+              <button class="btn sm" id="rnRefreshBtn">Refresh capability</button></div>
+            <div class="card-b">
+              <p class="muted" style="margin-bottom:8px">Toolchains installed on the warm images. A repository whose toolchain is missing is scheduled on demand and marked <em>unavailable</em> until the image catches up.</p>
+              <div class="capchips" id="rnCaps">
+                <span class="capchip">go 1.22</span><span class="capchip">python 3.12</span><span class="capchip">node 20</span>
+                <span class="capchip">rust 1.79</span><span class="capchip">java 21</span><span class="capchip">kotlin 1.9</span>
+                <span class="capchip">terraform 1.8</span><span class="capchip">clang 17</span>
+              </div>
+              <p class="hint small muted" style="margin-top:8px">Images rebuilt <time datetime="2026-08-02T04:10">Aug 2, 04:10</time> · covers all <span class="mono">18</span> repositories.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ============ Agents ============ -->
+        <div class="pane" id="pane-agents" role="tabpanel" aria-label="Agent access" hidden>
+          <div class="paneflash" id="flash-agents"></div>
+          <div class="section">
+            <h2>Agent access</h2>
+            <p class="sectionsub">Personal scope — tokens and endpoints below act as <span class="uchip"><span class="avatar" aria-hidden="true">DA</span><a class="user" href="team-management.html?member=dominic" title="Dominic Adams · Admin">@dominic</a></span>. The workspace-level MCP endpoint and webhooks live in <a href="integrations.html">Integrations</a>.</p>
+          </div>
+          <div class="section">
+            <h3 style="margin-bottom:8px">Pulse CLI</h3>
+            <div class="codeblock" id="cliBlock" style="max-width:680px">curl -fsSL pulse.aziron.dev/install | sh
+pulse auth login --workspace aziron<button class="btn sm copybtn" onclick="PS.copy('curl -fsSL pulse.aziron.dev/install | sh\npulse auth login --workspace aziron','CLI install copied')" aria-label="Copy CLI install commands">Copy</button></div>
+          </div>
+          <div class="section">
+            <h3 style="margin-bottom:8px">MCP configuration</h3>
+            <p class="sectionsub">Point your coding agent at Pulse to query verdicts, findings, and attestation receipts.</p>
+            <div class="codeblock" id="mcpBlock" style="max-width:680px">{
+  "mcpServers": {
+    "pulse": {
+      "endpoint": "mcp.pulse.aziron.dev",
+      "workspace": "aziron",
+      "token": "${PULSE_PAT}"
+    }
+  }
+}<button class="btn sm copybtn" id="mcpCopyBtn" aria-label="Copy MCP configuration">Copy</button></div>
+          </div>
+          <div class="section">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap">
+              <h3 style="flex:1;min-width:200px">Personal access tokens</h3>
+              <button class="btn primary sm" id="patNewBtn">Create token</button>
+            </div>
+            <div class="tblwrap">
+              <table class="tbl" aria-label="Personal access tokens">
+                <thead><tr>
+                  <th data-sort>Name</th><th>Token</th><th>Scope</th>
+                  <th class="col-optional" data-sort>Created</th><th data-sort>Last used</th>
+                  <th><span class="small">Actions</span></th>
+                </tr></thead>
+                <tbody id="patTbody">
+                  <tr data-token="laptop-cli">
+                    <td>laptop-cli</td><td class="id"><span class="copyable"><span class="mono">pat_7f3a…c21d</span><button type="button" class="icon-btn cp copybtn" data-copy="pat_7f3a…c21d" data-copy-label="Token prefix copied" aria-label="Copy token prefix pat_7f3a…c21d"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-copy" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2" ry="2" /> <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" /></svg></button></span></td><td><span class="label neutral">Full access</span></td>
+                    <td class="id col-optional"><time datetime="2026-07-12">Jul 12, 2026</time></td><td class="id"><time datetime="2026-08-03T09:12">Aug 3, 09:12</time></td>
+                    <td><button class="btn sm danger patrevoke">Revoke</button></td>
+                  </tr>
+                  <tr data-token="vscode-agent">
+                    <td>vscode-agent</td><td class="id"><span class="copyable"><span class="mono">pat_b58e…90af</span><button type="button" class="icon-btn cp copybtn" data-copy="pat_b58e…90af" data-copy-label="Token prefix copied" aria-label="Copy token prefix pat_b58e…90af"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-copy" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2" ry="2" /> <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" /></svg></button></span></td><td><span class="label neutral">Trigger runs</span></td>
+                    <td class="id col-optional"><time datetime="2026-07-25">Jul 25, 2026</time></td><td class="id"><time datetime="2026-08-02T17:44">Aug 2, 17:44</time></td>
+                    <td><button class="btn sm danger patrevoke">Revoke</button></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="hint small muted" style="margin-top:8px">Revoking a token cuts off any agent using it immediately. Tokens never grant more than your own role allows.</p>
+          </div>
+        </div>
+
+        <!-- ============ Governance & audit ============ -->
+        <div class="pane" id="pane-governance" role="tabpanel" aria-label="Governance and audit" hidden>
+          <div class="paneflash" id="flash-governance"></div>
+          <div class="statrow">
+            <div class="stat" data-metric="auditRetention">
+              <div class="lbl">Audit retention</div>
+              <div class="val">365 <span class="delta">days</span></div>
+            </div>
+            <div class="stat" data-metric="attestCoverage">
+              <div class="lbl">Attested runs</div>
+              <div class="val">96.8% <span class="delta">7 refusals</span></div>
+            </div>
+            <div class="stat" data-metric="decisionRecords">
+              <div class="lbl">Decision records</div>
+              <div class="val">1,847 <span class="delta">30 days</span></div>
+            </div>
+          </div>
+          <div class="card wide">
+            <div class="card-h"><h2>Retention &amp; provenance</h2></div>
+            <div class="card-b">
+              <div class="field" style="max-width:320px">
+                <label for="gvRetention">Audit retention</label>
+                <select class="select" id="gvRetention" aria-describedby="gvRetentionHint">
+                  <option value="180">180 days</option>
+                  <option value="365" selected>365 days</option>
+                  <option value="1095">3 years</option>
+                </select>
+                <span class="hint" id="gvRetentionHint">Applies to change history and decision provenance. Attestation receipts are kept for the life of the workspace regardless of this window.</span>
+              </div>
+              <div class="polrow">
+                <div class="pt"><strong>Record actor and reason on every change</strong>
+                  <span>A save without a reason is rejected. The reason is stored beside the previous value and the rollback path.</span></div>
+                <div class="pc"><label class="switch"><input type="checkbox" id="gvActor" checked aria-label="Record actor and reason on every change"><span class="track" aria-hidden="true"></span></label></div>
+              </div>
+              <div class="polrow">
+                <div class="pt"><strong>Attach decision provenance to every verdict</strong>
+                  <span>Selection inputs, replay proof and the signature travel with the verdict — run <span class="mono">06cb9564</span> carries <span class="mono">ed25519:7fd2…9c4e</span>.</span></div>
+                <div class="pc"><label class="switch"><input type="checkbox" id="gvProv" checked aria-label="Attach decision provenance to every verdict"><span class="track" aria-hidden="true"></span></label></div>
+              </div>
+              <div class="polrow">
+                <div class="pt"><strong>Sign policy changes with pulse-auditor</strong>
+                  <span>Settings changes are counter-signed, so a change history entry can be proven unaltered.</span></div>
+                <div class="pc"><label class="switch"><input type="checkbox" id="gvSign" checked aria-label="Sign policy changes with pulse-auditor"><span class="track" aria-hidden="true"></span></label></div>
+              </div>
+              <div class="savebar">
+                <button class="btn primary" data-savetab="governance">Save governance policy</button>
+              </div>
+            </div>
+          </div>
+          <div class="card wide" style="margin-top:16px">
+            <div class="card-h"><h2>Evidence export</h2><span class="hdnote">18 repositories · 1,847 runs</span></div>
+            <div class="card-b">
+              <p class="muted" style="margin-bottom:12px">Exports are generated from the same records the dashboard reads — an auditor can reproduce any verdict from the bundle alone.</p>
+              <div class="polrow">
+                <div class="pt"><strong>Change history</strong>
+                  <span>Every settings change with actor, reason, previous and new value, in CSV.</span></div>
+                <div class="pc"><button class="btn sm" id="gvExpCsv">Export CSV</button></div>
+              </div>
+              <div class="polrow">
+                <div class="pt"><strong>Attestation bundle</strong>
+                  <span>Receipts, signatures and replay proofs for the selected date range — <span class="mono">96.8%</span> of runs carry one.</span></div>
+                <div class="pc"><button class="btn sm" id="gvExpBundle">Export bundle</button></div>
+              </div>
+              <div class="polrow">
+                <div class="pt"><strong>Scheduled export</strong>
+                  <span id="gvSchedSub">Delivered to the evidence archive on the first of each month.</span></div>
+                <div class="pc"><select class="select" id="gvSchedule" aria-label="Scheduled export cadence">
+                  <option value="monthly" selected>Monthly</option>
+                  <option value="weekly">Weekly</option>
+                  <option value="off">Off</option>
+                </select></div>
+              </div>
+            </div>
+          </div>
+          <div class="card wide" style="margin-top:16px" id="chgHistoryCard">
+            <div class="card-h"><h2>Change history</h2><span class="hdnote">retained 365 days</span>
+              <button class="btn sm" id="gvExpCsv2">Export</button></div>
+            <div class="card-b">
+              <div class="tblwrap">
+                <table class="tbl" aria-label="Settings change history">
+                  <thead><tr>
+                    <th data-sort>When</th><th data-sort>Actor</th><th>Change</th>
+                    <th class="col-optional" data-sort>Section</th>
+                    <th class="col-optional">Scope</th><th><span class="small">Actions</span></th>
+                  </tr></thead>
+                  <tbody id="chgTbody">
+                    <tr data-key="workspace" data-when="2026-08-03T09:20" data-actor="sokafor" data-change="Default enforcement mode for new repositories" data-prev="Advisory" data-next="Shadow" data-scope="Organization · Aziron · 18 repositories" data-reason="Onboarding wave 3 starts in Shadow">
+                      <td class="id"><time datetime="2026-08-03T09:20">Aug 3, 09:20</time></td>
+                      <td class="chgactor"></td>
+                      <td>Default enforcement mode → <span class="mode shadow">Shadow</span></td>
+                      <td class="col-optional">Workspace</td>
+                      <td class="col-optional"><span class="mono">18 repositories</span></td>
+                      <td><button class="btn sm chgview">View</button></td>
+                    </tr>
+                    <tr data-key="runners" data-when="2026-08-03T08:05" data-actor="mwebb" data-change="Warm pool size per environment" data-prev="2" data-next="4" data-scope="Organization · Aziron · 3 runners" data-reason="Morning peak was queueing behind cold starts">
+                      <td class="id"><time datetime="2026-08-03T08:05">Aug 3, 08:05</time></td>
+                      <td class="chgactor"></td>
+                      <td>Warm pool size <span class="mono">2 → 4</span></td>
+                      <td class="col-optional">Runners</td>
+                      <td class="col-optional"><span class="mono">3 runners</span></td>
+                      <td><button class="btn sm chgview">View</button></td>
+                    </tr>
+                    <tr data-key="verification" data-when="2026-08-02T16:05" data-actor="dominic" data-change="Recall threshold" data-prev="98.5%" data-next="99.0%" data-scope="Organization · Aziron · 18 repositories" data-reason="Selection-safety review — estate recall is holding at 99.2%">
+                      <td class="id"><time datetime="2026-08-02T16:05">Aug 2, 16:05</time></td>
+                      <td class="chgactor"></td>
+                      <td>Recall threshold <span class="mono">98.5% → 99.0%</span></td>
+                      <td class="col-optional">Verification</td>
+                      <td class="col-optional"><span class="mono">18 repositories</span></td>
+                      <td><button class="btn sm chgview">View</button></td>
+                    </tr>
+                    <tr data-key="code-scanning" data-when="2026-08-02T14:30" data-actor="sokafor" data-change="External scanner import" data-prev="Not connected" data-next="Not connected" data-scope="Organization · Aziron" data-reason="SonarQube provenance fields not verified yet — kept native-only">
+                      <td class="id"><time datetime="2026-08-02T14:30">Aug 2, 14:30</time></td>
+                      <td class="chgactor"></td>
+                      <td>External scanners left <span class="mono">not connected</span></td>
+                      <td class="col-optional">Code scanning</td>
+                      <td class="col-optional"><span class="mono">organization</span></td>
+                      <td><button class="btn sm chgview">View</button></td>
+                    </tr>
+                    <tr data-key="security-policy" data-when="2026-08-01T10:40" data-actor="sokafor" data-change="Merge gate severity" data-prev="Critical only" data-next="Critical and high" data-scope="5 repositories in Enforce" data-reason="Quarterly policy review">
+                      <td class="id"><time datetime="2026-08-01T10:40">Aug 1, 10:40</time></td>
+                      <td class="chgactor"></td>
+                      <td>Block merge at <span class="mono">Critical and high</span></td>
+                      <td class="col-optional">Security policy</td>
+                      <td class="col-optional"><span class="mono">5 repositories</span></td>
+                      <td><button class="btn sm chgview">View</button></td>
+                    </tr>
+                    <tr data-key="repo-defaults" data-when="2026-08-01T11:05" data-actor="priyar" data-change="Exclude globs" data-prev="3 globs" data-next="4 globs" data-scope="Newly connected repositories" data-reason="Fixture directories were counting against coverage">
+                      <td class="id"><time datetime="2026-08-01T11:05">Aug 1, 11:05</time></td>
+                      <td class="chgactor"></td>
+                      <td>Exclude glob <span class="mono">**/testdata/**</span> added</td>
+                      <td class="col-optional">Repository defaults</td>
+                      <td class="col-optional"><span class="mono">new repositories</span></td>
+                      <td><button class="btn sm chgview">View</button></td>
+                    </tr>
+                    <tr data-key="governance" data-when="2026-07-28T10:03" data-actor="sokafor" data-change="Audit retention" data-prev="180 days" data-next="365 days" data-scope="Organization · Aziron" data-reason="Evidence archive request from the compliance review">
+                      <td class="id"><time datetime="2026-07-28T10:03">Jul 28, 10:03</time></td>
+                      <td class="chgactor"></td>
+                      <td>Audit retention <span class="mono">180 → 365 days</span></td>
+                      <td class="col-optional">Governance &amp; audit</td>
+                      <td class="col-optional"><span class="mono">organization</span></td>
+                      <td><button class="btn sm chgview">View</button></td>
+                    </tr>
+                    <tr data-key="unit-testing" data-when="2026-07-26T09:15" data-actor="esokolova" data-change="Flake handling" data-prev="Quarantine known flakes only" data-next="Quarantine known · 1 replay for new" data-scope="Organization · Aziron · 18 repositories" data-reason="Flake docket backlog reached 23 open">
+                      <td class="id"><time datetime="2026-07-26T09:15">Jul 26, 09:15</time></td>
+                      <td class="chgactor"></td>
+                      <td>Flake handling <span class="mono">+ 1 replay for new</span></td>
+                      <td class="col-optional">Unit testing</td>
+                      <td class="col-optional"><span class="mono">18 repositories</span></td>
+                      <td><button class="btn sm chgview">View</button></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <p class="hint small muted" style="margin-top:8px">Personal changes — profile and agent tokens — are recorded against the account, not the organization, and appear in your account activity instead.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ============ Danger zone ============ -->
+        <div class="pane" id="pane-danger" role="tabpanel" aria-label="Danger zone" hidden>
+          <div class="paneflash" id="flash-danger"></div>
+          <div class="section">
+            <h2>Danger zone</h2>
+            <p class="sectionsub">Irreversible workspace actions. In this prototype they are simulated and change nothing.</p>
+          </div>
+          <div class="dzcard">
+            <div class="dzrow">
+              <div class="dzt">
+                <h3>Transfer workspace ownership</h3>
+                <p>Hand the <span class="mono">aziron</span> workspace to another Admin. You keep your Admin role.</p>
+              </div>
+              <button class="btn" id="transferBtn">Transfer ownership…</button>
+            </div>
+            <div class="dzrow">
+              <div class="dzt">
+                <h3>Delete workspace</h3>
+                <p>Removes all runs, findings, and attestation history for 18 repositories. This cannot be undone.</p>
+              </div>
+              <button class="btn danger" id="deleteBtn">Delete workspace…</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div data-state="loading" hidden>
+        <div class="skel skel-line" style="width:30%;height:16px"></div>
+        <div class="skel skel-line" style="width:55%"></div>
+        <div class="skel skel-block" style="height:40px;margin:16px 0 8px"></div>
+        <div class="skel skel-block" style="height:320px"></div>
+      </div>
+
+      <div data-state="empty" hidden>
+        <div class="empty">
+          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-inbox" aria-hidden="true"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12" /> <path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z" /></svg>
+          <h2>No workspace configured</h2>
+          <p>Connect the Aziron workspace to unlock verification, repository defaults, and agent access settings.</p>
+          <a class="btn primary" href="onboarding.html">Get started</a>
+        </div>
+      </div>
+
+      <div data-state="error" hidden>
+        <div class="errbox">
+          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-alert" aria-hidden="true"><circle cx="12" cy="12" r="10" /> <line x1="12" x2="12" y1="8" y2="12" /> <line x1="12" x2="12.01" y1="16" y2="16" /></svg>
+          <h2>Couldn't load settings</h2>
+          <p>The configuration service didn't respond. Nothing was changed — try again.</p>
+          <button class="btn" onclick="PS.setState('loading')">Retry</button>
+        </div>
+      </div>
+
+      <footer class="pfoot">
+        <span>Pulse prototype · Aziron</span>
+        <div class="flinks">
+          <a href="design-system.html">Design system</a>
+          <a href="prototype-guide.html">Prototype guide</a>
+          <button class="btn invisible sm" id="stateBtn" aria-haspopup="true">States</button>
+        </div>
+      </footer>
+    </div>
+  </main>
+</div><!-- /layout -->
+</div><!-- /mainwrap -->
+</div><!-- /app -->
+
+<!-- Create PAT modal -->
+<div class="overlay" id="patModal" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="patTtl">
+    <div class="m-h"><h2 id="patTtl">Create personal access token</h2>
+      <button class="icon-btn" aria-label="Close dialog" onclick="PS.modal.close()"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x" aria-hidden="true"><path d="M18 6 6 18" /> <path d="m6 6 12 12" /></svg></button></div>
+    <div class="m-b">
+      <div id="patStep1">
+        <div class="field">
+          <label for="patName">Token name</label>
+          <input class="input" id="patName" placeholder="e.g. build-agent" maxlength="40">
+          <span class="err" id="patNameErr" hidden>⚠ Enter a token name</span>
+        </div>
+        <div class="field">
+          <label for="patScope">Scope</label>
+          <select class="select" id="patScope">
+            <option>Read-only</option>
+            <option selected>Trigger runs</option>
+            <option>Full access</option>
+          </select>
+          <span class="hint">Personal scope — the token acts as <span class="uchip"><span class="avatar" aria-hidden="true">DA</span><a class="user" href="team-management.html?member=dominic" title="Dominic Adams · Admin">@dominic</a></span> and never exceeds your role.</span>
+        </div>
+      </div>
+      <div id="patStep2" hidden>
+        <p style="margin-bottom:8px">Copy your token now — it won't be shown again.</p>
+        <div class="codeblock mono" id="patTokenBlock" aria-live="polite"></div>
+        <button class="btn sm" style="margin-top:8px" id="patCopyBtn">Copy token</button>
+      </div>
+    </div>
+    <div class="m-f">
+      <button class="btn" onclick="PS.modal.close()">Cancel</button>
+      <button class="btn primary" id="patCreate">Create token</button>
+    </div>
+  </div>
+</div>
+
+<!-- Transfer ownership modal -->
+<div class="overlay" id="transferModal" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="transferTtl">
+    <div class="m-h"><h2 id="transferTtl">Transfer workspace ownership</h2>
+      <button class="icon-btn" aria-label="Close dialog" onclick="PS.modal.close()"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x" aria-hidden="true"><path d="M18 6 6 18" /> <path d="m6 6 12 12" /></svg></button></div>
+    <div class="m-b">
+      <div class="banner warn" style="margin-bottom:16px">Ownership of <span class="mono">aziron</span> moves immediately. You keep your Admin role.</div>
+      <div class="field">
+        <label for="transferTo">New owner</label>
+        <select class="select" id="transferTo">
+          <option selected>Sarah Okafor (@sokafor) — Admin</option>
+        </select>
+        <span class="hint">Only Admins can receive ownership. Manage roles in <a href="team-management.html">Team</a>.</span>
+      </div>
+      <div class="field">
+        <label for="transferConfirmInput">Type <span class="mono">aziron</span> to confirm</label>
+        <input class="input monoval" id="transferConfirmInput" autocomplete="off" autocapitalize="none" spellcheck="false">
+      </div>
+    </div>
+    <div class="m-f">
+      <button class="btn" onclick="PS.modal.close()">Cancel</button>
+      <button class="btn primary" id="transferConfirm">Transfer ownership</button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete workspace modal -->
+<div class="overlay" id="deleteModal" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="deleteTtl">
+    <div class="m-h"><h2 id="deleteTtl">Delete workspace</h2>
+      <button class="icon-btn" aria-label="Close dialog" onclick="PS.modal.close()"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x" aria-hidden="true"><path d="M18 6 6 18" /> <path d="m6 6 12 12" /></svg></button></div>
+    <div class="m-b">
+      <div class="banner error" style="margin-bottom:16px">This removes <strong>1,847</strong> verified runs, all findings, and every attestation receipt for 18 repositories. It cannot be undone.</div>
+      <div class="field">
+        <label for="deleteConfirmInput">Type <span class="mono">aziron</span> to confirm</label>
+        <input class="input monoval" id="deleteConfirmInput" autocomplete="off" spellcheck="false">
+      </div>
+    </div>
+    <div class="m-f">
+      <button class="btn" onclick="PS.modal.close()">Cancel</button>
+      <button class="btn danger" id="deleteConfirmBtn" disabled>Delete workspace</button>
+    </div>
+  </div>
+</div>
+
+<!-- Preview changes modal (change-safety pattern) -->
+<div class="overlay" id="previewModal" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="pvTtl">
+    <div class="m-h"><h2 id="pvTtl">Preview changes</h2>
+      <button class="icon-btn" aria-label="Close dialog" onclick="PS.modal.close()"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x" aria-hidden="true"><path d="M18 6 6 18" /> <path d="m6 6 12 12" /></svg></button></div>
+    <div class="m-b">
+      <p class="muted" id="pvLede" style="margin-bottom:16px"></p>
+      <h3 style="font-size:13px;margin-bottom:8px">Values that would be applied</h3>
+      <dl class="kv" id="pvValues"></dl>
+      <h3 style="font-size:13px;margin:16px 0 8px">Blast radius</h3>
+      <dl class="kv" id="pvScope"></dl>
+    </div>
+    <div class="m-f">
+      <button class="btn" onclick="PS.modal.close()">Close</button>
+      <button class="btn primary" id="pvValidate">Run validation</button>
+    </div>
+  </div>
+</div>
+
+<!-- Audit entry modal (change-safety pattern · Governance change history) -->
+<div class="overlay" id="auditModal" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="auTtl">
+    <div class="m-h"><h2 id="auTtl">Audit entry</h2>
+      <button class="icon-btn" aria-label="Close dialog" onclick="PS.modal.close()"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x" aria-hidden="true"><path d="M18 6 6 18" /> <path d="m6 6 12 12" /></svg></button></div>
+    <div class="m-b">
+      <dl class="kv" id="auBody"></dl>
+      <p class="hint small muted" id="auNote" style="margin-top:12px"></p>
+    </div>
+    <div class="m-f">
+      <button class="btn" onclick="PS.modal.close()">Close</button>
+      <button class="btn primary" id="auHistory">Open change history</button>
+    </div>
+  </div>
+</div>
+
+<!-- State switcher -->
+<div class="stpanel" id="statePanel" hidden role="group" aria-label="Prototype state switcher">
+  <h3>Prototype state <button class="icon-btn" style="float:right;width:22px;height:22px" onclick="PS.stPanel(false)" aria-label="Close state switcher"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x" aria-hidden="true"><path d="M18 6 6 18" /> <path d="m6 6 12 12" /></svg></button></h3>
+  <label class="radio"><input type="radio" name="pstate" value="default" checked>Default</label>
+  <label class="radio"><input type="radio" name="pstate" value="loading">Loading</label>
+  <label class="radio"><input type="radio" name="pstate" value="empty">Empty</label>
+  <label class="radio"><input type="radio" name="pstate" value="error">Error</label>
+  <label class="radio"><input type="radio" name="pstate" value="restricted">Restricted</label>
+</div>
+
+<!-- Command palette -->
+<!-- Keyboard shortcut help (GitHub parity: ?) -->
+<div class="overlay" id="shortcutLay" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="scTtl">
+    <div class="m-h"><h2 id="scTtl">Keyboard shortcuts</h2><button class="icon-btn" aria-label="Close shortcuts" onclick="PS.closeTop()"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x" aria-hidden="true"><path d="M18 6 6 18" /> <path d="m6 6 12 12" /></svg></button></div>
+    <div class="m-b">
+      <div class="sccols">
+        <div>
+          <h3 class="scgrp">Navigation</h3>
+          <dl class="sclist">
+            <dt><kbd>g</kbd> <kbd>h</kbd></dt><dd>Go to Home</dd>
+            <dt><kbd>g</kbd> <kbd>a</kbd></dt><dd>Go to Action center</dd>
+            <dt><kbd>g</kbd> <kbd>p</kbd></dt><dd>Go to Pull requests</dd>
+            <dt><kbd>g</kbd> <kbd>f</kbd></dt><dd>Go to Findings</dd>
+            <dt><kbd>g</kbd> <kbd>u</kbd></dt><dd>Go to Unit tests</dd>
+            <dt><kbd>g</kbd> <kbd>c</kbd></dt><dd>Go to Coverage</dd>
+            <dt><kbd>g</kbd> <kbd>e</kbd></dt><dd>Go to Repositories</dd>
+            <dt><kbd>g</kbd> <kbd>n</kbd></dt><dd>Go to Notifications</dd>
+            <dt><kbd>g</kbd> <kbd>s</kbd></dt><dd>Go to Settings</dd>
+          </dl>
+        </div>
+        <div>
+          <h3 class="scgrp">Site-wide</h3>
+          <dl class="sclist">
+            <dt><kbd>⌘</kbd> <kbd>K</kbd></dt><dd>Command palette</dd>
+            <dt><kbd>/</kbd></dt><dd>Focus search</dd>
+            <dt><kbd>?</kbd></dt><dd>This dialog</dd>
+            <dt><kbd>Esc</kbd></dt><dd>Close dialog or drawer</dd>
+            <dt><kbd>.</kbd></dt><dd>Prototype state switcher</dd>
+          </dl>
+          <h3 class="scgrp">Lists &amp; tables</h3>
+          <dl class="sclist">
+            <dt><kbd>Enter</kbd></dt><dd>Open focused row</dd>
+            <dt><kbd>Tab</kbd></dt><dd>Move between controls</dd>
+          </dl>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="paletteLay" hidden>
+  <div class="modal palette" role="dialog" aria-modal="true" aria-label="Command palette">
+    <input type="text" id="paletteInput" placeholder="Search or jump to…  (try pr: run: finding: repo: user:)" aria-label="Search pages">
+    <ul id="paletteList" role="listbox"></ul>
+  </div>
+</div>
+
+<!-- Confirm dialog (PS.confirm builds content) -->
+<div class="overlay" id="confirmLay" hidden>
+  <div class="modal" role="alertdialog" aria-modal="true" aria-labelledby="confirmTtl">
+    <div class="m-h"><h2 id="confirmTtl">Confirm</h2></div>
+    <div class="m-b" id="confirmBody"></div>
+    <div class="m-f"><button class="btn" id="confirmCancel">Cancel</button><button class="btn primary" id="confirmOk">Confirm</button></div>
+  </div>
+</div>
+
+<div class="toasts" id="toasts" aria-live="polite"></div>
+
+<script>
+/* ============ PULSE SHELL RUNTIME (PS) — copy verbatim ============ */
+const PS = (() => {
+  const $ = (s, r=document) => r.querySelector(s);
+  const $$ = (s, r=document) => [...r.querySelectorAll(s)];
+  const PAGES = [
+    ["Home","index.html","Overview"],["Pull requests","pull-request-analysis.html","Analysis"],["Verification runs","runs.html","Analysis"],["PR #482 gateway-api","pr-details.html","Analysis"],
+    ["Unit tests","unit-test-analysis.html","Analysis"],["Combined","combined-analysis.html","Analysis"],
+    ["Run 06cb9564","run-details.html","Analysis"],["Findings","findings.html","Quality"],
+    ["Finding F-2381","finding-details.html","Quality"],["Coverage","coverage.html","Quality"],
+    ["Risk model","risk-model.html","Insights"],["Code intelligence","code-intelligence.html","Insights"],
+    ["Change graph","change-graph.html","Insights"],["Reliability","reliability.html","Trust"],
+    ["Security","security.html","Trust"],["Rollout","rollout.html","Trust"],["Reports","reports.html","Trust"],
+    ["Repositories","repositories.html","Estate"],["gateway-api","repository-overview.html","Estate"],
+    ["Team","team-management.html","Organization"],["Integrations","integrations.html","Organization"],
+    ["Notifications","notifications.html","Organization"],["Settings","settings.html","Organization"],
+    ["Get started","onboarding.html","Entry"],["Design system","design-system.html","Docs"],
+    ["Prototype guide","prototype-guide.html","Docs"],["Page inventory","page-inventory.html","Docs"],
+    ["Flow inventory","flow-inventory.html","Docs"],["Component inventory","component-inventory.html","Docs"],
+    ["Design decisions","design-decisions.html","Docs"],["QA report","qa-report.html","Docs"]
+  ];
+  const stack = []; let lastFocus = null; let PS_GO = 0;
+
+  /* focus trap */
+  function trap(el){
+    const f = $$('a[href],button:not([disabled]),input,select,textarea,[tabindex]:not([tabindex="-1"])', el).filter(x=>x.offsetParent!==null);
+    if(!f.length) return ()=>{};
+    const h = e => { if(e.key!=='Tab') return;
+      if(e.shiftKey && document.activeElement===f[0]){e.preventDefault();f[f.length-1].focus();}
+      else if(!e.shiftKey && document.activeElement===f[f.length-1]){e.preventDefault();f[0].focus();} };
+    el.addEventListener('keydown',h); return ()=>el.removeEventListener('keydown',h);
+  }
+  function openLayer(lay, focusEl){
+    lastFocus = document.activeElement; lay.hidden = false;
+    document.body.style.overflow='hidden';
+    const un = trap(lay); stack.push({lay,un});
+    (focusEl || $('button,input,a',lay))?.focus();
+  }
+  function closeTop(){
+    const t = stack.pop(); if(!t) return false;
+    t.lay.hidden = true; t.un();
+    if(!stack.length) document.body.style.overflow='';
+    lastFocus?.focus(); return true;
+  }
+  document.addEventListener('keydown', e=>{
+    if(e.key==='Escape'){ if(closeTop()) e.preventDefault(); closeMenus(); }
+    if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='k'){ e.preventDefault(); palette(); }
+    if(e.key==='/' && !/input|textarea|select/i.test(e.target.tagName)){ e.preventDefault(); palette(); }
+    if(e.key==='.' && !/input|textarea|select/i.test(e.target.tagName)){ stPanel(); }
+    /* GitHub parity: ? opens shortcut help, g+<key> jumps, all ignored while typing */
+    const typing = t => /input|textarea|select/i.test(t.tagName) || t.isContentEditable;
+    if(e.key==='?' && !typing(e.target)){ e.preventDefault(); const l=$('#shortcutLay'); if(l&&l.hidden) openLayer(l); }
+    if(!typing(e.target) && !e.metaKey && !e.ctrlKey && !e.altKey){
+      const now = Date.now();
+      if(e.key.toLowerCase()==='g'){ PS_GO = now; return; }
+      if(PS_GO && now - PS_GO < 1500){
+        const map = {h:'index.html',a:'action-center.html',p:'pull-request-analysis.html',r:'run-details.html',
+                     f:'findings.html',u:'unit-test-analysis.html',c:'coverage.html',s:'settings.html',
+                     n:'notifications.html',t:'team-management.html',e:'repositories.html',i:'integrations.html'};
+        const dest = map[e.key.toLowerCase()];
+        if(dest){ e.preventDefault(); PS_GO = 0; location.href = dest; return; }
+      }
+      PS_GO = 0;
+    }
+  });
+  $$('.overlay,.drawerlay').forEach(l=>l.addEventListener('mousedown',e=>{ if(e.target===l) closeTop(); }));
+
+  /* toasts */
+  function toast(msg, kind, action){
+    const box = $('#toasts'); const t = document.createElement('div');
+    t.className = 'toast'+(kind?' '+kind:''); t.setAttribute('role','status');
+    t.textContent = msg;
+    if(action){ const b=document.createElement('button'); b.textContent=action.label;
+      b.onclick=()=>{action.fn();t.remove();}; t.appendChild(b); }
+    box.appendChild(t); setTimeout(()=>t.remove(), 4200);
+  }
+
+  /* modal / drawer */
+  const modal = { open:id=>{const l=$('#'+id); l&&openLayer(l);}, close:()=>closeTop() };
+  const drawer = modal;
+
+  /* confirm */
+  function confirmDlg({title='Are you sure?',body='',confirmText='Confirm',danger=false,onConfirm=()=>{}}){
+    $('#confirmTtl').textContent = title; $('#confirmBody').innerHTML = body;
+    const ok = $('#confirmOk'); ok.textContent = confirmText;
+    ok.className = 'btn '+(danger?'danger':'primary');
+    ok.onclick = ()=>{ closeTop(); onConfirm(); };
+    $('#confirmCancel').onclick = ()=>closeTop();
+    openLayer($('#confirmLay'), ok);
+  }
+
+  /* copy */
+  function copy(text, label){
+    (navigator.clipboard?.writeText(text)||Promise.reject()).then(
+      ()=>toast((label||'Copied')+' — '+ (text.length>36?text.slice(0,36)+'…':text),'success'),
+      ()=>toast('Copy not available in this context'));
+  }
+
+  /* palette */
+  function palette(){
+    const lay=$('#paletteLay'), inp=$('#paletteInput'), list=$('#paletteList');
+    const ENTITIES = [
+      ['pr','#482 Rate-limit middleware for gateway ingress','pr-details.html','gateway-api'],
+      ['pr','#479 Retry budget for upstream pool','pull-request-analysis.html','gateway-api'],
+      ['run','06cb9564 · Passed · grade A','run-details.html','gateway-api'],
+      ['run','a3f81c02 · Failed','run-details.html#from-failed','gateway-api'],
+      ['run','e1447c09 · Refused','run-details.html#refused','sentinel-auth'],
+      ['finding','F-2381 New failing test TestRetryBudgetExhaustion','finding-details.html','gateway-api'],
+      ['repo','gateway-api','repository-overview.html','aziron'],
+      ['user','@priyar Priya Raghavan','team-management.html','Maintainer'],
+      ['user','@mwebb Marcus Webb','team-management.html','Member'],
+      ['user','@dominic Dominic Adams','settings.html','Admin']
+    ];
+    const render = q=>{
+      const raw = (q||'').trim();
+      const m = raw.match(/^(pr|run|finding|repo|user|page):\s*(.*)$/i);
+      const kind = m ? m[1].toLowerCase() : '';
+      const ql = (m ? m[2] : raw).toLowerCase();
+      const pageRows = (kind && kind!=='page') ? [] :
+        PAGES.filter(p=>p[0].toLowerCase().includes(ql)||p[2].toLowerCase().includes(ql))
+             .map(p=>`<li><a href="${p[1]}"><span class="etype">page</span>${p[0]}<span class="grp">${p[2]}</span></a></li>`);
+      const entRows = ENTITIES.filter(e=>(!kind||kind===e[0]) && (e[1].toLowerCase().includes(ql)||e[3].toLowerCase().includes(ql)))
+             .map(e=>`<li><a href="${e[2]}"><span class="etype">${e[0]}</span>${e[1]}<span class="grp">${e[3]}</span></a></li>`);
+      const rows = entRows.concat(pageRows);
+      list.innerHTML = rows.join('') || '<li style="padding:12px;color:var(--fg-subtle)">No matches — try pr:, run:, finding:, repo:, user:</li>';
+    };
+    render(''); inp.value='';
+    inp.oninput = ()=>render(inp.value);
+    inp.onkeydown = e=>{
+      const items=$$('li',list); const cur=items.findIndex(i=>i.classList.contains('focus'));
+      if(e.key==='ArrowDown'||e.key==='ArrowUp'){ e.preventDefault();
+        items[cur]?.classList.remove('focus');
+        const n=e.key==='ArrowDown'?(cur+1)%items.length:(cur-1+items.length)%items.length;
+        items[n]?.classList.add('focus'); items[n]?.scrollIntoView({block:'nearest'});}
+      if(e.key==='Enter'){ const a=$('a',items[cur>-1?cur:0]); if(a) location.href=a.href; }
+    };
+    openLayer(lay, inp);
+  }
+  $('#paletteBtn')?.addEventListener('click',()=>palette());
+
+  /* menus */
+  function closeMenus(){ $$('.menu').forEach(m=>m.hidden=true); $$('[aria-haspopup]').forEach(b=>b.setAttribute('aria-expanded','false')); }
+  document.addEventListener('click', e=>{
+    const btn = e.target.closest('[aria-haspopup="menu"],[aria-haspopup="true"]');
+    if(btn){ const m = btn.parentElement.querySelector('.menu'); if(m){ const was=m.hidden; closeMenus(); m.hidden=!was; btn.setAttribute('aria-expanded',String(was)); e.stopPropagation(); return; } }
+    if(!e.target.closest('.menu')) closeMenus();
+  });
+
+  /* tabs */
+  $$('[role="tablist"]').forEach(tl=>{
+    const tabs = $$('[role="tab"]', tl);
+    const activate = t=>{
+      tabs.forEach(x=>{ x.setAttribute('aria-selected', String(x===t)); x.tabIndex = x===t?0:-1;
+        const p = document.getElementById(x.getAttribute('aria-controls')); if(p) p.hidden = x!==t; });
+      if(tl.dataset.tabsHash) history.replaceState(null,'','#'+t.dataset.tab);
+    };
+    tabs.forEach(t=>{ t.addEventListener('click',()=>activate(t));
+      t.addEventListener('keydown',e=>{ const i=tabs.indexOf(t);
+        if(e.key==='ArrowRight'){tabs[(i+1)%tabs.length].focus();tabs[(i+1)%tabs.length].click();}
+        if(e.key==='ArrowLeft'){tabs[(i-1+tabs.length)%tabs.length].focus();tabs[(i-1+tabs.length)%tabs.length].click();}});});
+    const h = location.hash.slice(1);
+    const init = tabs.find(t=>t.dataset.tab===h) || tabs.find(t=>t.getAttribute('aria-selected')==='true') || tabs[0];
+    if(init) activate(init);
+  });
+
+  /* sortable tables */
+  $$('.tbl th[data-sort]').forEach(th=>{
+    th.tabIndex=0; th.setAttribute('role','button');
+    const go=()=>{ const tbl=th.closest('table'); const idx=[...th.parentNode.children].indexOf(th);
+      const dir = th.getAttribute('aria-sort')==='ascending'?'descending':'ascending';
+      $$('th',tbl).forEach(x=>x.removeAttribute('aria-sort')); th.setAttribute('aria-sort',dir);
+      const rows=$$('tbody tr',tbl); const num=th.dataset.sort==='num';
+      rows.sort((a,b)=>{ let A=a.children[idx].textContent.trim(), B=b.children[idx].textContent.trim();
+        if(num){A=parseFloat(A.replace(/[^\d.-]/g,''))||0;B=parseFloat(B.replace(/[^\d.-]/g,''))||0;}
+        return (A>B?1:A<B?-1:0)*(dir==='ascending'?1:-1); });
+      rows.forEach(r=>r.parentNode.appendChild(r)); };
+    th.addEventListener('click',go); th.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go();}});
+  });
+
+  /* row links */
+  document.addEventListener('click',e=>{
+    const r=e.target.closest('tr.rowlink'); if(!r||e.target.closest('a,button,input,select,.menuwrap'))return;
+    location.href=r.dataset.href;
+  });
+  document.addEventListener('keydown',e=>{
+    const r=e.target.closest?.('tr.rowlink'); if(r&&e.key==='Enter') location.href=r.dataset.href;
+  });
+  $$('tr.rowlink').forEach(r=>{r.tabIndex=0;});
+
+  /* active nav — the rail is the only nav */
+  const here = location.pathname.split('/').pop() || 'index.html';
+  const WS = {runs:['runs.html','unit-test-analysis.html','combined-analysis.html'],quality:['findings.html','coverage.html','reliability.html'],insights:['risk-model.html','code-intelligence.html','change-graph.html','reports.html'],estate:['repositories.html','rollout.html'],org:['settings.html','team-management.html','integrations.html','notifications.html']};
+  $$('.railbtn').forEach(a=>{
+    const href=a.getAttribute('href'), ws=a.dataset.ws;
+    if(href===here || (ws && (WS[ws]||[]).includes(here))) a.setAttribute('aria-current','page');
+  });
+
+  /* Align the shell controls with the Run workspace header, retaining each page title. */
+  const topbar=$('.topbar'), topbarActions=$('.topbar-actions');
+  if(topbar && topbarActions && !topbar.querySelector('.topbar-live')){
+    const crumb=topbar.querySelector('.crumbs a');
+    if(crumb){ crumb.textContent='Pulse'; crumb.href='index.html'; }
+    const sep=topbar.querySelector('.crumbs .sep'); if(sep) sep.textContent='›';
+    const live=document.createElement('span');
+    live.className='topbar-live'; live.textContent='live · updated 1m ago';
+    topbar.insertBefore(live,topbarActions);
+    const createSource=$('#createBtn')?.closest('.menuwrap');
+    const divider=document.createElement('span'); divider.className='reference-divider'; divider.setAttribute('aria-hidden','true');
+    const language=document.createElement('button'); language.type='button'; language.className='reference-language'; language.setAttribute('aria-label','Language: English');
+    language.innerHTML='<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-globe" aria-hidden="true"><circle cx="12" cy="12" r="10" /> <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" /> <path d="M2 12h20" /></svg>EN<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>';
+    const repoContext=$('.repoctx'), bell=$('.bellwrap'), theme=$('#themeBtn'), user=$('#userMenuBtn')?.closest('.menuwrap');
+    topbarActions.append(repoContext,createSource,divider,bell,theme,language,user);
+  }
+  /* Rail labels use a viewport-level tooltip so scroll clipping cannot hide them. */
+  const railTip=document.createElement('div');
+  railTip.className='rail-tooltip'; railTip.hidden=true; document.body.appendChild(railTip);
+  const hideRailTip=()=>{ railTip.hidden=true; };
+  const showRailTip=a=>{
+    if(!rail || rail.dataset.expanded==='true' || rail.getBoundingClientRect().width>100) return;
+    const r=a.getBoundingClientRect();
+    railTip.textContent=a.dataset.tip || a.dataset.label || a.getAttribute('aria-label') || '';
+    railTip.style.left=`${r.right+8}px`; railTip.style.top=`${r.top+r.height/2}px`; railTip.hidden=!railTip.textContent;
+  };
+  $$('.railbtn[data-tip]').forEach(a=>{
+    a.addEventListener('pointerenter',()=>showRailTip(a));
+    a.addEventListener('pointerleave',hideRailTip);
+    a.addEventListener('focus',()=>showRailTip(a));
+    a.addEventListener('blur',hideRailTip);
+  });
+
+  /* page select (panel mode) */
+  const psel=$('#pageSelect');
+  if(psel){ let g=''; PAGES.forEach(p=>{ if(p[2]!==g){g=p[2];const og=document.createElement('optgroup');og.label=g;psel.appendChild(og);}
+      const o=document.createElement('option');o.value=p[1];o.textContent=p[0];o.selected=p[1]===here;psel.lastElementChild.appendChild(o);});
+    psel.addEventListener('change',()=>location.href=psel.value); }
+
+  /* theme — light | dark, remembered per browser, seeded from the OS */
+  function setTheme(t, remember=true){
+    document.documentElement.dataset.theme = t;
+    if(remember){ try{ localStorage.setItem('pulseTheme', t); }catch(e){} }
+    const b = $('#themeBtn');
+    if(b){ b.setAttribute('aria-pressed', String(t==='dark'));
+      b.setAttribute('aria-label', t==='dark' ? 'Switch to light theme' : 'Switch to dark theme'); }
+    document.dispatchEvent(new CustomEvent('pulsetheme',{detail:{theme:t}}));
+  }
+  function toggleTheme(){ setTheme(document.documentElement.dataset.theme==='dark'?'light':'dark'); }
+  setTheme(document.documentElement.dataset.theme==='dark'?'dark':'light', false);
+  $('#themeBtn')?.addEventListener('click', toggleTheme);
+  matchMedia('(prefers-color-scheme:dark)').addEventListener('change', e=>{
+    let saved=null; try{ saved=localStorage.getItem('pulseTheme'); }catch(_){}
+    if(!saved) setTheme(e.matches?'dark':'light', false);   /* only while unset */
+  });
+
+  /* Aziron product rail — expand state is remembered, like the theme */
+  const rail = $('#rail'), railBtn = $('#railToggle');
+  function setRail(open, remember=true){
+    if(!rail) return;
+    rail.dataset.expanded = String(open);
+    railBtn?.setAttribute('aria-expanded', String(open));
+    railBtn?.setAttribute('aria-label', open ? 'Collapse Aziron navigation' : 'Expand Aziron navigation');
+    if(remember){ try{ localStorage.setItem('pulseRail', open?'1':'0'); }catch(e){} }
+  }
+  let railSaved=null; try{ railSaved=localStorage.getItem('pulseRail'); }catch(e){}
+  setRail(railSaved!=='0', false);
+  railBtn?.addEventListener('click',()=>setRail(rail.dataset.expanded!=='true'));
+  /* below 1013px the expanded rail overlays the page, so let it be dismissed like a panel */
+  const railOverlays = ()=> rail && rail.dataset.expanded==='true' && matchMedia('(max-width:1012px)').matches;
+  document.addEventListener('click', e=>{
+    if(railOverlays() && !e.target.closest('#rail,#railToggle')) setRail(false);
+  });
+  document.addEventListener('keydown', e=>{
+    if(e.key==='Escape' && railOverlays()){ setRail(false); railBtn?.focus(); }
+  });
+  $('#railLogo')?.addEventListener('click',()=>toast('Aziron workspace — outside this Pulse prototype'));
+
+  /* surface + state engine */
+  const q = new URLSearchParams(location.search);
+  if(q.get('surface')==='vscode') document.documentElement.classList.add('surface-vscode');
+  const __pmq=matchMedia('(max-width:640px)');
+  const __pms=()=>{ if(q.get('surface')!=='vscode') document.documentElement.classList.toggle('surface-vscode', __pmq.matches); };
+  __pmq.addEventListener('change',__pms); addEventListener('resize',__pms); __pms();
+  function setState(s, push=true){
+    document.documentElement.dataset.pstate=s;
+    $$('[data-state]').forEach(el=>{ el.hidden = !el.dataset.state.split(' ').includes(s); });
+    $$('#statePanel input').forEach(r=>r.checked=r.value===s);
+    if(push){ const u=new URL(location); u.searchParams.set('state',s); history.replaceState(null,'',u); }
+    if(s==='loading' && !q.has('hold')) setTimeout(()=>{ if(document.documentElement.dataset.pstate==='loading') setState('default'); }, 900);
+  }
+  const initState = q.get('state') || (location.hash.match(/state=(\w+)/)||[])[1] || 'default';
+  function stPanel(force){ const p=$('#statePanel'); p.hidden = force===false ? true : !p.hidden; }
+  $('#stateBtn')?.addEventListener('click',()=>stPanel());
+  $$('#statePanel input').forEach(r=>r.addEventListener('change',()=>setState(r.value)));
+  if($$('[data-state]').length) setState(initState,false);
+
+  /* Concept parity: persistent context bar, metric definitions, start run */
+  const CTX_KEY = 'pulseCtx';
+  function ctx(){ try { return JSON.parse(localStorage.getItem(CTX_KEY)||'{}'); } catch(e){ return {}; } }
+  function setCtx(patch){
+    const c = Object.assign({altitude:'team',range:'7',compare:'prev'}, ctx(), patch);
+    try { localStorage.setItem(CTX_KEY, JSON.stringify(c)); } catch(e){}
+    document.dispatchEvent(new CustomEvent('pulsectx',{detail:c}));
+    return c;
+  }
+  function mountContextBar(host){ return; /* scope bar removed */
+    const el = host || $('#ctxBar'); if(!el || el.dataset.built) return;
+    el.dataset.built = '1'; el.className = 'ctxbar'; el.setAttribute('aria-label','Analysis scope');
+    const c = Object.assign({altitude:'team',range:'7',compare:'prev'}, ctx());
+    el.innerHTML =
+      '<span class="ctxlbl">Scope</span>' +
+      '<select class="select" id="ctxAlt" aria-label="Altitude">' +
+        '<option value="mine">My work</option><option value="team">Team · Platform</option><option value="org">Organization · Aziron</option>' +
+      '</select>' +
+      '<select class="select" id="ctxRange" aria-label="Date range">' +
+        '<option value="7">Last 7 days</option><option value="14">Last 14 days</option><option value="30">Last 30 days</option>' +
+      '</select>' +
+      '<select class="select" id="ctxCmp" aria-label="Comparison">' +
+        '<option value="prev">Compare · previous period</option><option value="avg">Compare · team average</option><option value="none">No comparison</option>' +
+      '</select>' +
+      '<button class="btn sm" id="ctxSave">☆ Save view</button>' +
+      '<span class="ctxspacer"></span>' +
+      '<span class="ctxfresh" id="ctxFresh">Analytics synced 2 minutes ago</span>';
+    $('#ctxAlt').value = c.altitude; $('#ctxRange').value = c.range; $('#ctxCmp').value = c.compare;
+    const note = () => { const a=$('#ctxAlt'), r=$('#ctxRange'); toast('Scope: ' + a.options[a.selectedIndex].text + ' · ' + r.options[r.selectedIndex].text); };
+    $('#ctxAlt').addEventListener('change', e=>{ setCtx({altitude:e.target.value}); note(); });
+    $('#ctxRange').addEventListener('change', e=>{ setCtx({range:e.target.value}); note(); });
+    $('#ctxCmp').addEventListener('change', e=>{ setCtx({compare:e.target.value}); toast('Comparison updated'); });
+    $('#ctxSave').addEventListener('click', ()=>toast('View saved — scope, range and comparison stored','success'));
+  }
+  /* metric definition dialog: pages declare window.METRIC_DEFS = {key:{formula,source,scope,caveat,sync}} */
+  function metricDef(key){
+    const d = (window.METRIC_DEFS||{})[key];
+    if(!d){ toast('No definition recorded for this metric'); return; }
+    const rows = [['Formula',d.formula],['Data source',d.source],['Scope',d.scope],['Caveat',d.caveat],['Last sync',d.sync||'2 minutes ago']]
+      .filter(r=>r[1]).map(r=>'<dt>'+r[0]+'</dt><dd>'+r[1]+'</dd>').join('');
+    $('#confirmTtl').textContent = d.title || key;
+    $('#confirmBody').innerHTML = '<dl class="kv">'+rows+'</dl>';
+    const ok = $('#confirmOk'); ok.textContent = 'Close'; ok.className = 'btn primary';
+    ok.onclick = ()=>closeTop();
+    $('#confirmCancel').style.display = 'none';
+    openLayer($('#confirmLay'), ok);
+    const restore = () => { $('#confirmCancel').style.display = ''; document.removeEventListener('pulsedlgclose', restore); };
+    document.addEventListener('pulsedlgclose', restore);
+  }
+  function mountMetricDefs(root){
+    $$('[data-metric]', root||document).forEach(el=>{
+      if(el.dataset.defBuilt) return; el.dataset.defBuilt='1';
+      const lbl = el.querySelector('.lbl') || el;
+      const b = document.createElement('button');
+      b.className='mdef'; b.type='button'; b.textContent='?';
+      b.setAttribute('aria-label','About this metric: ' + (lbl.textContent||'').trim());
+      b.addEventListener('click', e=>{ e.stopPropagation(); metricDef(el.dataset.metric); });
+      lbl.appendChild(b);
+    });
+  }
+  function startRun(){
+    confirmDlg({title:'Start a verification run?', body:'<p>Queues a full verification for the current repository scope. Selection, replay and attestation run as configured in Settings › Verification.</p>',
+      confirmText:'Start run', onConfirm:()=>toast('Verification queued — run '+Math.random().toString(16).slice(2,10)+' starting','success')});
+  }
+  document.addEventListener('DOMContentLoaded', ()=>{ mountContextBar(); mountMetricDefs(); });
+  if(document.readyState !== 'loading'){ mountContextBar(); mountMetricDefs(); }
+
+  /* GitHub parity: repository context switcher (org/repo scope like GitHub) */
+  const REPOS = [
+    ['gateway-api','Enforce'],['orion-web','Advisory'],['atlas-data','Advisory'],['relay-workers','Shadow'],
+    ['sentinel-auth','Enforce'],['nimbus-infra','Shadow'],['quill-docs','Advisory'],['forge-ci','Enforce'],
+    ['hermes-notify','Advisory'],['vault-core','Enforce'],['echo-mobile','Shadow'],['prism-analytics','Advisory'],
+    ['beacon-search','Advisory'],['drift-scheduler','Enforce'],['canvas-ui','Advisory'],['meridian-sync','Shadow'],
+    ['onyx-cache','Shadow'],['spectra-ml','Shadow']
+  ];
+  function repoScope(){ try { return localStorage.getItem('pulseRepoScope') || ''; } catch(e){ return ''; } }
+  function setRepoScope(name){
+    try { name ? localStorage.setItem('pulseRepoScope', name) : localStorage.removeItem('pulseRepoScope'); } catch(e){}
+    const lbl = $('#repoCtxLabel'); if(lbl) lbl.textContent = name ? 'aziron/' + name : 'All repositories';
+    document.dispatchEvent(new CustomEvent('pulserepo',{detail:{repo:name}}));
+  }
+  function renderRepoMenu(q){
+    const list = $('#repoCtxList'); if(!list) return;
+    const ql = (q||'').toLowerCase(), cur = repoScope();
+    const rows = REPOS.filter(r=>r[0].includes(ql));
+    list.innerHTML = '<button class="ritem" data-repo="">'+(cur?'':'✓ ')+'All repositories</button><hr class="rsep">' +
+      (rows.map(r=>'<button class="ritem" data-repo="'+r[0]+'">'+(cur===r[0]?'✓ ':'')+'<span class="rname">'+r[0]+'</span><span class="rmode">'+r[1]+'</span></button>').join('')
+       || '<div style="padding:10px;color:var(--fg-subtle);font-size:12px">No repositories match</div>');
+  }
+  const rcBtn = $('#repoCtxBtn');
+  if(rcBtn){
+    setRepoScope(repoScope());
+    renderRepoMenu('');
+    $('#repoCtxFilter')?.addEventListener('input', e=>renderRepoMenu(e.target.value));
+    $('#repoCtxList')?.addEventListener('click', e=>{
+      const b = e.target.closest('[data-repo]'); if(!b) return;
+      const name = b.dataset.repo; setRepoScope(name); closeMenus();
+      toast(name ? 'Scope set to aziron/' + name : 'Scope set to all repositories');
+    });
+  }
+
+  /* GitHub parity: relative timestamps with absolute tooltip */
+  const NOW = new Date('2026-08-03T11:30:00');
+  function rel(iso){
+    const d = new Date(iso); if(isNaN(d)) return '';
+    const s = Math.round((NOW - d)/1000);
+    if(s < 60) return 'just now';
+    const m = Math.round(s/60); if(m < 60) return m + (m===1?' minute ago':' minutes ago');
+    const h = Math.round(m/60); if(h < 24) return h + (h===1?' hour ago':' hours ago');
+    const dd = Math.round(h/24); if(dd < 30) return dd + (dd===1?' day ago':' days ago');
+    const mo = Math.round(dd/30); return mo + (mo===1?' month ago':' months ago');
+  }
+  function abs(iso){
+    const d = new Date(iso); if(isNaN(d)) return '';
+    return d.toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'});
+  }
+  function hydrateTimes(root){
+    $$('time[datetime]', root||document).forEach(t=>{
+      if(t.dataset.relDone) return; t.dataset.relDone='1';
+      const iso = t.getAttribute('datetime');
+      const r = rel(iso); if(!r) return;
+      if(!t.title) t.title = abs(iso);
+      t.textContent = r;
+    });
+  }
+  hydrateTimes();
+  document.addEventListener('pulsetimes', ()=>hydrateTimes());
+
+  return { toast, modal, drawer, confirm:confirmDlg, copy, palette, setState, stPanel, trap, openLayer, closeTop, setTheme, toggleTheme, setRail, rel, abs, hydrateTimes, ctx, setCtx, mountContextBar, metricDef, mountMetricDefs, startRun, PAGES };
+})();
+</script>
+<script>
+/* ============ GitHub parity: micro-conventions (page-local) ============ */
+/* The shared PS runtime is byte-identical across pages, so these helpers live here. */
+const PX_COPY_SVG = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-copy" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2" ry="2" /> <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" /></svg>';
+const PX_USERS = {
+  dominic:['DA','Dominic Adams','Admin'], sokafor:['SO','Sarah Okafor','Owner'],
+  priyar:['PR','Priya Raghavan','Maintainer'], mwebb:['MW','Marcus Webb','Member'],
+  esokolova:['ES','Elena Sokolova','Member'], ktanaka:['KT','Kenji Tanaka','Analyst'],
+  'pulse-auditor':['PA','pulse-auditor','Attestation bot']
+};
+/* thousands separators everywhere a count is printed */
+function pxNum(n){ return (typeof n === 'number' && isFinite(n)) ? n.toLocaleString('en-US') : n; }
+/* agreement-correct counts: one finding, six findings */
+function pxPlural(n, one, many){ return pxNum(n) + ' ' + (Math.abs(Number(n)) === 1 ? one : (many || one + 's')); }
+/* copy affordance for a mono identifier, as markup (for JS-rendered rows) */
+function pxCopyBtn(value, label, aria){
+  return '<button type="button" class="icon-btn cp copybtn" data-copy="' + value + '" data-copy-label="' +
+    (label || 'Copied') + '" aria-label="' + (aria || ('Copy ' + value)) + '">' + PX_COPY_SVG + '</button>';
+}
+/* person reference: initials avatar + linked @handle carrying name and role */
+function pxUser(handle, opts){
+  const h = String(handle).replace(/^@/, '');
+  const u = PX_USERS[h] || [h.slice(0, 2).toUpperCase(), h, 'Member'];
+  const text = (opts && opts.plain) ? u[1] : '@' + h;
+  return '<span class="uchip"><span class="avatar' + ((opts && opts.bot) ? ' bot' : '') + '" aria-hidden="true">' + u[0] + '</span>' +
+    '<a class="user" href="team-management.html?member=' + h + '" title="' + u[1] + ' \u00b7 ' + u[2] + '">' + text + '</a></span>';
+}
+/* GitHub's flash message: a dismissible banner at the top of the region that changed */
+function pxFlash(region, msg, kind){
+  const host = typeof region === 'string' ? document.querySelector(region) : region;
+  if(!host) return null;
+  [...host.children].forEach(c => { if(c.classList && c.classList.contains('pxflash')) c.remove(); });
+  const b = document.createElement('div');
+  b.className = 'banner flash pxflash ' + (kind || 'success');
+  b.setAttribute('role', 'status');
+  b.innerHTML = '<span class="fico" aria-hidden="true">' + (kind === 'error' ? '\u2715' : kind === 'warn' ? '\u26a0' : '\u2713') +
+    '</span><span class="fmsg"></span><button type="button" class="icon-btn x" aria-label="Dismiss this message">' +
+    '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x" aria-hidden="true"><path d="M18 6 6 18" /> <path d="m6 6 12 12" /></svg></button>';
+  b.querySelector('.fmsg').innerHTML = msg;
+  host.insertBefore(b, host.firstChild);
+  b.querySelector('.x').addEventListener('click', () => b.remove());
+  if(typeof PS !== 'undefined' && PS.hydrateTimes) PS.hydrateTimes(b);   /* PS is a script-scope const, not a window property */
+  return b;
+}
+/* irreversible actions gate behind typing the resource name */
+function pxConfirmName(o){
+  const name = o.typeToConfirm;
+  const id = 'pxcn-' + Math.random().toString(36).slice(2, 8);
+  PS.confirm({
+    title: o.title,
+    confirmText: o.confirmText || 'Confirm',
+    danger: true,
+    body: (o.body || '') +
+      '<div class="pxcn"><label for="' + id + '">To confirm, type <span class="mono">' + name + '</span> below.</label>' +
+      '<input class="input" id="' + id + '" type="text" autocomplete="off" autocapitalize="none" spellcheck="false"></div>',
+    onConfirm: o.onConfirm
+  });
+  const ok = document.getElementById('confirmOk'), inp = document.getElementById(id);
+  if(!ok || !inp) return;
+  ok.disabled = true;
+  inp.addEventListener('input', () => { ok.disabled = inp.value.trim() !== name; });
+  inp.addEventListener('keydown', e => { if(e.key === 'Enter' && !ok.disabled){ e.preventDefault(); ok.click(); } });
+  inp.focus();
+}
+/* the confirm dialog is shared, so always hand it back enabled */
+(function(){
+  const lay = document.getElementById('confirmLay'); if(!lay) return;
+  new MutationObserver(() => { if(lay.hidden){ const ok = document.getElementById('confirmOk'); if(ok) ok.disabled = false; } })
+    .observe(lay, { attributes: true, attributeFilter: ['hidden'] });
+})();
+/* one delegated handler copies every .copyable identifier on the page */
+(function(){
+  const CHECK = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check" aria-hidden="true"><path d="M20 6 9 17l-5-5" /></svg>';
+  document.addEventListener('click', e => {
+    const b = e.target.closest('.cp[data-copy]'); if(!b) return;
+    e.preventDefault(); e.stopPropagation();
+    PS.copy(b.dataset.copy, b.dataset.copyLabel || 'Copied');
+    if(b.dataset.done) return;
+    b.dataset.done = '1';
+    const old = b.innerHTML;
+    b.innerHTML = CHECK; b.classList.add('done');
+    setTimeout(() => { b.innerHTML = old; b.classList.remove('done'); delete b.dataset.done; }, 1200);
+  });
+})();
+
+/* ============ settings.html page logic ============ */
+(() => {
+  const $ = (s, r=document) => r.querySelector(s);
+  const $$ = (s, r=document) => [...r.querySelectorAll(s)];
+
+  /* GitHub parity: in-flight button state — disable + present-participle label, then restore */
+  function pxBusy(btn, label, done, ms){
+    if(!btn){ if(done) done(); return; }
+    if(btn.dataset.busy) return;
+    btn.dataset.busy = '1';
+    const old = btn.innerHTML;
+    btn.style.minWidth = btn.offsetWidth + 'px';
+    btn.disabled = true; btn.setAttribute('aria-busy','true');
+    btn.textContent = label;
+    setTimeout(()=>{
+      btn.innerHTML = old; btn.disabled = false;
+      btn.removeAttribute('aria-busy'); delete btn.dataset.busy;
+      btn.style.minWidth = '';
+      if(done) done();
+    }, ms || 900);
+  }
+  /* prototype clock is pinned to the canon "now" so relative + absolute agree */
+  function nowIso(){ return '2026-08-03T11:30'; }
+
+  /* ---------- Save actions ---------- */
+  const SAVE_MSG = {
+    'profile':'Profile saved',
+    'workspace':'Workspace settings saved',
+    'repo-defaults':'Repository defaults saved — applies to newly connected repositories',
+    'verification':'Verification settings saved',
+    'code-scanning':'Code scanning integrations saved',
+    'unit-testing':'Unit-test policy saved',
+    'security-policy':'Security policy saved',
+    'runners':'Runner settings saved',
+    'agents':'Agent settings saved',
+    'governance':'Governance policy saved',
+    'danger':null
+  };
+  /* Change safety: while a pane's "Require validation before apply" switch is on, the pane
+     cannot be saved until Run validation has passed for it, and any later edit spends that pass. */
+  const validated = new Set();
+  function needsValidation(key){
+    const sw = $('[data-reqval="'+key+'"]');
+    return !!(sw && sw.checked) && !validated.has(key);
+  }
+  function guardSave(key){
+    if(!needsValidation(key)){ validated.delete(key); return true; }
+    PS.toast('Run validation before applying these changes','danger');
+    pxFlash('#flash-'+key, 'This section requires validation before changes can be applied — choose <strong>Run validation</strong> above, then save.', 'warn');
+    const b = $('[data-validate="'+key+'"]'); if(b) b.focus();
+    return false;
+  }
+  function saveTab(key){
+    const msg = SAVE_MSG[key];
+    if(msg===null){ PS.toast('Nothing to save in the Danger zone'); return; }
+    if(!guardSave(key)) return;
+    PS.toast(msg||'Settings saved','success');
+    pxFlash('#flash-'+key, (msg||'Settings saved') +
+      ' <time datetime="2026-08-03T11:30">Aug 3, 11:30</time>. Changes apply from the next verified run.');
+  }
+  $('#saveAllBtn').addEventListener('click', e=>{
+    const t = $('.tabs [role="tab"][aria-selected="true"]');
+    const key = t ? t.dataset.tab : 'profile';
+    if(SAVE_MSG[key] === null || needsValidation(key)){ saveTab(key); return; }
+    pxBusy(e.currentTarget, 'Saving…', ()=>saveTab(key));
+  });
+  $$('[data-savetab]').forEach(b=>b.addEventListener('click', e=>{
+    if(needsValidation(b.dataset.savetab)){ saveTab(b.dataset.savetab); return; }
+    pxBusy(e.currentTarget, 'Saving…', ()=>saveTab(b.dataset.savetab));
+  }));
+
+  /* ---------- Chip editors (Repository defaults) ---------- */
+  function chipEditor(listId, inputId, addBtnId, seed, noun, onChange){
+    const list = $('#'+listId), inp = $('#'+inputId), addBtn = $('#'+addBtnId);
+    function values(){ return $$('.chip .cv', list).map(c=>c.textContent); }
+    function mkChip(v){
+      const span = document.createElement('span');
+      span.className = 'chip'; span.setAttribute('role','listitem');
+      const cv = document.createElement('span'); cv.className='cv'; cv.textContent = v;
+      const x = document.createElement('button');
+      x.type='button'; x.innerHTML='<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x" aria-hidden="true"><path d="M18 6 6 18" /> <path d="m6 6 12 12" /></svg>';
+      x.setAttribute('aria-label','Remove '+noun+' '+v);
+      x.addEventListener('click', ()=>{ span.remove(); PS.toast(noun.charAt(0).toUpperCase()+noun.slice(1)+' removed — save to apply'); if(onChange) onChange('removed', v); });
+      span.append(cv, x); return span;
+    }
+    function add(){
+      const v = inp.value.trim();
+      if(!v){ inp.focus(); return; }
+      if(values().includes(v)){ PS.toast('That '+noun+' is already listed'); inp.select(); return; }
+      list.appendChild(mkChip(v)); inp.value=''; inp.focus();
+      if(onChange) onChange('added', v);
+    }
+    function reseed(){ list.textContent=''; seed.forEach(v=>list.appendChild(mkChip(v))); }
+    reseed();
+    addBtn.addEventListener('click', add);
+    inp.addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); add(); } });
+    return { values, reseed };
+  }
+  chipEditor('tpChips','tpInput','tpAdd',
+    ['**/*_test.go','tests/**/test_*.py','src/**/*.spec.ts','**/*_test.rs'],'test pattern');
+  chipEditor('exChips','exInput','exAdd',
+    ['vendor/**','node_modules/**','**/testdata/**','dist/**'],'exclude glob');
+
+  /* ---------- Verification reset ---------- */
+  $('#vfReset').addEventListener('click', ()=>{
+    $('#vfSelTarget').value = 40; $('#vfReplay').value = 12;
+    $('#vfRecall').value = '99.0'; $('#vfAttest').checked = true;
+    $('#dvMode').value = 'manual'; $('#dvAi').checked = false;
+    dvEditor.reseed(); syncDvPaths(); renderYaml();
+    PS.toast('Verification settings reset to defaults');
+  });
+
+  /* ---------- Deep verify ---------- */
+  const dvMode = $('#dvMode'), dvPathsField = $('#dvPathsField');
+  const dvEditor = chipEditor('dvChips','dvInput','dvAdd',
+    ['**/auth/**','**/migrations/**','**/crypto/**'],'risk path',
+    (kind, v)=>{ if(kind==='added') PS.toast('Risk path '+v+' added — save to apply'); renderYaml(); });
+  const DV_MSG = {
+    disabled:'Deep verify disabled — runs stay on the selected-tier suite',
+    manual:'Deep verify set to Manual — trigger it from any run or pull request',
+    automatic:'Deep verify set to Automatic — risk-path changes queue the full suite (~28 min)'
+  };
+  function syncDvPaths(){ dvPathsField.hidden = dvMode.value !== 'automatic'; }
+  dvMode.addEventListener('change', ()=>{ syncDvPaths(); PS.toast(DV_MSG[dvMode.value]); renderYaml(); });
+  syncDvPaths();
+
+  $('#dvAi').addEventListener('change', e=>{
+    PS.toast(e.target.checked
+      ? 'AI-authored changes (≥60% attribution) now queue deep verify'
+      : 'AI-authored changes verify at the standard tier');
+  });
+
+  /* ---------- Configuration as code (pulse.yaml mirrors the tabs) ---------- */
+  const yamlText = $('#yamlText');
+  function numVal(id, fb){ const el = $('#'+id); const v = el ? parseFloat(el.value) : NaN; return isNaN(v) ? fb : v; }
+  function selVal(id, fb){ const el = $('#'+id); return el ? el.value : fb; }
+  function boolVal(id, fb){ const el = $('#'+id); return el ? el.checked : fb; }
+  function renderYaml(){
+    const paths = dvEditor.values();
+    const lines = [
+      '# pulse.yaml — commit at the repository root',
+      'version: 1',
+      'verification:',
+      '  selection_target: ' + (+(numVal('vfSelTarget',40)/100).toFixed(4)),
+      '  replay_samples: ' + Math.round(numVal('vfReplay',12)),
+      '  recall_threshold: ' + (+(numVal('vfRecall',99)/100).toFixed(4)),
+      '  attestation_required: ' + $('#vfAttest').checked,
+      '  deep_verify: ' + dvMode.value,
+      paths.length ? '  deep_verify_paths:' : '  deep_verify_paths: []',
+      ...paths.map(p=>'    - "'+p+'"'),
+      'enforcement:',
+      '  default_mode: ' + (($('input[name="wsMode"]:checked')||{value:'shadow'}).value),
+      'baseline:',
+      '  mode: ' + (($('input[name="wsBaseline"]:checked')||{value:'baseline'}).value)
+    ];
+    yamlText.textContent = lines.join('\n');
+  }
+  ['vfSelTarget','vfReplay','vfRecall'].forEach(id=>$('#'+id).addEventListener('input', renderYaml));
+  $('#vfAttest').addEventListener('change', renderYaml);
+  $$('input[name="wsMode"], input[name="wsBaseline"]').forEach(r=>r.addEventListener('change', renderYaml));
+  renderYaml();
+
+  $('#yamlCopyBtn').addEventListener('click', ()=>PS.copy(yamlText.textContent,'pulse.yaml copied'));
+  $('#yamlDownloadBtn').addEventListener('click', ()=>PS.toast('pulse.yaml downloaded — commit it at the repository root to override these defaults','success'));
+  $$('#yamlHint a').forEach(a=>a.addEventListener('click', e=>{
+    e.preventDefault();
+    const t = $('.tabs [role="tab"][data-tab="'+a.getAttribute('href').slice(1)+'"]');
+    if(t){ t.click(); t.focus(); }
+  }));
+
+  /* ---------- MCP snippet copy ---------- */
+  const MCP_SNIPPET = '{\n  "mcpServers": {\n    "pulse": {\n      "endpoint": "mcp.pulse.aziron.dev",\n      "workspace": "aziron",\n      "token": "${PULSE_PAT}"\n    }\n  }\n}';
+  $('#mcpCopyBtn').addEventListener('click', ()=>PS.copy(MCP_SNIPPET,'MCP configuration copied'));
+
+  /* ---------- Personal access tokens ---------- */
+  const patTbody = $('#patTbody'), patCnt = $('#patCnt');
+  function refreshCnt(){ patCnt.textContent = pxNum($$('tr', patTbody).length); }
+  function hex(n){ let s=''; while(s.length<n) s+=Math.floor(Math.random()*16).toString(16); return s; }
+  let pendingToken = null;
+
+  function resetPatModal(){
+    $('#patStep1').hidden = false; $('#patStep2').hidden = true;
+    $('#patName').value=''; $('#patName').removeAttribute('aria-invalid');
+    $('#patNameErr').hidden = true; $('#patScope').selectedIndex = 1;
+    $('#patCreate').textContent = 'Create token';
+    pendingToken = null;
+  }
+  $('#patNewBtn').addEventListener('click', ()=>{ resetPatModal(); PS.modal.open('patModal'); $('#patName').focus(); });
+
+  $('#patCreate').addEventListener('click', e=>{
+    if(!$('#patStep1').hidden){
+      const name = $('#patName').value.trim();
+      if(!name){ $('#patName').setAttribute('aria-invalid','true'); $('#patNameErr').hidden=false; $('#patName').focus(); return; }
+      const full = 'pat_'+hex(32);
+      pxBusy(e.currentTarget, 'Creating…', ()=>{
+        pendingToken = { name, scope: $('#patScope').value, full,
+          prefix: full.slice(0,8)+'…'+full.slice(-4) };
+        $('#patTokenBlock').textContent = full;
+        $('#patStep1').hidden = true; $('#patStep2').hidden = false;
+        $('#patCreate').textContent = 'Done';
+      });
+      return;
+    }
+    /* Done step */
+    const t = pendingToken; PS.modal.close();
+    if(!t) return;
+    const tr = document.createElement('tr');
+    tr.dataset.token = t.name;
+    tr.innerHTML =
+      '<td></td><td class="id"></td><td><span class="label neutral"></span></td>'+
+      '<td class="id col-optional"><time datetime="' + nowIso() + '">Aug 3, 2026</time></td><td class="id">—</td>'+
+      '<td><button class="btn sm danger patrevoke">Revoke</button></td>';
+    tr.children[0].textContent = t.name;
+    tr.children[1].textContent = t.prefix;
+    tr.children[2].firstElementChild.textContent = t.scope;
+    patTbody.appendChild(tr); PS.hydrateTimes(tr); refreshCnt();
+    PS.toast('Token "'+t.name+'" created ('+t.scope+')','success');
+    pxFlash('#flash-agents', 'Personal access token <strong>'+t.name+'</strong> created with <span class="mono">'+t.scope+
+      '</span> scope — the full value was shown once, in the dialog.');
+    pendingToken = null;
+  });
+  $('#patCopyBtn').addEventListener('click', ()=>{ if(pendingToken) PS.copy(pendingToken.full,'Token copied'); });
+
+  patTbody.addEventListener('click', e=>{
+    const btn = e.target.closest('.patrevoke'); if(!btn) return;
+    const tr = btn.closest('tr'); const name = tr.dataset.token;
+    pxConfirmName({
+      title:'Revoke token?',
+      body:'<p><span class="mono">'+name+'</span> stops working immediately for any agent or CLI session using it.</p>',
+      confirmText:'Revoke token',
+      typeToConfirm:name,
+      onConfirm:()=>pxBusy(btn, 'Revoking…', ()=>{
+        tr.remove(); refreshCnt();
+        PS.toast('Token "'+name+'" revoked','success');
+        pxFlash('#flash-agents', 'Personal access token <strong>'+name+'</strong> was revoked — any agent or CLI session using it is cut off.', 'warn');
+      })
+    });
+  });
+  refreshCnt();
+
+  /* ---------- Danger zone ---------- */
+  const trInput = $('#transferConfirmInput'), trBtn = $('#transferConfirm');
+  $('#transferBtn').addEventListener('click', ()=>{
+    trInput.value=''; trBtn.disabled = true; PS.modal.open('transferModal'); trInput.focus();
+  });
+  trInput.addEventListener('input', ()=>{ trBtn.disabled = trInput.value.trim().toLowerCase() !== 'aziron'; });
+  trBtn.addEventListener('click', e=>{
+    pxBusy(e.currentTarget, 'Transferring…', ()=>{
+      PS.modal.close();
+      PS.toast('Prototype: ownership transfer is a no-op — @sokafor would now own aziron');
+      pxFlash('#flash-danger', 'Prototype: ownership transfer is a no-op — <strong>aziron</strong> is unchanged. In production, ' +
+        '<a class="user" href="team-management.html?member=sokafor" title="Sarah Okafor · Owner">@sokafor</a> would now own the workspace.', 'warn');
+    });
+  });
+
+  const delInput = $('#deleteConfirmInput'), delBtn = $('#deleteConfirmBtn');
+  $('#deleteBtn').addEventListener('click', ()=>{
+    delInput.value=''; delBtn.disabled = true; PS.modal.open('deleteModal'); delInput.focus();
+  });
+  delInput.addEventListener('input', ()=>{ delBtn.disabled = delInput.value.trim().toLowerCase() !== 'aziron'; });
+  delBtn.addEventListener('click', e=>{
+    pxBusy(e.currentTarget, 'Deleting…', ()=>{
+      PS.modal.close();
+      PS.toast('Prototype: workspace deletion is a no-op — aziron is untouched');
+      pxFlash('#flash-danger', 'Prototype: workspace deletion is a no-op — <strong>aziron</strong>, its 1,847 verified runs and every attestation receipt are untouched.', 'warn');
+    });
+  });
+
+  /* ---------- Restricted (Analyst) read-only mode ---------- */
+  function applyRestricted(){
+    const ro = document.documentElement.dataset.pstate === 'restricted';
+    $$('#settingsBody .pane').forEach(pane=>{
+      $$('input,select,textarea,button', pane).forEach(c=>{
+        if(c.classList.contains('copybtn')) return;           /* copying is a read action */
+        if(c.classList.contains('cp')) return;                /* copying is a read action */
+        if(!('origDisabled' in c.dataset)) c.dataset.origDisabled = c.disabled ? '1' : '';
+        c.disabled = ro || c.dataset.origDisabled === '1';
+      });
+    });
+    const s = $('#saveAllBtn'); if(s) s.disabled = ro;
+  }
+  new MutationObserver(applyRestricted)
+    .observe(document.documentElement, { attributes:true, attributeFilter:['data-pstate'] });
+  applyRestricted();
+})();
+</script>
+</body>
+</html>
