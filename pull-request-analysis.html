@@ -540,7 +540,14 @@ button.score:hover{box-shadow:0 0 0 1px var(--fg-subtle)}
 .rowstate{margin-top:2px;flex:none}
 .ghnoav{display:inline-block;width:20px;height:20px;border-radius:50%;border:1px dashed var(--border);flex:none}
 
-/* "All pull requests" is today's queue, untouched: no score, no why-now, no type chips. */
+/* Queue legend — verdict answers "did it pass", grade answers "how good was the evidence". */
+.qlegend{display:flex;flex-wrap:wrap;gap:10px 22px;align-items:flex-start;margin-top:12px;padding:12px 14px;border:1px solid var(--border);border-radius:var(--r-lg);background:var(--bg-subtle);font-size:12px;color:var(--fg-muted)}
+.qlegend-grp{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;min-width:0}
+.qlegend-ttl{font:600 11px var(--font-sans);color:var(--fg);letter-spacing:.02em;text-transform:uppercase;white-space:nowrap}
+.qlegend-item{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.qlegend .grade{width:20px;height:20px;font-size:11px}
+
+/* "All" is today's queue, untouched: no score, no why-now, no type chips. */
 .tab-all .scorecell,.tab-all .prwhy,.tab-all #typeBar{display:none}
 /* Verb tabs keep Filters+search; Open/Closed, secondary selects and bulk stay on All. */
 .tab-scored .listhead,.tab-scored #bulkBar,.tab-scored .selcell{display:none}
@@ -728,16 +735,15 @@ html[data-theme="dark"] .railgrp::before{color:#9aabc6}
           <button class="icon-btn x" id="bannerDismiss" aria-label="Dismiss banner" style="width:24px;height:24px"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x" aria-hidden="true"><path d="M18 6 6 18" /> <path d="m6 6 12 12" /></svg></button>
         </div>
 
-        <!-- Primary segmentation: the verb the work demands. Hash-routed by the shell's
-             tab helper (#review / #action / #ready / #all), default "Needs your review". -->
+        <!-- Primary queues. Hash-routed (#action / #review / #ready / #all), default "My pull requests". -->
         <!-- The shell's tab helper resolves the initial tab from the hash; this page owns
              writing it back, so a #state= deep link is never clobbered before the state
              engine has read it. -->
         <div class="tabs" id="verbTabs" role="tablist" aria-label="Pull request work queues">
-          <button type="button" role="tab" id="tabReview" data-tab="review" aria-controls="queuePanel" aria-selected="true">Needs your review <span class="cnt" data-cnt="review" aria-live="polite">2</span></button>
-          <button type="button" role="tab" id="tabAction" data-tab="action" aria-controls="queuePanel" aria-selected="false">Needs your action <span class="cnt" data-cnt="action" aria-live="polite">3</span></button>
+          <button type="button" role="tab" id="tabAction" data-tab="action" aria-controls="queuePanel" aria-selected="true">My pull requests <span class="cnt" data-cnt="action" aria-live="polite">3</span></button>
+          <button type="button" role="tab" id="tabReview" data-tab="review" aria-controls="queuePanel" aria-selected="false">To review <span class="cnt" data-cnt="review" aria-live="polite">2</span></button>
           <button type="button" role="tab" id="tabReady" data-tab="ready" aria-controls="queuePanel" aria-selected="false">Ready to merge <span class="cnt" data-cnt="ready" aria-live="polite">1</span></button>
-          <button type="button" role="tab" id="tabAll" data-tab="all" aria-controls="queuePanel" aria-selected="false">All pull requests <span class="cnt" data-cnt="all" aria-live="polite">8</span></button>
+          <button type="button" role="tab" id="tabAll" data-tab="all" aria-controls="queuePanel" aria-selected="false">All <span class="cnt" data-cnt="all" aria-live="polite">8</span></button>
         </div>
 
         <!-- GitHub-style Filters + qualifier search: under tabs, always on, scopes to the active queue. -->
@@ -1255,7 +1261,7 @@ html[data-theme="dark"] .railgrp::before{color:#9aabc6}
                 </div></td>
               </tr>
               <!-- Non-PR work on @dominic's plate. Neither row carries data-pr, so the
-                   "All pull requests" tab never sees it; the verb tabs and the type chips
+                   "All" tab never sees it; the verb tabs and the type chips
                    do — that is how personal work stops being orphaned on another page. -->
               <tr class="rowlink prrow" data-href="finding-details.html" data-type="finding" data-verb="action" data-score="91" data-ev="f2381" data-repo="gateway-api" data-created="2026-08-03T08:22:00" data-updated="2026-08-03T08:22:00" data-comments="3">
                 <td class="selcell"></td>
@@ -1354,6 +1360,24 @@ html[data-theme="dark"] .railgrp::before{color:#9aabc6}
               </tr>
             </tbody>
           </table>
+        </div>
+
+        <div class="qlegend" aria-label="How to read the Verdict and Grade columns">
+          <div class="qlegend-grp">
+            <span class="qlegend-ttl">Verdict — did it pass</span>
+            <span class="qlegend-item"><span class="verdict passed">Passed</span> all gates met</span>
+            <span class="qlegend-item"><span class="verdict advisory">Advisory</span> findings, not blocking</span>
+            <span class="qlegend-item"><span class="verdict failed">Failed</span> blocked until fixed</span>
+            <span class="qlegend-item"><span class="verdict refused">Refused</span> evidence incomplete</span>
+          </div>
+          <div class="qlegend-grp">
+            <span class="qlegend-ttl">Grade — quality of the run</span>
+            <span class="qlegend-item"><span class="grade g-a" aria-hidden="true">A</span> strong</span>
+            <span class="qlegend-item"><span class="grade g-b" aria-hidden="true">B</span> acceptable</span>
+            <span class="qlegend-item"><span class="grade g-c" aria-hidden="true">C</span> weak</span>
+            <span class="qlegend-item"><span class="grade g-d" aria-hidden="true">D</span> poor</span>
+            <span class="qlegend-item"><span class="grade g-none" aria-hidden="true">–</span> no grade</span>
+          </div>
         </div>
       </div>
 
@@ -1941,7 +1965,7 @@ const PS = (() => {
 
   const tbody = $('#prTable tbody');
   /* every queue row (pull requests + the non-PR personal work) vs. the pull-request-only
-     subset that the "All pull requests" tab, its qualifier syntax and the bulk bar own */
+     subset that the "All" tab, its qualifier syntax and the bulk bar own */
   const rows = $$('#prTable tbody tr[data-type]');
   const prRows = rows.filter(r => r.hasAttribute('data-pr'));
   const noMatchRow = $('#noMatchRow');
@@ -1963,17 +1987,17 @@ const PS = (() => {
   /* ---------- verb segregation: which tab is showing, which work type ----------
      Tabs 1–3 are personal and ranked by attention score; tab 4 is the full queue.
      GitHub Filters + qualifier search sit under the tabs and scope every view. */
-  const TABS = ['review','action','ready','all'];
-  const TABLBL = {review:'Needs your review', action:'Needs your action',
-                  ready:'Ready to merge', all:'All pull requests'};
+  const TABS = ['action','review','ready','all'];
+  const TABLBL = {action:'My pull requests', review:'To review',
+                  ready:'Ready to merge', all:'All'};
   const TABLEAD = {
-    review:'Pull requests where @dominic is a requested reviewer, ranked by attention score — highest first. Narrow with Filters or qualifier search.',
-    action:'Your own pull requests that are blocked, failing or refused, plus the non-PR work on your plate. Use Filters or search to narrow this queue.',
-    ready:'Verdict attested and approvals complete. Nothing is left but the merge — search still applies if you need to find one fast.',
-    all:'The full queue with GitHub qualifier syntax, Open / Closed, bulk actions and sort. Type author:, label:, review: or free text — same shape as github.com search.'
+    action:'Pull requests you opened that still need your attention.',
+    review:'Pull requests waiting for your review.',
+    ready:'Approved and attested — ready to merge.',
+    all:'Every open pull request across your repositories.'
   };
   const TYPELBL = {all:'items', pr:'pull requests', finding:'findings', security:'security items'};
-  let TAB = 'review';
+  let TAB = 'action';
   let TYPE = 'all';
   const scored = () => TAB !== 'all';
   const verbs = r => (r.dataset.verb || '').split(/\s+/).filter(Boolean);
@@ -2555,7 +2579,7 @@ const PS = (() => {
   const verbTabBtns = $$('#verbTabs [role="tab"]');
   const panel = $('#queuePanel');
   function selectTab(tab){
-    TAB = TABS.includes(tab) ? tab : 'review';
+    TAB = TABS.includes(tab) ? tab : 'action';
     TYPE = 'all';
     const root = $('#queueRoot');
     root.classList.toggle('tab-all', TAB === 'all');
@@ -2594,7 +2618,7 @@ const PS = (() => {
 
   /* repo / author / label in a row are filter affordances, like GitHub's row links.
      They write into the qualifier query, which only rules the full queue — so acting on
-     one from a verb tab lands you in "All pull requests" with the filter applied. */
+     one from a verb tab lands you in "All" with the filter applied. */
   tbody.addEventListener('click', e => {
     const sb = e.target.closest('[data-evopen]');
     if (sb){ e.stopPropagation(); openEvidence(sb.closest('tr').dataset.ev); return; }
@@ -2604,7 +2628,7 @@ const PS = (() => {
     if (!lbl && !repo && !auth) return;
     const jumped = scored();
     if (jumped) selectTab('all');
-    const where = jumped ? ' in All pull requests' : '';
+    const where = jumped ? ' in All' : '';
     if (lbl){ addTok('label:' + lbl.dataset.lbl); run(); PS.toast('Filtered by label ' + lbl.dataset.lbl + where); }
     else if (repo){ setTok('repo', repo.dataset.repofilter); run(); PS.toast('Filtered to ' + repo.dataset.repofilter + where); }
     else if (auth){ setTok('author', auth.dataset.authorfilter); run(); PS.toast('Filtered to pull requests by @' + auth.dataset.authorfilter + where); }
@@ -2717,7 +2741,7 @@ const PS = (() => {
       title:'Attention score',
       formula:'0.35 · Consequence + 0.30 · Confidence + 0.20 · Age against SLA + 0.15 · Ownership, normalised to 0–100',
       source:'GET /api/pulse/queue/ranking — run ledger, finding store and GitHub sync',
-      scope:'Every open queue item across the 18-repository estate. Bands: ≥90 danger, ≥75 attention, below that neutral. Hidden in “All pull requests”, where a cross-verb ranking would mean nothing.',
+      scope:'Every open queue item across the 18-repository estate. Bands: ≥90 danger, ≥75 attention, below that neutral. Hidden in “All”, where a cross-verb ranking would mean nothing.',
       caveat:'Confidence measures the evidence, not the outcome: a refusal scores high because the consequence is certain and the evidence is provably incomplete.',
       sync:'2 minutes ago'
     }
@@ -2995,7 +3019,7 @@ const PS = (() => {
       it.cat = 'Ready to merge';
       it.summary = 'Run <span class="mono">06cb9564</span> attested <strong>Passed</strong>, grade A. @priyar approved and @dominic’s review satisfied the merge gate — the override of @mwebb’s pending request is logged in the audit trail. Finish on the PR page: pick squash or rebase, review the impact preview, confirm.';
       if (row){
-        row.dataset.verb = 'ready';   /* it leaves "Needs your action" for "Ready to merge" */
+        row.dataset.verb = 'ready';   /* it leaves "My pull requests" for "Ready to merge" */
         rowChip(row, 'label success', 'Ready to merge');
         const why = $('.prwhy', row);
         if (why) why.innerHTML = 'Why now — approved by you, so the merge gate is satisfied and the override of @mwebb’s pending request is logged. Finish the merge on the PR page.';

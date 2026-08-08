@@ -445,6 +445,11 @@ html.surface-vscode .drawer{width:100%;max-width:100%}
 .ghtabs button[aria-selected="true"][data-tab="resolved"] .sico{color:var(--success)}
 .ghtools{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-left:auto}
 .ghtools .select{width:auto;height:28px;font-size:12px;padding:0 26px 0 8px}
+.btn.tog[aria-pressed="true"]{background:var(--accent-subtle);color:var(--accent-chip);border-color:var(--accent-line)}
+.mkchip{display:inline-flex;align-items:center;gap:4px;height:18px;padding:0 6px;border-radius:4px;background:var(--bg-inset);color:var(--fg-muted);font:600 10px var(--font-mono);vertical-align:middle;margin-left:4px}
+.mkchip a{color:inherit;text-decoration:none}
+.mkchip a:hover{color:var(--accent)}
+.yrchip{display:inline-flex;align-items:center;height:18px;padding:0 5px;border-radius:4px;background:var(--accent-subtle);color:var(--accent-chip);font:700 9px var(--font-sans);vertical-align:middle;margin-left:4px}
 .ghbulk{display:flex;align-items:center;gap:8px;flex-wrap:wrap;flex:1;min-width:0}
 .ghbulk .selcount{font-weight:600}
 .ghbulk .rolenote{margin-left:auto;font-size:12px;color:var(--fg-muted)}
@@ -682,7 +687,7 @@ html[data-theme="dark"] .railgrp::before{color:#9aabc6}
             </div>
             <button class="btn sm" id="fClear">Clear filters</button>
           </div>
-          <p class="qhelp" id="qHelp">Qualifiers <code>is:open</code> <code>is:acknowledged</code> <code>is:resolved</code> <code>is:dismissed</code> <code>severity:critical</code> <code>repo:gateway-api</code> <code>category:flake</code> <code>assignee:@me</code> — anything else is free text. Query and dropdowns stay in sync.</p>
+          <p class="qhelp" id="qHelp">Qualifiers <code>is:open</code> <code>is:acknowledged</code> <code>is:resolved</code> <code>is:dismissed</code> <code>severity:critical</code> <code>repo:gateway-api</code> <code>category:flake</code> <code>assignee:@me</code> <code>assigned:2026</code> <code>marker:SECRET_SCAN_BLOCK</code> — anything else is free text. Query and dropdowns stay in sync.</p>
 
           <div class="ghbox">
             <div class="ghhead">
@@ -714,6 +719,7 @@ html[data-theme="dark"] .railgrp::before{color:#9aabc6}
                   <option value="@esokolova">@esokolova</option><option value="@sokafor">@sokafor</option>
                   <option value="none">Unassigned</option>
                 </select>
+                <button type="button" class="btn sm tog" id="fYear" aria-pressed="false" title="Show findings raised by rules assigned for 2026">Assigned 2026</button>
                 <div class="menuwrap">
                   <button class="btn sm" id="sortBtn" aria-haspopup="menu" aria-expanded="false">Sort: <span id="sortLbl">Newest</span> ▾</button>
                   <div class="menu" id="sortMenu" role="menu" aria-label="Sort findings" hidden>
@@ -1465,6 +1471,30 @@ const PS = (() => {
   const list = $('#findList'); if(!list) return;
   const rows = $$('li.ghrow', list);
 
+  /* Rule / marker attribution — mirrors Settings › Rulebooks yearly assignment pack. */
+  const FIND_RULES = {
+    'F-2381': { marker:'RATE_LIMIT_CONTENTION_TEST', year:2026 },
+    'F-2380': { marker:'SECRET_SCAN_BLOCK', year:2026 },
+    'F-2378': { marker:'LICENSE_HEADER', year:2026 },
+    'F-2377': { marker:'GATEWAY_RESOURCE_EXHAUSTION', year:2026 },
+    'F-2372': { marker:'SECRET_SCAN_BLOCK', year:2026 },
+    'F-2371': { marker:'AZIRON_UI_ROOT_RULEBOOK_CANARY', year:2026 },
+    'F-2369': { marker:'RATE_LIMIT_REFILL_BOUNDS', year:2026 },
+    'F-2365': { marker:'MIDDLEWARE_TRACE_ORDER', year:2026 }
+  };
+  rows.forEach(r => {
+    const meta = FIND_RULES[r.dataset.id];
+    if(!meta) return;
+    r.dataset.marker = meta.marker;
+    r.dataset.year = String(meta.year);
+    const ghmeta = $('.ghmeta', r);
+    if(!ghmeta) return;
+    const chips = document.createElement('span');
+    chips.innerHTML = ' · <span class="mkchip" title="Firing rule marker"><a href="settings.html#rulebooks/'+meta.marker+'">'+meta.marker+'</a></span>'
+      +(meta.year === 2026 ? '<span class="yrchip" title="Raised by a rule assigned for 2026">Assigned 2026</span>' : '');
+    ghmeta.appendChild(chips);
+  });
+
   /* estate totals — this page is page 1 of 3 (28 open + 8 resolved across the estate) */
   const ESTATE = { open:28, resolved:8 };
   const ME = '@dominic';
@@ -1495,13 +1525,13 @@ const PS = (() => {
   const SORTS = { newest:'Newest', oldest:'Oldest', severity:'Severity · high to low',
                   updated:'Recently updated', comments:'Most commented' };
 
-  const qInput = $('#fQuery'), fCat = $('#fCat'), fSev = $('#fSev'), fRepo = $('#fRepo'), fAssignee = $('#fAssignee');
+  const qInput = $('#fQuery'), fCat = $('#fCat'), fSev = $('#fSev'), fRepo = $('#fRepo'), fAssignee = $('#fAssignee'), fYear = $('#fYear');
   const tabs = $$('#findTabs [role="tab"]');
   const caption = $('#tblCaption'), noMatch = $('#noMatch'), pagerNav = $('.pager');
   const chkAll = $('#chkAll'), bulkBar = $('#bulkBar'), bulkCount = $('#bulkCount');
   const tools = $('#ghTools'), tabsWrap = $('#findTabs');
 
-  const state = { tab:'open', sub:'', cat:'', sev:'', repo:'', assignee:'', text:'', sort:'newest' };
+  const state = { tab:'open', sub:'', cat:'', sev:'', repo:'', assignee:'', year:'', marker:'', text:'', sort:'newest' };
 
   const rowChk = r => $('input[type="checkbox"]', r);
   const visibleRows = () => rows.filter(r => !r.hidden);
@@ -1525,11 +1555,13 @@ const PS = (() => {
     if(state.repo) parts.push('repo:' + state.repo);
     if(state.cat) parts.push('category:' + slug(state.cat));
     if(state.assignee) parts.push('assignee:' + (state.assignee === ME ? '@me' : state.assignee));
+    if(state.year) parts.push('assigned:' + state.year);
+    if(state.marker) parts.push('marker:' + state.marker);
     if(state.text) parts.push(state.text);
     qInput.value = parts.join(' ');
   }
   function parseQuery(raw){
-    state.sub = ''; state.cat = ''; state.sev = ''; state.repo = ''; state.assignee = ''; state.text = '';
+    state.sub = ''; state.cat = ''; state.sev = ''; state.repo = ''; state.assignee = ''; state.year = ''; state.marker = ''; state.text = '';
     let tab = 'open';
     const free = [];
     (raw.match(/"[^"]*"|\S+/g) || []).forEach(tok => {
@@ -1549,6 +1581,8 @@ const PS = (() => {
       if(key === 'severity'){ state.sev = SEVS.find(s => s.toLowerCase() === val.toLowerCase()) || ''; return; }
       if(key === 'repo'){ state.repo = [...fRepo.options].map(o=>o.value).find(v => v && v.toLowerCase() === val.toLowerCase()) || ''; return; }
       if(key === 'category'){ state.cat = CATS.find(c => slug(c) === slug(val)) || ''; return; }
+      if(key === 'assigned' || key === 'year'){ state.year = /^\d{4}$/.test(val) ? val : ''; return; }
+      if(key === 'marker' || key === 'rule'){ state.marker = val.toUpperCase(); return; }
       if(key === 'assignee'){
         const v = val.toLowerCase();
         state.assignee = v === '@me' || v === 'me' ? ME
@@ -1564,6 +1598,7 @@ const PS = (() => {
   }
   function syncControls(){
     fCat.value = state.cat; fSev.value = state.sev; fRepo.value = state.repo; fAssignee.value = state.assignee;
+    if(fYear) fYear.setAttribute('aria-pressed', String(state.year === '2026'));
     tabs.forEach(t => {
       const on = t.dataset.tab === state.tab;
       t.setAttribute('aria-selected', String(on)); t.tabIndex = on ? 0 : -1;
@@ -1580,13 +1615,15 @@ const PS = (() => {
     if(state.sev && r.dataset.sev !== state.sev) return false;
     if(state.repo && r.dataset.repo !== state.repo) return false;
     if(state.assignee && r.dataset.assignee !== state.assignee) return false;
+    if(state.year && r.dataset.year !== state.year) return false;
+    if(state.marker && (r.dataset.marker || '').toUpperCase() !== state.marker) return false;
     if(state.text){
-      const hay = (r.dataset.id + ' ' + r.dataset.title + ' ' + r.dataset.repo + ' ' + r.dataset.cat + ' ' + r.dataset.assignee).toLowerCase();
+      const hay = (r.dataset.id + ' ' + r.dataset.title + ' ' + r.dataset.repo + ' ' + r.dataset.cat + ' ' + r.dataset.assignee + ' ' + (r.dataset.marker || '')).toLowerCase();
       if(!hay.includes(state.text)) return false;
     }
     return true;
   }
-  const isFiltered = () => !!(state.sub || state.cat || state.sev || state.repo || state.assignee || state.text);
+  const isFiltered = () => !!(state.sub || state.cat || state.sev || state.repo || state.assignee || state.year || state.marker || state.text);
 
   function sortRows(){
     const key = state.sort;
@@ -1637,6 +1674,10 @@ const PS = (() => {
     state.cat = fCat.value; state.sev = fSev.value; state.repo = fRepo.value; state.assignee = fAssignee.value;
     writeQuery(); refresh();
   }));
+  if(fYear) fYear.addEventListener('click', () => {
+    state.year = state.year === '2026' ? '' : '2026';
+    syncControls(); writeQuery(); refresh();
+  });
   qInput.addEventListener('input', () => { parseQuery(qInput.value); refresh(); });
   qInput.addEventListener('keydown', e => { if(e.key === 'Enter'){ e.preventDefault(); writeQuery(); refresh(); } });
   tabsWrap.addEventListener('click', e => {
@@ -1646,7 +1687,7 @@ const PS = (() => {
     syncControls(); writeQuery(); refresh();
   });
   function clearFilters(){
-    state.tab = 'open'; state.sub = ''; state.cat = ''; state.sev = ''; state.repo = ''; state.assignee = ''; state.text = '';
+    state.tab = 'open'; state.sub = ''; state.cat = ''; state.sev = ''; state.repo = ''; state.assignee = ''; state.year = ''; state.marker = ''; state.text = '';
     syncControls(); writeQuery(); refresh();
     PS.toast('Filters cleared — showing open findings');
   }
@@ -1783,6 +1824,12 @@ const PS = (() => {
   $$('.pgstub').forEach(b => b.addEventListener('click', () =>
     PS.toast('Prototype dataset covers page 1 — later pages are stubbed')));
 
+  const bootQ = new URLSearchParams(location.search);
+  if(bootQ.get('assigned') === '2026' || bootQ.get('year') === '2026'){
+    qInput.value = 'is:open assigned:2026';
+  } else if(bootQ.get('marker')){
+    qInput.value = 'is:open marker:' + bootQ.get('marker').toUpperCase();
+  }
   parseQuery(qInput.value);
   refresh();
 })();

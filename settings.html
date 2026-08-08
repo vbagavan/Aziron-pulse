@@ -8,6 +8,8 @@
 document.documentElement.dataset.theme=(t==='dark'||t==='light')?t:
 (window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');}catch(e){}})();</script>
 <title>Settings · Pulse</title>
+<script>/* captured before the shell's tab-init can rewrite it via replaceState */
+window.__initialHash=location.hash;</script>
 <style>
 /* ============ PULSE DESIGN SYSTEM — copy this whole <style> verbatim ============ */
 :root{
@@ -565,6 +567,53 @@ html[data-theme="dark"] .railgrp::before{color:#9aabc6}
 .reference-language{display:inline-flex;align-items:center;gap:4px;height:32px;padding:0 2px;border:0;background:transparent;color:var(--fg-muted);font:13px var(--font-sans)}
 .reference-language svg{width:15px;height:15px}
 .topbar .bellwrap{display:inline-flex;position:relative}.topbar .avatar{border-radius:8px;background:var(--accent-subtle);color:var(--accent-chip)}
+/* ---- Rulebooks registry (pane-rulebooks) ---- */
+.rb-strip{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 12px;margin-bottom:16px;border:1px solid var(--border);border-radius:var(--r-lg);background:var(--bg-subtle);font-size:12px;color:var(--fg-muted)}
+.rb-strip .arrow{color:var(--fg-subtle)}
+.rb-strip .cap{flex-basis:100%;font-size:11px;color:var(--fg-subtle)}
+.rb-period{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px;padding:10px 12px;border:1px solid var(--border);border-radius:var(--r-lg);background:var(--bg)}
+.rb-period-l{display:flex;align-items:center;gap:10px;flex-wrap:wrap;min-width:0}
+.rb-period-l strong{font-size:13px}
+.rb-period-l .hint{font-size:12px;color:var(--fg-muted)}
+.rb-period select{width:auto;min-width:96px;height:30px;padding:0 28px 0 10px}
+.rb-seg{display:inline-flex;border:1px solid var(--border);border-radius:var(--r);overflow:hidden;background:var(--bg)}
+.rb-seg button{min-height:28px;padding:0 11px;border:none;background:none;color:var(--fg-muted);font:600 12px var(--font-sans);cursor:pointer}
+.rb-seg button[aria-pressed="true"]{background:var(--accent-subtle);color:var(--accent-chip)}
+.rb-lv{display:inline-flex;align-items:center;height:19px;padding:0 7px;border-radius:999px;font:700 10px var(--font-sans);white-space:nowrap}
+.rb-lv.org{background:var(--neutral-subtle);color:var(--neutral)}
+.rb-lv.repo{background:var(--accent-subtle);color:var(--accent-chip)}
+.rb-lv.component{background:var(--success-subtle);color:var(--success)}
+.rb-yr{display:inline-flex;align-items:center;height:18px;padding:0 6px;border-radius:4px;background:var(--accent-subtle);color:var(--accent-chip);font:700 10px var(--font-mono)}
+.rb-yr.none{background:var(--bg-inset);color:var(--fg-subtle)}
+.rb-md{display:inline-flex;align-items:center;height:18px;padding:0 6px;border-radius:4px;font:700 10px var(--font-sans)}
+.rb-md.required{background:var(--danger-subtle);color:var(--danger)}
+.rb-md.advisory{background:var(--attention-subtle);color:var(--attention)}
+tr.rb-row{cursor:pointer}
+tr.rb-row .chev{display:inline-block;transition:transform .15s ease;color:var(--fg-subtle);margin-right:6px}
+tr.rb-row[aria-expanded="true"] .chev{transform:rotate(90deg)}
+tr.rb-row.retired .mono{text-decoration:line-through;color:var(--fg-subtle)}
+tr.rb-rules>td{background:var(--bg-subtle);padding:10px 12px 12px}
+.card-f{padding:10px 14px;border-top:1px solid var(--border);font-size:12px;color:var(--fg-muted)}
+.rb-rule{display:grid;grid-template-columns:minmax(0,200px) minmax(0,1fr) 70px 110px 90px auto;gap:10px;align-items:center;padding:6px 4px;border-bottom:1px solid var(--border-muted);font-size:12px}
+.rb-rule:last-of-type{border-bottom:none}
+.rb-rule .mk{font-family:var(--font-mono);font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rb-rule .rb-meta{font-size:11px;color:var(--fg-subtle);white-space:nowrap}
+.rb-hl{background:var(--accent-subtle);outline:2px solid var(--accent);outline-offset:-2px;border-radius:4px}
+.rb-casc{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:7px}
+.rb-casc li{display:flex;align-items:flex-start;gap:9px;padding:9px 10px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg)}
+.rb-casc li.wins{border-color:var(--accent-line);box-shadow:0 0 0 1px var(--accent-line)}
+.rb-casc .bkmain{flex:1;min-width:0}
+.rb-casc .bkpath{font:12px var(--font-mono)}
+.rb-casc li.ign .bkpath{text-decoration:line-through;color:var(--fg-subtle)}
+.rb-casc .bkscope{font-size:11px;color:var(--fg-subtle);margin-top:1px}
+.rb-casc .bknote{font-size:11px;color:var(--attention);margin-top:3px}
+.rb-v{flex:none;height:19px;padding:0 7px;border-radius:4px;display:inline-flex;align-items:center;font:700 9.5px var(--font-sans);letter-spacing:.04em}
+.rb-v.wins{background:var(--accent);color:var(--on-fill)}
+.rb-v.over{background:var(--bg-inset);color:var(--fg-subtle)}
+.rb-v.ign{background:var(--attention-subtle);color:var(--attention)}
+.rb-v.inh{background:var(--neutral-subtle);color:var(--neutral)}
+@media (prefers-reduced-motion:reduce){tr.rb-row .chev{transition:none}}
+@media(max-width:1100px){.rb-rule{grid-template-columns:minmax(0,1fr) 70px auto}}
 @media(max-width:1350px){.reference-estate,.reference-language,.reference-divider{display:none}.topbar .searchbtn{min-width:220px}}
 @media(max-width:1100px){.topbar-live{display:none}.topbar .searchbtn{min-width:180px}}
 @media(max-width:900px){.topbar .repoctx{display:none}}
@@ -708,6 +757,7 @@ html[data-theme="dark"] .railgrp::before{color:#9aabc6}
           <button role="tab" data-tab="runners" aria-controls="pane-runners" aria-selected="false">Runners <span class="cnt">3</span></button>
           <button role="tab" data-tab="agents" aria-controls="pane-agents" aria-selected="false">Agents <span class="cnt" id="patCnt">2</span></button>
           <button role="tab" data-tab="governance" aria-controls="pane-governance" aria-selected="false">Governance &amp; audit</button>
+          <button role="tab" data-tab="rulebooks" aria-controls="pane-rulebooks" aria-selected="false">Rulebooks <span class="cnt">4</span></button>
           <button role="tab" data-tab="danger" aria-controls="pane-danger" aria-selected="false">Danger zone</button>
         </div>
 
@@ -1545,6 +1595,62 @@ pulse auth login --workspace aziron<button class="btn sm copybtn" onclick="PS.co
           </div>
         </div>
 
+        <!-- ============ Rulebooks (governance registry) ============ -->
+        <div class="pane" id="pane-rulebooks" role="tabpanel" aria-label="Rulebooks" hidden>
+          <div class="paneflash" id="flash-rulebooks"></div>
+          <div class="rb-period">
+            <div class="rb-period-l">
+              <strong>Assigned period</strong>
+              <label class="vh" for="rbYear">Assigned period year</label>
+              <select class="select" id="rbYear" aria-label="Assigned period year">
+                <option value="2026" selected>2026</option>
+                <option value="2025">2025</option>
+              </select>
+              <span class="hint">Rules the estate is held to this year — separate from last updated and 30-day findings.</span>
+            </div>
+            <div class="rb-seg" role="group" aria-label="Registry filter">
+              <button type="button" id="rbFiltYear" aria-pressed="true">This year</button>
+              <button type="button" id="rbFiltAll" aria-pressed="false">All</button>
+            </div>
+          </div>
+          <div class="statrow">
+            <div class="stat"><div class="lbl">Rulebooks</div><div class="val" id="rbStatBooks">4 <span class="delta">3 levels</span></div></div>
+            <div class="stat"><div class="lbl">Rules</div><div class="val" id="rbStatRules">9</div></div>
+            <div class="stat"><div class="lbl">Assigned this year</div><div class="val" id="rbStatAssigned">7 <span class="delta" id="rbStatAssignedDelta">2026 pack</span></div></div>
+            <div class="stat"><div class="lbl">Findings raised</div><div class="val" id="rbStatFind">22 <span class="delta">30 days</span></div></div>
+            <div class="stat"><div class="lbl">Retired</div><div class="val" id="rbStatRet">1 <span class="delta">matched but ignored</span></div></div>
+          </div>
+
+          <div class="rb-strip" role="img" aria-label="Resolution order: organization baseline, then repo root fallback, then component scope. Most specific scope wins; retired rulebooks are matched but ignored.">
+            <span class="rb-lv org">Org baseline</span><span class="arrow">→</span>
+            <span class="rb-lv repo">Repo root fallback</span><span class="arrow">→</span>
+            <span class="rb-lv component">Component scope</span>
+            <span class="cap">Most specific scope wins · retired rulebooks are matched but deliberately ignored · a finding always names the rulebook that raised it.</span>
+          </div>
+
+          <div class="card wide">
+            <div class="card-h"><h2>Registry — gateway-api</h2><span class="small subtle" id="rbRegSub">Showing rules assigned for 2026</span></div>
+            <div class="card-b" style="padding:0">
+              <div class="tblwrap"><table class="tbl" aria-label="Rulebook registry">
+                <thead><tr><th>Rulebook</th><th>Level</th><th>Applies to</th><th style="text-align:right">Rules</th><th>Period</th><th>Mandate</th><th style="text-align:right">Findings · 30d</th><th>Status</th><th>Updated</th></tr></thead>
+                <tbody id="rbTbody"></tbody>
+              </table></div>
+            </div>
+            <div class="card-f"><span class="small subtle">Rulebooks are versioned markdown in the repo — edits ship as PRs. Yearly assignment is recorded in <a href="settings.html#governance">Governance &amp; audit</a>.</span></div>
+          </div>
+
+          <div class="card wide">
+            <div class="card-h"><h2>Try a path</h2><span class="small subtle">See which rulebook governs any file or folder</span></div>
+            <div class="card-b">
+              <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+                <input class="input" id="rbPath" style="flex:1;min-width:240px;font-family:var(--font-mono);font-size:12px" value="internal/ratelimit/limiter.go" aria-label="Path to resolve">
+                <button class="btn" id="rbResolveBtn">Resolve</button>
+              </div>
+              <div id="rbCascade" aria-live="polite"></div>
+            </div>
+          </div>
+        </div>
+
         <!-- ============ Danger zone ============ -->
         <div class="pane" id="pane-danger" role="tabpanel" aria-label="Danger zone" hidden>
           <div class="paneflash" id="flash-danger"></div>
@@ -1611,6 +1717,14 @@ pulse auth login --workspace aziron<button class="btn sm copybtn" onclick="PS.co
 </div><!-- /app -->
 
 <!-- Create PAT modal -->
+<div class="overlay" id="rbSrcModal" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="rbSrcTitle">
+    <div class="m-h"><h2 id="rbSrcTitle" class="mono">.pulse/rules/reliability.md</h2>
+      <button class="icon-btn" aria-label="Close dialog" onclick="PS.modal.close()"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18" /> <path d="m6 6 12 12" /></svg></button></div>
+    <div class="m-b"><div class="codeblock" id="rbSrcCode" style="white-space:pre-wrap"></div></div>
+    <div class="m-f"><span class="small subtle" style="margin-right:auto">Rulebooks are versioned markdown in the repo — edits ship as PRs.</span><button class="btn" onclick="PS.modal.close()">Close</button></div>
+  </div>
+</div>
 <div class="overlay" id="patModal" hidden>
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="patTtl">
     <div class="m-h"><h2 id="patTtl">Create personal access token</h2>
@@ -2588,6 +2702,191 @@ function pxConfirmName(o){
   new MutationObserver(applyRestricted)
     .observe(document.documentElement, { attributes:true, attributeFilter:['data-pstate'] });
   applyRestricted();
+})();
+
+/* ============ Rulebooks registry — data, resolver, renderers ============ */
+(function(){
+  const q=s=>document.querySelector(s), qa=s=>[...document.querySelectorAll(s)];
+  const esc=s=>{const d=document.createElement('div');d.textContent=s;return d.innerHTML;};
+  const YEAR_NOW=2026;
+  /* One coherent story across the three levels. Findings in pr-details cite these
+     books; the retired entry is what makes "matched but ignored" demonstrable.
+     assignedYear / mandate / owner / assignedOn = the yearly assignment pack. */
+  const RULEBOOKS=[
+    {id:'org', level:'org', name:'Organization baseline', path:'aziro-org/.pulse/org-review.md',
+     scope:'All repositories (18)', status:'active', updated:'2026-07-28', actor:'@sokafor',
+     rules:[
+       {marker:'SECRET_SCAN_BLOCK',title:'Secrets never merge',sev:'Critical',findings30:3,assignedYear:2026,assignedOn:'2026-01-06',owner:'@sokafor',mandate:'required'},
+       {marker:'LICENSE_HEADER',title:'License headers on new files',sev:'Low',findings30:11,assignedYear:2026,assignedOn:'2026-01-06',owner:'@sokafor',mandate:'advisory'}
+     ]},
+    {id:'root', level:'repo', name:'Repo review rulebook', path:'.pulse/pr-review.md',
+     scope:'Repo root fallback — PULSE_RULEBOOK_ROOT_SCOPE.md', status:'active', updated:'2026-08-01', actor:'@priyar',
+     rules:[
+       {marker:'MIDDLEWARE_TRACE_ORDER',title:'Tracing installs before admission control',sev:'Low',findings30:2,assignedYear:2026,assignedOn:'2026-02-12',owner:'@priyar',mandate:'required'},
+       {marker:'AZIRON_UI_ROOT_RULEBOOK_CANARY',title:'Root rulebook canary',sev:'Minor',findings30:1,assignedYear:2026,assignedOn:'2026-08-01',owner:'@priyar',mandate:'advisory'},
+       {marker:'GATEWAY_RESOURCE_EXHAUSTION',title:'Ingress state is bounded per client',sev:'High',findings30:1,assignedYear:2026,assignedOn:'2026-03-18',owner:'@mwebb',mandate:'required'}
+     ]},
+    {id:'reliability', level:'component', name:'Rate-limit reliability', path:'.pulse/rules/reliability.md',
+     scope:'internal/ratelimit/**', status:'active', updated:'2026-08-02', actor:'@mwebb',
+     rules:[
+       {marker:'RATE_LIMIT_REFILL_BOUNDS',title:'Refill arithmetic clamps elapsed time',sev:'Moderate',findings30:4,assignedYear:2026,assignedOn:'2026-02-01',owner:'@mwebb',mandate:'required'},
+       {marker:'RATE_LIMIT_CONTENTION_TEST',title:'Contended waiters are exercised in tests',sev:'Moderate',findings30:0,assignedYear:2026,assignedOn:'2026-02-01',owner:'@mwebb',mandate:'required'}
+     ]},
+    {id:'obs-v1', level:'component', name:'Observability v1', path:'.pulse/rules/observability-v1.md',
+     scope:'internal/**', status:'retired', retired:'Superseded by service-level tracing rules · 2026-07-12',
+     updated:'2026-07-12', actor:'@esokolova',
+     rules:[
+       {marker:'TRACE_SPAN_NAMES',title:'Span names follow service.verb',sev:'Low',findings30:0,assignedYear:2025,assignedOn:'2025-03-04',owner:'@esokolova',mandate:'advisory'},
+       {marker:'LOG_FIELD_SET',title:'Structured log field set',sev:'Low',findings30:0,assignedYear:2025,assignedOn:'2025-03-04',owner:'@esokolova',mandate:'advisory'}
+     ]}
+  ];
+  const LV={org:'Org baseline',repo:'Repo root',component:'Component'};
+  let rbYear=YEAR_NOW;
+  let rbFilt='year'; /* year | all */
+  const rbMatch=(scope,path)=>scope.includes('**')?path.startsWith(scope.split('**')[0]):path===scope;
+  const rulesForYear=(b,y)=>b.rules.filter(r=>Number(r.assignedYear)===Number(y));
+  const allRules=()=>RULEBOOKS.flatMap(b=>b.rules.map(r=>({b,r})));
+  function rbResolve(path){
+    const rows=[]; let won=false;
+    RULEBOOKS.filter(b=>b.level==='component')
+      .sort((a,b)=>b.scope.length-a.scope.length)
+      .forEach(b=>{ if(!rbMatch(b.scope,path)) return;
+        if(b.status==='retired') rows.push({b,verdict:'ign'});
+        else { rows.push({b,verdict:won?'over':'wins'}); won=true; } });
+    const root=RULEBOOKS.find(b=>b.level==='repo');
+    rows.push({b:root,verdict:won?'over':'wins'}); won=true;
+    const org=RULEBOOKS.find(b=>b.level==='org');
+    rows.push({b:org,verdict:'inh'});
+    return rows;
+  }
+  const VLBL={wins:'WINS',over:'OVERRIDDEN',ign:'IGNORED · RETIRED',inh:'INHERITED'};
+  function rbCascadeHTML(rows){
+    return '<ul class="rb-casc">'+rows.map(r=>'<li class="'+r.verdict+'">'
+      +'<span class="rb-lv '+r.b.level+'">'+LV[r.b.level]+'</span>'
+      +'<span class="bkmain"><span class="bkpath">'+esc(r.b.path)+'</span>'
+      +'<span class="bkscope" style="display:block">'+esc(r.b.scope)+'</span>'
+      +(r.b.retired?'<span class="bknote" style="display:block">'+esc(r.b.retired)+'</span>':'')
+      +'</span><span class="rb-v '+r.verdict+'">'+VLBL[r.verdict]+'</span></li>').join('')+'</ul>';
+  }
+  window.__rbCascadeText=path=>rbResolve(path).map(r=>r.b.path+'|'+r.verdict).join(';'); /* cross-page verification hook */
+  function sevLabel(s){ return '<span class="label '+(s==='Critical'||s==='High'?'danger':s==='Moderate'?'attention':'neutral')+'">'+esc(s)+'</span>'; }
+  function mandateChip(m){ return '<span class="rb-md '+esc(m)+'">'+(m==='required'?'Required':'Advisory')+'</span>'; }
+  function periodChip(y){ return y?'<span class="rb-yr">'+y+'</span>':'<span class="rb-yr none">—</span>'; }
+  function bookPeriod(b){
+    const yrs=[...new Set(b.rules.map(r=>r.assignedYear).filter(Boolean))].sort();
+    if(!yrs.length) return '—';
+    if(rbFilt==='year') return String(rbYear);
+    return yrs.join(' · ');
+  }
+  function bookMandate(b){
+    const rules=rbFilt==='year'?rulesForYear(b,rbYear):b.rules;
+    if(!rules.length) return '—';
+    return rules.some(r=>r.mandate==='required')?'required':'advisory';
+  }
+  function syncStats(){
+    const assigned=allRules().filter(x=>Number(x.r.assignedYear)===Number(rbYear)).length;
+    const total=allRules().length;
+    const f30=allRules().reduce((n,x)=>n+x.r.findings30,0);
+    const books=RULEBOOKS.length;
+    const ret=RULEBOOKS.filter(b=>b.status==='retired').length;
+    q('#rbStatBooks').innerHTML=books+' <span class="delta">3 levels</span>';
+    q('#rbStatRules').textContent=String(total);
+    q('#rbStatAssigned').innerHTML=assigned+' <span class="delta" id="rbStatAssignedDelta">'+rbYear+' pack</span>';
+    q('#rbStatFind').innerHTML=f30+' <span class="delta">30 days</span>';
+    q('#rbStatRet').innerHTML=ret+' <span class="delta">matched but ignored</span>';
+    const sub=q('#rbRegSub');
+    if(sub) sub.textContent=rbFilt==='year'?'Showing rules assigned for '+rbYear:'Showing every rulebook — click a row to expand';
+  }
+  function renderRb(){
+    /* In "This year" mode, hide books with zero assigned rules for the period (retired 2025-only). */
+    const visible=rbFilt==='year'?RULEBOOKS.filter(b=>rulesForYear(b,rbYear).length):RULEBOOKS;
+    q('#rbTbody').innerHTML=visible.map(b=>{
+      const shown=rbFilt==='year'?rulesForYear(b,rbYear):b.rules;
+      const f30=shown.reduce((n,r)=>n+r.findings30,0);
+      const md=bookMandate(b);
+      return '<tr class="rb-row'+(b.status==='retired'?' retired':'')+'" data-rb="'+b.id+'" aria-expanded="false" tabindex="0">'
+        +'<td><span class="chev" aria-hidden="true">▸</span><span class="mono">'+esc(b.path)+'</span></td>'
+        +'<td><span class="rb-lv '+b.level+'">'+LV[b.level]+'</span></td>'
+        +'<td class="small">'+esc(b.scope)+'</td>'
+        +'<td style="text-align:right" class="mono">'+shown.length+(shown.length!==b.rules.length?' <span class="subtle">/'+b.rules.length+'</span>':'')+'</td>'
+        +'<td>'+periodChip(bookPeriod(b))+'</td>'
+        +'<td>'+(md==='—'?'<span class="subtle">—</span>':mandateChip(md))+'</td>'
+        +'<td style="text-align:right" class="mono">'+f30+'</td>'
+        +'<td>'+(b.status==='retired'?'<span class="label attention">Retired</span>':'<span class="label success">Active</span>')+'</td>'
+        +'<td class="small subtle">'+esc(b.updated)+' · '+esc(b.actor)+'</td></tr>'
+        +'<tr class="rb-rules" data-rbfor="'+b.id+'" hidden><td colspan="9">'
+        +(b.retired?'<p class="small" style="color:var(--attention);margin:0 0 8px">'+esc(b.retired)+' — markers below still appear in files but are ignored by resolution.</p>':'')
+        +shown.map(r=>'<div class="rb-rule" data-marker="'+r.marker+'">'
+          +'<span class="mk">'+r.marker+'</span><span>'+esc(r.title)+'</span>'
+          +sevLabel(r.sev)
+          +'<span class="rb-meta">Assigned '+r.assignedYear+' · '+esc(r.owner)+' · since '+(r.assignedOn||'').replace(/^(\d{4})-(\d{2})-(\d{2})$/,(_,y,m,d)=>{const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return months[+m-1]+' '+(+d);})+'</span>'
+          +'<span class="mono" style="text-align:right">'+r.findings30+' · 30d</span>'
+          +'<a class="small" href="findings.html?assigned=2026">Findings · Assigned 2026 →</a></div>').join('')
+        +(rbFilt==='year'&&shown.length<b.rules.length?'<p class="small subtle" style="margin:8px 0 0">'+(b.rules.length-shown.length)+' rule'+(b.rules.length-shown.length===1?'':'s')+' assigned outside '+rbYear+' — switch to All to see them.</p>':'')
+        +'<button class="btn sm" style="margin-top:9px" data-rbsrc="'+b.id+'">View source</button>'
+        +'</td></tr>';
+    }).join('')||'<tr><td colspan="9" style="padding:28px;text-align:center;color:var(--fg-muted)">No rules assigned for '+esc(String(rbYear))+'. Switch to All or pick another year.</td></tr>';
+    syncStats();
+  }
+  function setFilt(mode){
+    rbFilt=mode;
+    q('#rbFiltYear').setAttribute('aria-pressed',String(mode==='year'));
+    q('#rbFiltAll').setAttribute('aria-pressed',String(mode==='all'));
+    renderRb();
+  }
+  document.addEventListener('click',e=>{
+    const src=e.target.closest('[data-rbsrc]');
+    if(src){ const b=RULEBOOKS.find(x=>x.id===src.dataset.rbsrc);
+      q('#rbSrcTitle').textContent=b.path;
+      q('#rbSrcCode').textContent='# '+b.name+'\napplies_to: '+b.scope+'\nstatus: '+b.status+'\n\n'
+        +b.rules.map(r=>'## '+r.marker+'\nseverity: '+r.sev+'\nmandate: '+r.mandate+'\nassigned: '+r.assignedYear+' · '+r.owner+'\n'+r.title+'.\n').join('\n');
+      PS.modal.open('rbSrcModal'); return; }
+    const row=e.target.closest('tr.rb-row');
+    if(row && !e.target.closest('a,button')){
+      const open=row.getAttribute('aria-expanded')==='true';
+      row.setAttribute('aria-expanded',String(!open));
+      const sub=q('[data-rbfor="'+row.dataset.rb+'"]'); if(sub) sub.hidden=open;
+      return; }
+  });
+  document.addEventListener('keydown',e=>{
+    if(e.key!=='Enter'&&e.key!==' ') return;
+    const row=e.target.closest&&e.target.closest('tr.rb-row');
+    if(row){ e.preventDefault(); row.click(); }
+  });
+  function runResolver(){
+    const p=(q('#rbPath').value||'').trim().replace(/^\/+/,'');
+    if(!p){ q('#rbCascade').innerHTML='<p class="small subtle">Enter a path.</p>'; return; }
+    q('#rbCascade').innerHTML='<p class="small subtle" style="margin-bottom:8px">Cascade for <span class="mono">'+esc(p)+'</span></p>'+rbCascadeHTML(rbResolve(p));
+  }
+  q('#rbResolveBtn').addEventListener('click',runResolver);
+  q('#rbPath').addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); runResolver(); } });
+  q('#rbYear').addEventListener('change',()=>{ rbYear=Number(q('#rbYear').value)||YEAR_NOW; renderRb(); });
+  q('#rbFiltYear').addEventListener('click',()=>setFilt('year'));
+  q('#rbFiltAll').addEventListener('click',()=>setFilt('all'));
+  renderRb(); runResolver();
+  /* Deep link: #rulebooks opens the tab (shell handles it); #rulebooks/MARKER also
+     expands the owning book and highlights the rule. The shell's hash-init failed to
+     match the compound form, so activate the tab ourselves. */
+  const dm=(window.__initialHash||location.hash).match(/^#rulebooks(?:\/(.+))?$/);
+  if(dm){
+    document.querySelector('[role="tab"][data-tab="rulebooks"]')?.click();
+    if(dm[1]){
+      const marker=decodeURIComponent(dm[1]);
+      /* Ensure the owning book is visible even if "This year" would hide it. */
+      const owned=allRules().find(x=>x.r.marker===marker);
+      if(owned && Number(owned.r.assignedYear)!==Number(rbYear)) setFilt('all');
+      else renderRb();
+      const rule=q('[data-marker="'+CSS.escape(marker)+'"]');
+      if(rule){
+        const sub=rule.closest('tr.rb-rules');
+        sub.hidden=false;
+        q('tr.rb-row[data-rb="'+sub.dataset.rbfor+'"]')?.setAttribute('aria-expanded','true');
+        rule.classList.add('rb-hl');
+        history.replaceState(null,'','#rulebooks/'+dm[1]);   /* keep the deep link in the URL */
+        setTimeout(()=>rule.scrollIntoView({block:'center'}),60);
+      }
+    }
+  }
 })();
 </script>
 </body>

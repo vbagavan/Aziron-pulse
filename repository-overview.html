@@ -559,6 +559,24 @@ html[data-theme="dark"] .railgrp::before{color:#9aabc6}
 .reference-language{display:inline-flex;align-items:center;gap:4px;height:32px;padding:0 2px;border:0;background:transparent;color:var(--fg-muted);font:13px var(--font-sans)}
 .reference-language svg{width:15px;height:15px}
 .topbar .bellwrap{display:inline-flex;position:relative}.topbar .avatar{border-radius:8px;background:var(--accent-subtle);color:var(--accent-chip)}
+/* ---- Governance stack (About sidebar) ---- */
+.rbstack-h{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+.rbstack-h .lbl{color:var(--fg-subtle);font:600 10px var(--font-sans);letter-spacing:.06em;text-transform:uppercase}
+.rbstack-h .rb-left{display:inline-flex;align-items:center;gap:8px;min-width:0}
+.rbstack-h .rb-count{font:600 11px var(--font-sans);color:var(--fg-muted);letter-spacing:0;text-transform:none}
+.rbrow{display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:1px solid var(--border-muted)}
+.rbrow:last-child{border-bottom:none}
+.rbmain{min-width:0;flex:1}
+.rbmain .mono{display:block;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rbsub{display:block;font-size:10.5px;color:var(--fg-subtle);margin-top:1px}
+.rbrow.retired .mono{text-decoration:line-through;color:var(--fg-subtle)}
+.rbrow.retired .rbsub{color:var(--attention)}
+.rb-lv{display:inline-flex;align-items:center;height:18px;padding:0 6px;border-radius:999px;font:700 9px var(--font-sans);white-space:nowrap;flex:none;margin-top:1px}
+.rb-lv.org{background:var(--neutral-subtle);color:var(--neutral)}
+.rb-lv.repo{background:var(--accent-subtle);color:var(--accent-chip)}
+.rb-lv.component{background:var(--success-subtle);color:var(--success)}
+.rb-yr{display:inline-flex;align-items:center;height:17px;padding:0 5px;border-radius:4px;background:var(--accent-subtle);color:var(--accent-chip);font:700 9px var(--font-mono);flex:none;margin-top:1px}
+.rb-yr.none{background:var(--bg-inset);color:var(--fg-subtle)}
 @media(max-width:1350px){.reference-estate,.reference-language,.reference-divider{display:none}.topbar .searchbtn{min-width:220px}}
 @media(max-width:1100px){.topbar-live{display:none}.topbar .searchbtn{min-width:180px}}
 @media(max-width:900px){.topbar .repoctx{display:none}}
@@ -863,6 +881,19 @@ deploy/             manifests, shutdown + drain config
                   <a href="coverage.html">Coverage gates</a>
                   <a href="rollout.html">Rollout settings</a>
                   <a href="#insights">Ownership map</a>
+                </div>
+                <hr>
+                <!-- Rulebook stack in precedence order: component beats repo root beats
+                     org baseline; retired books are matched but ignored. -->
+                <div class="rbstack" aria-label="Rulebook governance for 2026">
+                  <div class="rbstack-h">
+                    <span class="rb-left"><span class="lbl">Governance · 2026</span><span class="rb-count">7 rules assigned</span></span>
+                    <a class="small" href="settings.html#rulebooks">Registry →</a>
+                  </div>
+                  <div class="rbrow"><span class="rb-lv component">Component</span><div class="rbmain"><span class="mono">.pulse/rules/reliability.md</span><span class="rbsub">internal/ratelimit/** · 2 rules</span></div><span class="rb-yr" title="Assigned for 2026">2026</span></div>
+                  <div class="rbrow"><span class="rb-lv repo">Repo root</span><div class="rbmain"><span class="mono">.pulse/pr-review.md</span><span class="rbsub">root fallback · 3 rules</span></div><span class="rb-yr" title="Assigned for 2026">2026</span></div>
+                  <div class="rbrow"><span class="rb-lv org">Org</span><div class="rbmain"><span class="mono">aziro-org/.pulse/org-review.md</span><span class="rbsub">all repositories · 2 rules</span></div><span class="rb-yr" title="Assigned for 2026">2026</span></div>
+                  <div class="rbrow retired"><span class="rb-lv component">Component</span><div class="rbmain"><span class="mono">.pulse/rules/observability-v1.md</span><span class="rbsub">Retired · superseded 2026-07-12 — matched but ignored</span></div><span class="rb-yr none" title="Not in the 2026 pack">2025</span></div>
                 </div>
               </div>
             </aside>
