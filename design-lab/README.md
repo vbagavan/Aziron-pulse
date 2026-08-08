@@ -29,3 +29,4 @@ design-lab/
 | Topic | Question | Status |
 |---|---|---|
 | [`360-strip/`](360-strip/) | How should the PR's 360° overview strip look? | **Adopted** — option 7 (Grouped) shipped in `pr-details.html`, 2026-08-08 |
+| [`pr-sidebar/`](pr-sidebar/) | How should the PR right rail be structured at 300px? | **Adopted** — option 7 shipped in `pr-details.html`, 2026-08-09 (−29% in situ) |

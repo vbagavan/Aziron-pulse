@@ -437,8 +437,13 @@ html.surface-vscode .drawer{width:100%;max-width:100%}
 .prstate.merged{background:var(--attest);color:var(--on-fill)}
 .prstate.draft{background:var(--neutral);color:var(--on-fill)}
 a.verdict:hover{text-decoration:none;box-shadow:0 0 0 1px var(--fg-subtle)}
-.prmeta{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:8px;font-size:13px;color:var(--fg-muted)}
+.prmeta{display:flex;align-items:center;gap:0;flex-wrap:wrap;margin-top:8px;font-size:13px;color:var(--fg-muted)}
+.prmeta-group{display:inline-flex;align-items:center;gap:6px;min-height:22px;padding:0 14px;border-left:1px solid var(--border)}
+.prmeta-group:first-child{border-left:0;padding-left:0}
+.prmeta-label{color:var(--fg-subtle);font:600 10px var(--font-sans);letter-spacing:.06em;text-transform:uppercase}
+.prmeta-group .mono{white-space:nowrap}
 .branch{font-family:var(--font-mono);font-size:12px;background:var(--accent-subtle);color:var(--accent-chip);border-radius:4px;padding:2px 6px;overflow-wrap:anywhere}
+@media (max-width:720px){.prmeta{align-items:flex-start;flex-direction:column;gap:5px}.prmeta-group{border-left:0;padding:0}}
 /* Two-column layout */
 .prgrid{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:24px;align-items:start}
 .prgrid[data-side="off"]{grid-template-columns:minmax(0,1fr)}
@@ -448,7 +453,81 @@ a.verdict:hover{text-decoration:none;box-shadow:0 0 0 1px var(--fg-subtle)}
 .prgrid[data-side="off"] .prside{display:none}
 @media (min-width:981px){.prside{position:sticky;top:calc(var(--topbar-h) + 16px)}}
 /* Sidebar sections */
-.sb-sec{padding:14px 0;border-bottom:1px solid var(--border-muted)}
+/* ---- Sidebar: collapsible cards (design-lab/pr-sidebar option 7) -------------
+   The rail is 300px and was 2,032px tall. Sections the 360° strip already answers
+   start collapsed with their value on the header row; a card is a real region so
+   a collapsed one still reports. ---------------------------------------------- */
+.prside{min-width:0;display:flex;flex-direction:column;gap:10px}
+.sb-sec{border:1px solid var(--border);border-radius:var(--r-lg);background:var(--bg);overflow:hidden}
+.sb-tog{flex:1;min-width:0;display:flex;align-items:center;gap:7px;padding:9px 11px;margin:0;
+  border:0;background:none;color:var(--fg);font:600 12px var(--font-sans);text-align:left;cursor:pointer}
+.sb-tog:hover{background:var(--bg-subtle)}
+.sb-tog:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.sb-tog .ic{flex:none;width:14px;height:14px;color:var(--fg-subtle)}
+.sb-tog h2{font:600 12px var(--font-sans);letter-spacing:-.01em;white-space:nowrap}
+.sb-cnt{flex:none;font:600 10px var(--font-mono);color:var(--fg-muted);background:var(--bg-inset);
+  border-radius:999px;padding:1px 6px}
+.sb-cnt.bad{background:var(--danger-subtle);color:var(--danger)}
+.sb-cnt.ok{background:var(--success-subtle);color:var(--success)}
+.sb-sum{flex:1;min-width:0;text-align:right;font:500 11px var(--font-sans);color:var(--fg-subtle);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* 300px is tight — an open header shows its count chip, a collapsed one shows the
+   richer summary. Never both: that is what crowds the row. */
+.sb-sec[data-open="true"] .sb-sum{display:none}
+.sb-sec[data-open="false"] .sb-cnt{display:none}
+.sb-sec[data-open="true"] .sb-tog h2{flex:1}
+.sb-chev{flex:none;width:13px;height:13px;color:var(--fg-subtle);transition:transform .15s ease}
+.sb-sec[data-open="false"] .sb-chev{transform:rotate(-90deg)}
+.sb-sec[data-open="false"] .sb-b{display:none}
+.sb-b{padding:0 11px 11px}
+.sb-b .ckrow:first-child{border-top:0}
+.sb-add{display:flex;gap:6px;margin-top:8px}
+/* readiness donut — #crBar is the progress arc, written by syncReadiness */
+.rd-top{display:flex;gap:12px;align-items:center;margin-bottom:8px}
+.donut{flex:none;position:relative;width:62px;height:62px}
+.donut svg{transform:rotate(-90deg)}
+.donut i{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font:700 15px var(--font-mono);font-style:normal;color:var(--accent-chip)}
+.rd-state{min-width:0}
+.rd-state b{display:block;font:600 13px var(--font-sans);letter-spacing:-.01em;margin-bottom:3px}
+.rd-blk{display:flex;flex-direction:column;gap:3px}
+.rd-blk span{display:flex;gap:5px;align-items:flex-start;font-size:11px;color:var(--fg-muted)}
+.rd-blk b{flex:none;font-size:11px}
+.rd-blk .b1 b{color:var(--danger)} .rd-blk .b2 b{color:var(--attention)} .rd-blk .b3 b{color:var(--success)}
+/* row icons on the dense Change block */
+.ckrow .ci{flex:none;width:14px;height:14px;color:var(--fg-subtle)}
+.sb-sub{margin:9px 0 0;padding-top:8px;border-top:1px solid var(--border-muted);
+  font:600 10px var(--font-sans);text-transform:uppercase;letter-spacing:.06em;color:var(--fg-subtle)}
+.sb-why{margin-top:9px;padding:8px 9px;border-radius:var(--r);background:var(--bg-subtle);
+  border:1px solid var(--border-muted);font-size:11px;color:var(--fg-muted)}
+.sb-why b{color:var(--fg)}
+/* merge: a blocked control must not look like a faded primary */
+.sb-sec.mg[data-blocked="true"]{border-color:var(--danger-subtle)}
+.btn.primary[disabled],.btn.primary[aria-disabled="true"]{background:var(--bg-inset);
+  border-color:var(--border);color:var(--fg-subtle);opacity:1}
+.mg-alert{display:flex;gap:6px;align-items:flex-start;margin:10px 0 8px;padding:7px 9px;
+  border-radius:var(--r);background:var(--danger-subtle);color:var(--danger);
+  font:600 11px var(--font-sans)}
+.mg-alert svg{flex:none;width:13px;height:13px;margin-top:1px}
+/* sticky action footer — the next action never scrolls away */
+.sb-foot{position:sticky;bottom:0;z-index:5;display:flex;align-items:center;gap:9px;padding:9px 11px;
+  border:1px solid var(--border);border-radius:var(--r-lg);background:var(--bg);
+  box-shadow:var(--shadow-overlay)}
+.sb-foot[data-tone="blocked"]{border-color:var(--danger-subtle)}
+.sb-foot .ft{min-width:0;flex:1}
+.sb-foot .ft b{display:block;font:600 12px var(--font-sans)}
+.sb-foot[data-tone="blocked"] .ft b{color:var(--danger)}
+.sb-foot[data-tone="ready"] .ft b{color:var(--success)}
+.sb-foot .ft span{display:block;font-size:11px;color:var(--fg-subtle);line-height:1.35}
+.sb-foot .btn{flex:none;padding:0 12px}
+/* header row: the toggle is a button, so the metric "?" (mounted into .lbl by
+   mountMetricDefs) must sit OUTSIDE it — nested buttons are invalid. */
+.sb-h{display:flex;align-items:center;gap:0;margin:0;padding-right:9px}
+/* sentence case, not the old uppercase rail label — these are card titles now */
+.sb-h .sb-tog h2{font-size:12px;color:var(--fg);text-transform:none;letter-spacing:-.01em;flex:none}
+.sb-h .lbl{flex:none;font-size:0;display:inline-flex;align-items:center}
+.sb-h .lbl .mdef{font-size:11px}
+.sb-h .menuwrap{flex:none;margin-left:4px}
 .sb-sec:first-child{padding-top:0}
 .sb-h{display:flex;align-items:center;gap:8px;margin-bottom:8px}
 .sb-h h2{font-size:11px;color:var(--fg-muted);text-transform:uppercase;letter-spacing:.06em;flex:1}
@@ -1391,12 +1470,19 @@ html[data-theme="dark"] .railgrp::before{color:#9aabc6}
               </div>
             </div>
           </div>
-          <div class="prmeta">
-            <span><span class="branch">main</span> → <span class="branch">feat/rate-limit-middleware</span></span>
-            <span><strong>@priyar</strong> opened this <time datetime="2026-08-03T09:32:00">Aug 3, 09:32</time></span>
-            <span class="mono" id="metaCommits">3 commits</span>
-            <span class="mono"><span class="plus" id="metaPlus">+412</span> <span class="minus" id="metaMinus">−96</span></span>
-            <span><a href="repository-overview.html">gateway-api</a> · <span class="mode enforce">Enforce</span></span>
+          <div class="prmeta" aria-label="Pull request metadata">
+            <span class="prmeta-group">
+              <span class="prmeta-label">Change</span>
+              <span class="branch">feat/rate-limit-middleware</span> → <span class="branch">main</span>
+            </span>
+            <span class="prmeta-group">
+              <span class="prmeta-label">Activity</span>
+              <strong>@priyar</strong> opened <time datetime="2026-08-03T09:32:00">Aug 3, 09:32</time> · <span class="mono" id="metaCommits">3 commits</span>
+            </span>
+            <span class="prmeta-group">
+              <span class="prmeta-label">Impact</span>
+              <span class="mono">3 files</span> · <span class="mono"><span class="plus" id="metaPlus">+412</span> <span class="minus" id="metaMinus">−96</span></span> · <span class="mode enforce">Enforcement enabled</span>
+            </span>
           </div>
         </div>
       </div>
@@ -2160,19 +2246,43 @@ html[data-theme="dark"] .railgrp::before{color:#9aabc6}
         </div><!-- /prmain -->
 
         <aside class="prside" id="prSide" aria-label="Pull request sidebar">
-          <section class="sb-sec" data-metric="change-readiness" aria-labelledby="crH">
-            <div class="sb-h"><h2 class="lbl" id="crH">Change readiness</h2><span class="livechip">Live · now</span></div>
-            <div class="rscore"><b id="crPct">82%</b><span class="rsl" id="crNote" aria-live="polite">Held by 2 open review findings and 1 approval outstanding.</span></div>
-            <div class="rmeter" id="crMeter" role="img" aria-label="Change readiness 82 percent"><i id="crBar" style="width:82%"></i></div>
-            <div class="ckrow"><span class="cgl pend" id="glCrPr" role="img" aria-label="Pending">⏳</span><span class="cnm">PR review</span><span class="cdt" id="dtCrPr" aria-live="polite">2 open findings</span></div>
-            <div class="ckrow"><span class="cgl ok" role="img" aria-label="Pass">✓</span><span class="cnm">Unit tests</span><span class="cdt" id="crUtDt">18 of 18 · coverage 86.0%</span></div>
-            <div class="ckrow"><span class="cgl ok" role="img" aria-label="Pass">✓</span><span class="cnm">Security</span><span class="cdt">Gate passed</span></div>
-            <div class="ckrow"><span class="cgl ok" role="img" aria-label="Pass">✓</span><span class="cnm">Evidence</span><span class="cdt"><a href="run-details.html" class="mono">06cb9564</a> · fresh</span></div>
-            <p class="small subtle" style="margin-top:8px">Composite of PR review (40), unit tests (30), security (20) and evidence freshness (10). <button type="button" class="lnkbtn" data-goto="checks">See the readiness groups</button></p>
+          <section class="sb-sec" data-metric="change-readiness" data-open="true" data-sb="readiness" aria-labelledby="crH">
+            <div class="sb-h">
+              <button type="button" class="sb-tog" data-sbsec="readiness" aria-expanded="true" aria-controls="sbb-readiness">
+                <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 14v-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></svg>
+                <h2 id="crH">Change readiness</h2><span class="sb-sum" id="crSum"></span>
+                <svg class="sb-chev" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m4 6 4 4 4-4"/></svg>
+              </button>
+              <span class="lbl">Change readiness</span>
+            </div>
+            <div class="sb-b" id="sbb-readiness">
+              <div class="rd-top">
+                <span class="donut" id="crMeter" role="img" aria-label="Change readiness 82 percent">
+                  <svg width="62" height="62" viewBox="0 0 62 62" aria-hidden="true">
+                    <circle cx="31" cy="31" r="26" fill="none" stroke="var(--bg-inset)" stroke-width="7"/>
+                    <circle cx="31" cy="31" r="26" fill="none" stroke="var(--accent)" stroke-width="7" stroke-linecap="round" stroke-dasharray="163.4" stroke-dashoffset="29.4" id="crBar"/>
+                  </svg><i id="crPct">82%</i></span>
+                <span class="rd-state">
+                  <b id="crState">Not ready — <span style="color:var(--danger)">blockers</span></b>
+                  <span class="rd-blk" id="crBlk"></span>
+                </span>
+              </div>
+              <p class="small subtle" id="crNote" aria-live="polite" hidden>Held by 2 open review findings and 1 approval outstanding.</p>
+              <div class="ckrow"><span class="cgl pend" id="glCrPr" role="img" aria-label="Pending">⏳</span><span class="cnm">PR review</span><span class="cdt" id="dtCrPr" aria-live="polite">2 open findings</span></div>
+              <div class="ckrow"><span class="cgl ok" role="img" aria-label="Pass">✓</span><span class="cnm">Unit tests</span><span class="cdt" id="crUtDt">18 of 18 · coverage 86.0%</span></div>
+              <div class="ckrow"><span class="cgl ok" role="img" aria-label="Pass">✓</span><span class="cnm">Security</span><span class="cdt">Gate passed</span></div>
+              <div class="ckrow"><span class="cgl ok" role="img" aria-label="Pass">✓</span><span class="cnm">Evidence</span><span class="cdt"><a href="run-details.html" class="mono">06cb9564</a> · fresh</span></div>
+              <p class="small subtle" style="margin-top:8px">PR review (40) · Unit tests (30) · Security (20) · Evidence (10). <button type="button" class="lnkbtn" data-goto="checks">See the readiness groups</button></p>
+            </div>
           </section>
 
-          <section class="sb-sec">
-            <div class="sb-h"><h2 id="revH">Reviewers</h2>
+          <section class="sb-sec" data-open="true" data-sb="reviewers">
+            <div class="sb-h">
+              <button type="button" class="sb-tog" data-sbsec="reviewers" aria-expanded="true" aria-controls="sbb-reviewers">
+                <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/></svg>
+                <h2 id="revH">Reviewers</h2><span class="sb-cnt" id="revCnt">1 of 2</span><span class="sb-sum" id="revSum"></span>
+                <svg class="sb-chev" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m4 6 4 4 4-4"/></svg>
+              </button>
               <div class="menuwrap">
                 <button class="icon-btn act" style="width:24px;height:24px" aria-haspopup="menu" aria-expanded="false" aria-label="Request a reviewer">＋</button>
                 <div class="menu" role="menu" hidden>
@@ -2181,86 +2291,136 @@ html[data-theme="dark"] .railgrp::before{color:#9aabc6}
                 </div>
               </div>
             </div>
-            <ul class="plist" id="revList" aria-labelledby="revH">
-              <li><span class="avatar sm" aria-hidden="true">PR</span>@priyar<span class="st ok">✓ Approved</span></li>
-              <li><span class="avatar sm" aria-hidden="true">MW</span>@mwebb<span class="st pend">⏳ Pending</span></li>
-            </ul>
-            <p class="small subtle" id="revNote" aria-live="polite" style="margin-top:8px"><span class="mono">1 of 2</span> required approvals</p>
+            <div class="sb-b" id="sbb-reviewers">
+              <ul class="plist" id="revList" aria-labelledby="revH">
+                <li><span class="avatar sm" aria-hidden="true">PR</span>@priyar<span class="st ok">✓ Approved</span></li>
+                <li><span class="avatar sm" aria-hidden="true">MW</span>@mwebb<span class="st pend">⏳ Pending</span></li>
+              </ul>
+              <p class="small subtle" id="revNote" aria-live="polite" style="margin-top:8px"><span class="mono">1 of 2</span> required approvals</p>
+            </div>
           </section>
 
-          <section class="sb-sec">
-            <div class="sb-h"><h2 id="asgH">Assignees</h2>
-              <div class="menuwrap">
-                <button class="icon-btn act" style="width:24px;height:24px" aria-haspopup="menu" aria-expanded="false" aria-label="Add an assignee">＋</button>
-                <div class="menu" role="menu" hidden>
-                  <button role="menuitem" onclick="addAssignee('@priyar','PR')">@priyar · Maintainer</button>
-                  <button role="menuitem" onclick="addAssignee('@mwebb','MW')">@mwebb · Member</button>
-                </div>
-              </div>
+          <!-- assignees + labels merged: two short lists that never needed two cards -->
+          <section class="sb-sec" data-open="true" data-sb="people">
+            <div class="sb-h">
+              <button type="button" class="sb-tog" data-sbsec="people" aria-expanded="true" aria-controls="sbb-people">
+                <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z"/><circle cx="7.5" cy="7.5" r=".5"/></svg>
+                <h2 id="asgH">People &amp; labels</h2><span class="sb-sum" id="peopleSum"></span>
+                <svg class="sb-chev" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m4 6 4 4 4-4"/></svg>
+              </button>
             </div>
-            <ul class="plist" id="asgList" aria-labelledby="asgH">
-              <li><span class="avatar sm" aria-hidden="true">DA</span>@dominic</li>
-            </ul>
-          </section>
-
-          <section class="sb-sec">
-            <div class="sb-h"><h2>Labels</h2>
-              <div class="menuwrap">
-                <button class="icon-btn act" style="width:24px;height:24px" aria-haspopup="menu" aria-expanded="false" aria-label="Add a label">＋</button>
-                <div class="menu" role="menu" hidden>
-                  <button role="menuitem" onclick="addLabel('ratelimit')">ratelimit</button>
-                  <button role="menuitem" onclick="addLabel('go')">go</button>
-                  <button role="menuitem" onclick="addLabel('needs-docs')">needs-docs</button>
-                </div>
-              </div>
-            </div>
-            <div class="lblrow" id="labelRow">
+            <div class="sb-b" id="sbb-people">
+              <ul class="plist" id="asgList" aria-labelledby="asgH">
+                <li><span class="avatar sm" aria-hidden="true">DA</span>@dominic</li>
+              </ul>
+              <div class="lblrow" id="labelRow">
               <span class="label accent">gateway<button class="act" aria-label="Remove label gateway" onclick="rmLabel(this,'gateway')"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x" aria-hidden="true"><path d="M18 6 6 18" /> <path d="m6 6 12 12" /></svg></button></span>
               <span class="label accent">perf<button class="act" aria-label="Remove label perf" onclick="rmLabel(this,'perf')"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x" aria-hidden="true"><path d="M18 6 6 18" /> <path d="m6 6 12 12" /></svg></button></span>
+              </div>
+              <div class="sb-add">
+                <div class="menuwrap">
+                  <button class="btn sm act" aria-haspopup="menu" aria-expanded="false">＋ Assignee</button>
+                  <div class="menu" role="menu" hidden>
+                    <button role="menuitem" onclick="addAssignee('@priyar','PR')">@priyar · Maintainer</button>
+                    <button role="menuitem" onclick="addAssignee('@mwebb','MW')">@mwebb · Member</button>
+                  </div>
+                </div>
+                <div class="menuwrap">
+                  <button class="btn sm act" aria-haspopup="menu" aria-expanded="false">＋ Label</button>
+                  <div class="menu" role="menu" hidden>
+                    <button role="menuitem" onclick="addLabel('ratelimit')">ratelimit</button>
+                    <button role="menuitem" onclick="addLabel('go')">go</button>
+                    <button role="menuitem" onclick="addLabel('needs-docs')">needs-docs</button>
+                  </div>
+                </div>
+              </div>
             </div>
           </section>
 
-          <section class="sb-sec" data-metric="risk-profile">
-            <div class="sb-h"><h2>Change</h2></div>
-            <div class="ckrow"><span class="cnm">Files changed</span><span class="cdt" id="chFiles">3</span></div>
-            <div class="ckrow"><span class="cnm">Lines</span><span class="cdt"><span class="plus" id="chPlus">+412</span> <span class="minus" id="chMinus">−96</span></span></div>
-            <div class="ckrow"><span class="cnm">Linked work</span><span class="cdt"><button type="button" class="lnkbtn act" id="linkedWorkBtn" data-tip="Aziron work item — opened by @priyar">AZ-892</button></span></div>
-            <div class="ckrow"><span class="cnm">Cross-repo impact</span><span class="cdt"><a href="code-intelligence.html">2 consumers</a></span></div>
-            <div class="ckrow"><span class="cnm">Risk profile</span><span class="cdt"><span class="label attention">Medium</span></span></div>
-            <div class="ckrow"><span class="cnm">Size</span><span class="cdt">M — +412 −96 · 3 files</span></div>
-            <div class="ckrow"><span class="cnm">Churn hotspot</span><span class="cdt"><span class="mono">wiring.go</span> · 14 changes/90d</span></div>
-            <div class="ckrow"><span class="cnm">Author familiarity</span><span class="cdt">High · 62% of touched lines</span></div>
-            <p class="small subtle" style="margin-top:8px">Risk scored by the <a href="risk-model.html">estate risk model</a> — size band · file churn · author familiarity.</p>
-            <p class="small subtle" style="margin-top:6px"><span class="mono">orion-web</span> and <span class="mono">relay-workers</span> call this ingress path — <a href="code-intelligence.html">open the blast radius</a> before merging.</p>
-            <p class="small subtle" style="margin-top:6px">A pull request with no linked work item fails the traceability gate: PR review readiness turns <span class="mono">✕</span> and merge stays closed on an Enforce repository.</p>
+          <!-- collapsed by default: the 360° strip above already carries these -->
+          <section class="sb-sec" data-metric="risk-profile" data-open="false" data-sb="change">
+            <div class="sb-h">
+              <button type="button" class="sb-tog" data-sbsec="change" aria-expanded="false" aria-controls="sbb-change">
+                <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m16 18 6-6-6-6M8 6l-6 6 6 6"/></svg>
+                <h2>Change &amp; risk</h2><span class="sb-sum">+412 −96 · risk Medium</span>
+                <svg class="sb-chev" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m4 6 4 4 4-4"/></svg>
+              </button>
+              <span class="lbl">Change and risk</span>
+            </div>
+            <div class="sb-b" id="sbb-change">
+              <div class="ckrow"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/><path d="M14 2v5h5"/></svg><span class="cnm">Files changed</span><span class="cdt" id="chFiles">3</span></div>
+              <div class="ckrow"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m16 18 6-6-6-6M8 6l-6 6 6 6"/></svg><span class="cnm">Lines</span><span class="cdt"><span class="plus" id="chPlus">+412</span> <span class="minus" id="chMinus">−96</span></span></div>
+              <div class="ckrow"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg><span class="cnm">Linked work</span><span class="cdt"><button type="button" class="lnkbtn act" id="linkedWorkBtn" data-tip="Aziron work item — opened by @priyar">AZ-892</button></span></div>
+              <div class="ckrow"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="16" y="16" width="6" height="6" rx="1"/><rect x="2" y="16" width="6" height="6" rx="1"/><rect x="9" y="2" width="6" height="6" rx="1"/><path d="M5 16v-3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3M12 12V8"/></svg><span class="cnm">Cross-repo impact</span><span class="cdt"><a href="code-intelligence.html">2 consumers</a></span></div>
+              <p class="sb-sub">Risk profile</p>
+              <div class="ckrow"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 14v-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></svg><span class="cnm">Score</span><span class="cdt"><span class="label attention">Medium</span></span></div>
+              <div class="ckrow"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg><span class="cnm">Size</span><span class="cdt">M · +412 −96</span></div>
+              <div class="ckrow"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg><span class="cnm">Churn hotspot</span><span class="cdt"><span class="mono">wiring.go</span> · 14/90d</span></div>
+              <div class="ckrow"><svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span class="cnm">Author familiarity</span><span class="cdt">High · 62%</span></div>
+              <div class="sb-why"><b>Why Medium?</b> Two downstream consumers and one churn hotspot raise review risk; high author familiarity lowers it. <a href="risk-model.html">Risk model</a></div>
+              <p class="small subtle" style="margin-top:8px"><span class="mono">orion-web</span> and <span class="mono">relay-workers</span> call this ingress path — <a href="code-intelligence.html">open the blast radius</a> before merging.</p>
+              <p class="small subtle" style="margin-top:6px">A pull request with no linked work item fails the traceability gate: PR review readiness turns <span class="mono">✕</span> and merge stays closed on an Enforce repository.</p>
+            </div>
           </section>
 
-          <section class="sb-sec">
-            <div class="sb-h"><h2>Linked findings</h2></div>
-            <p class="small muted">None — verdict Passed with <span class="mono">0</span> new findings. <a href="findings.html">Browse findings</a></p>
+          <section class="sb-sec" data-open="false" data-sb="findings">
+            <div class="sb-h">
+              <button type="button" class="sb-tog" data-sbsec="findings" aria-expanded="false" aria-controls="sbb-findings">
+                <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                <h2>Linked findings</h2><span class="sb-sum">none linked</span>
+                <svg class="sb-chev" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m4 6 4 4 4-4"/></svg>
+              </button>
+            </div>
+            <div class="sb-b" id="sbb-findings">
+              <p class="small muted">None — verdict Passed with <span class="mono">0</span> new findings. <a href="findings.html">Browse findings</a></p>
+            </div>
           </section>
 
-          <section class="sb-sec">
-            <div class="sb-h"><h2>Enforcement</h2></div>
-            <p style="margin-bottom:4px"><span class="mode enforce">Enforce</span></p>
-            <p class="small muted">gateway-api merges require an attested <strong>Passed</strong> verdict. <a href="rollout.html">Rollout modes</a></p>
+          <section class="sb-sec" data-open="false" data-sb="enforce">
+            <div class="sb-h">
+              <button type="button" class="sb-tog" data-sbsec="enforce" aria-expanded="false" aria-controls="sbb-enforce">
+                <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                <h2>Enforcement</h2><span class="sb-sum">Enforce</span>
+                <svg class="sb-chev" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m4 6 4 4 4-4"/></svg>
+              </button>
+            </div>
+            <div class="sb-b" id="sbb-enforce">
+              <p style="margin-bottom:4px"><span class="mode enforce">Enforce</span></p>
+              <p class="small muted">gateway-api merges require an attested <strong>Passed</strong> verdict. <a href="rollout.html">Rollout modes</a></p>
+            </div>
           </section>
 
           <!-- Delivery: the post-merge half of the 360 — plan is policy until merge;
                actual progress lives on the rollout board. -->
-          <section class="sb-sec" data-metric="delivery-plan" id="sbDelivery">
-            <div class="sb-h"><h2>Delivery (post-merge)</h2></div>
-            <div class="ckrow"><span class="cnm">Environment</span><span class="cdt mono">prd01-gateway</span></div>
-            <div class="ckrow"><span class="cnm">Rollout</span><span class="cdt">canary 10% → 50% → 100%</span></div>
-            <div class="ckrow"><span class="cnm">Release train</span><span class="cdt"><span class="mono">R-2026-32</span> · Tue/Thu 14:00 UTC</span></div>
-            <div class="ckrow"><span class="cnm">Feature flag</span><span class="cdt mono">gateway.ratelimit.enabled</span></div>
-            <div class="ckrow"><span class="cnm">Watch</span><span class="cdt"><a href="reliability.html">gateway p99 SLO</a> · budget 99.2%</span></div>
-            <p class="small subtle" style="margin-top:8px">Canary auto-halts on SLO breach; alerts route to <span class="mono">#gateway-oncall</span>. The flag stays off until the canary clears. <a href="rollout.html">Rollout board</a></p>
+          <section class="sb-sec" data-metric="delivery-plan" id="sbDelivery" data-open="false" data-sb="delivery">
+            <div class="sb-h">
+              <button type="button" class="sb-tog" data-sbsec="delivery" aria-expanded="false" aria-controls="sbb-delivery">
+                <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91 0z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/></svg>
+                <h2>Delivery</h2><span class="sb-sum">canary 10%</span>
+                <svg class="sb-chev" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m4 6 4 4 4-4"/></svg>
+              </button>
+              <span class="lbl">Delivery</span>
+            </div>
+            <div class="sb-b" id="sbb-delivery">
+              <div class="ckrow"><span class="cnm">Environment</span><span class="cdt mono">prd01-gateway</span></div>
+              <div class="ckrow"><span class="cnm">Rollout</span><span class="cdt">canary 10% → 50% → 100%</span></div>
+              <div class="ckrow"><span class="cnm">Release train</span><span class="cdt"><span class="mono">R-2026-32</span> · Tue/Thu</span></div>
+              <div class="ckrow"><span class="cnm">Feature flag</span><span class="cdt mono">ratelimit.enabled</span></div>
+              <div class="ckrow"><span class="cnm">Watch</span><span class="cdt"><a href="reliability.html">p99 SLO</a> · 99.2%</span></div>
+              <p class="small subtle" style="margin-top:8px">Canary auto-halts on SLO breach; alerts route to <span class="mono">#gateway-oncall</span>. The flag stays off until the canary clears. <a href="rollout.html">Rollout board</a></p>
+            </div>
           </section>
 
-          <section class="sb-sec" style="border-bottom:none">
+          <section class="sb-sec mg" data-open="true" data-sb="merge" data-blocked="true">
+            <div class="sb-h">
+              <button type="button" class="sb-tog" data-sbsec="merge" aria-expanded="true" aria-controls="sbb-merge">
+                <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M6 21V9a9 9 0 0 0 9 9"/></svg>
+                <h2>Merge</h2><span class="sb-cnt bad" id="mgChip">Blocked</span><span class="sb-sum" id="mgSum"></span>
+                <svg class="sb-chev" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m4 6 4 4 4-4"/></svg>
+              </button>
+            </div>
+            <div class="sb-b" id="sbb-merge">
             <div class="mergecard" id="mergeLive">
-              <h2 style="font-size:13px;margin-bottom:6px">Merge</h2>
               <div class="gate ok" id="gateVerdict"><span class="gi" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check" aria-hidden="true"><path d="M20 6 9 17l-5-5" /></svg></span><div><strong id="gvTitle">Verdict attested</strong><span id="gvSub">Passed · run <a class="mono" href="run-details.html">06cb9564</a> · grade A</span></div></div>
               <div class="gate pend" id="gateAppr"><span class="gi" aria-hidden="true">⏳</span><div><strong id="gaTitle">Approvals 1 of 2</strong><span id="gaSub">Waiting on @mwebb — or an Admin review completes it</span></div></div>
               <div class="gate ok" id="gateBranch"><span class="gi" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check" aria-hidden="true"><path d="M20 6 9 17l-5-5" /></svg></span><div><strong>Branch up to date</strong><span class="mono">0</span> behind main</div></div>
@@ -2271,6 +2431,8 @@ html[data-theme="dark"] .railgrp::before{color:#9aabc6}
                   <button class="btn sm act" id="updateBranchBtn" disabled aria-disabled="true">Update branch</button>
                 </span>
               </div>
+              <!-- cause sits directly above the control it blocks (rendered by renderMerge) -->
+              <div class="mg-alert" id="mgAlert" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg><span id="mgAlertTxt"></span></div>
               <div class="menuwrap mergewrap" id="mergeWrap" data-tip="Needs 2 approvals — currently 1 of 2" style="margin-top:10px">
                 <button class="btn primary act" id="mergeBtn" disabled aria-disabled="true">Squash and merge</button>
                 <button class="btn primary act mcaret" id="mergeMethodBtn" aria-haspopup="menu" aria-expanded="false" aria-label="Choose a merge method — currently squash and merge"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg></button>
@@ -2299,7 +2461,14 @@ html[data-theme="dark"] .railgrp::before{color:#9aabc6}
             <div class="mergecard" id="mergeClosed" hidden>
               <p class="small muted"><strong>Closed without merging.</strong> The branch and verdict <span class="mono">06cb9564</span> stay in the ledger. Reopen from the ⋯ menu in the header.</p>
             </div>
+            </div>
           </section>
+
+          <!-- sticky action footer: the one next step, always in reach (renderMerge) -->
+          <div class="sb-foot" id="sbFoot" data-tone="blocked">
+            <span class="ft"><b id="sbFootT">Review blocked</b><span id="sbFootS">1 approval outstanding</span></span>
+            <button type="button" class="btn sm act" id="sbFootBtn">Review blockers</button>
+          </div>
         </aside>
         </div><!-- /prgrid -->
 
@@ -3543,7 +3712,10 @@ const PS = (() => {
     if(psg){ psg.className='cgl '+(open===0?'ok':'pend'); psg.textContent=open===0?'✓':'⏳'; psg.setAttribute('aria-label',open===0?'Pass':'Pending'); }
     const pct=Math.max(0,40-Math.min(open,2)*6-(chg?12:(appr>=2?0:6)))+60;
     $('#crPct').textContent=pct+'%';
-    $('#crBar').style.width=pct+'%';
+    /* donut arc: r=26 ⇒ circumference 163.4. The ring replaced the linear meter, so
+       this writes stroke-dashoffset rather than width. */
+    const arc=$('#crBar');
+    if(arc) arc.style.strokeDashoffset=(163.4*(1-pct/100)).toFixed(1);
     $('#crMeter').setAttribute('aria-label','Change readiness '+pct+' percent');
     const bits=[];
     if(open) bits.push(open+(open===1?' open review finding':' open review findings'));
@@ -3551,6 +3723,19 @@ const PS = (() => {
     $('#crNote').textContent=bits.length
       ? 'Held by '+bits.join(' and ')+'.'
       : 'Every input is green — merge is backed by attested verdict 06cb9564.';
+    /* headline + blocker list — same facts as #crNote, rendered as scannable lines */
+    const st=$('#crState');
+    if(st) st.innerHTML = S.merged ? 'Merged'
+      : bits.length ? 'Not ready — <span style="color:var(--danger)">blockers</span>'
+      : '<span style="color:var(--success)">Ready to merge</span>';
+    const blk=$('#crBlk');
+    if(blk) blk.innerHTML = bits.length
+      ? (open?'<span class="b1"><b>!</b>'+open+' open review finding'+(open===1?'':'s')+'</span>':'')
+        +(chg?'<span class="b1"><b>!</b>a requested-changes review</span>'
+             :appr<2?'<span class="b2"><b>⏳</b>1 approval outstanding</span>':'')
+      : '<span class="b3"><b>✓</b>every input is green</span>';
+    const sum=$('#crSum');
+    if(sum) sum.textContent=pct+'% · '+(bits.length?bits.length+' blocker'+(bits.length===1?'':'s'):'ready');
   }
   function syncChangeCard(){
     $('#chFiles').textContent=String(ORDER.length);
@@ -4329,6 +4514,65 @@ const PS = (() => {
      Reads existing state only. Lives outside #wsLegacy, so the workspace observer
      never repaints it; hooked at the end of renderMerge() and renderSecSummary().
      p360Cache lives in the top state block (TDZ). */
+  /* ---- sidebar chrome: merge chip, inline blocked reason, sticky action footer ----
+     Two different lists on purpose: MERGE is blocked only by real gates, while the
+     footer reports review pressure, which also counts open findings. A finding never
+     blocks a merge in this product, so it never appears in the merge alert. */
+  function renderSbFoot(){
+    const foot=$('#sbFoot'); if(!foot) return;
+    const sec=$('.sb-sec.mg'), chip=$('#mgChip'), al=$('#mgAlert'), alt=$('#mgAlertTxt');
+    const gates=[];
+    if(S.verdictStale) gates.push('verdict re-analyzing');
+    if(SONAR.status==='ERROR') gates.push('quality gate failed');
+    if(S.changesRequested) gates.push('a requested-changes review');
+    else if(S.approvals<2) gates.push((2-S.approvals)+' approval outstanding');
+    const open=aiOpen(), done=S.merged||S.closed;
+    const review=gates.slice();
+    if(open) review.push(open+' open finding'+(open===1?'':'s'));
+    if(sec) sec.dataset.blocked=(!done&&gates.length)?'true':'false';
+    if(chip){
+      chip.textContent=S.merged?'Merged':S.closed?'Closed':gates.length?'Blocked':'Ready';
+      chip.className='sb-cnt '+(done?'':gates.length?'bad':'ok');
+    }
+    if(al){ al.hidden=done||!gates.length;
+      if(alt&&gates.length) alt.textContent='Merge blocked: '+gates[0]; }
+    const ms=$('#mgSum'); if(ms&&chip) ms.textContent=chip.textContent.toLowerCase();
+    const t=$('#sbFootT'), s=$('#sbFootS'), b=$('#sbFootBtn');
+    foot.dataset.tone=done?'done':(review.length?'blocked':'ready');
+    if(S.merged){ t.textContent='Merged to main'; s.textContent='canary 10% on the next train'; b.textContent='Delivery'; }
+    else if(S.closed){ t.textContent='Closed without merging'; s.textContent='verdict 06cb9564 retained'; b.textContent='Reopen'; }
+    else if(review.length){ t.textContent='Review blocked';
+      s.textContent=review[0]+(review.length>1?' · +'+(review.length-1)+' more':'');
+      b.textContent='Review blockers'; }
+    else { t.textContent='Ready to merge'; s.textContent='all gates green · '+S.method; b.textContent=METHODS[S.method].btn; }
+    sbCounts();
+  }
+  /* header count chips — a collapsed section still has to report honestly */
+  function sbCounts(){
+    const rc=$('#revCnt');
+    if(rc){ rc.textContent=S.approvals+' of 2';
+      rc.className='sb-cnt'+(S.changesRequested?' bad':S.approvals>=2?' ok':' bad'); }
+    const rs=$('#revSum');
+    if(rs) rs.textContent=S.approvals+' of 2 approved';
+    const ps=$('#peopleSum');
+    if(ps){ const a=$$('#asgList li').length, l=$$('#labelRow .label').length;
+      ps.textContent=a+' assignee'+(a===1?'':'s')+' · '+l+' label'+(l===1?'':'s'); }
+  }
+  $('#sbFootBtn')?.addEventListener('click',()=>{
+    if(isRO()) return;
+    if(S.merged){ $('#sbDelivery')?.scrollIntoView({block:'center'}); return; }
+    if(!S.closed && !aiOpen() && gatesOk()){ $('#mergeBtn')?.click(); return; }
+    if(aiOpen()){ goTab('files'); return; }
+    $('.sb-sec.mg')?.scrollIntoView({block:'center'});
+  });
+  /* collapsible sections — remembers the reader's choice, like the 360° strip toggle */
+  document.addEventListener('click',e=>{
+    const t=e.target.closest('[data-sbsec]'); if(!t) return;
+    const sec=t.closest('.sb-sec'), open=t.getAttribute('aria-expanded')!=='true';
+    sec.dataset.open=String(open);
+    t.setAttribute('aria-expanded',String(open));
+    if(!open) sbCounts();   /* refresh the summary the header is about to show */
+  });
   function p360svg(d){ return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+d+'</svg>'; }
   function render360(){
     const spine=$('#p360Spine'), pills=$('#p360Pills'); if(!spine||!pills) return;
@@ -4507,7 +4751,7 @@ const PS = (() => {
     $('#mergeLive').hidden = S.merged || S.closed;
     $('#mergeDone').hidden = !S.merged;
     $('#mergeClosed').hidden = !S.closed;
-    if(S.merged || S.closed){ $('#pendBar').hidden=true; render360(); return; }
+    if(S.merged || S.closed){ $('#pendBar').hidden=true; render360(); renderSbFoot(); return; }
     const g=$('#gateAppr'), btn=$('#mergeBtn'), wrap=$('#mergeWrap'), note=$('#mergeNote');
     $('#readyBtn').hidden=!S.draft;
     $('#autoMsg').hidden=!S.auto;
@@ -4557,6 +4801,7 @@ const PS = (() => {
       setTimeout(()=>{ S.firing=false; if(S.auto && gatesOk()) doMerge(true); },500);
     }
     render360();
+    renderSbFoot();
   }
   function impactHTML(){
     return '<p style="margin-bottom:8px">Merges <strong>'+S.commits+' commits</strong> (<span class="mono">+'+S.plus+' −'+S.minus+'</span>) from <span class="mono">feat/rate-limit-middleware</span> into <span class="mono">main</span> via <strong>'+METHODS[S.method].btn.toLowerCase()+'</strong>.</p>'+

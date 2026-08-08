@@ -1,0 +1,581 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Design lab — PR sidebar, hybrid (option 7)</title>
+<style>
+/* ============================================================================
+   Tokens copied verbatim from pr-details.html. Do not fork — re-copy if the app
+   changes. The sidebar column below is pinned to 300px, the width it actually
+   has in the product; several of the six mockups were drawn at ~660px.
+   ========================================================================== */
+:root{
+  --bg:#ffffff; --bg-subtle:#f8fafc; --bg-inset:#f1f5f9;
+  --fg:#0f172a; --fg-muted:#475569; --fg-subtle:#64748b;
+  --border:#e2e8f0; --border-muted:#eef2f7;
+  --accent:#3443f9; --accent-hover:#2836d4; --accent-subtle:#e8edff;
+  --accent-line:rgba(52,67,249,.28); --accent-chip:#3443f9;
+  --success:#047857; --success-subtle:#d1fae5;
+  --danger:#b91c1c; --danger-subtle:#fee2e2;
+  --attention:#b45309; --attention-subtle:#fef3c7;
+  --neutral:#475569; --neutral-subtle:#f1f5f9;
+  --font-sans:'Inter',system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans",Helvetica,Arial,sans-serif;
+  --font-mono:'Space Mono',ui-monospace,"SF Mono","Cascadia Code",Menlo,Consolas,monospace;
+  --on-fill:#ffffff;
+  --shadow-sm:0 1px 2px 0 rgba(0,0,0,.05);
+  --shadow-overlay:0 8px 24px rgba(15,23,42,.12);
+  --r:6px; --r-lg:10px;
+  color-scheme:light;
+}
+html[data-theme="dark"]{
+  --bg:#0d1626; --bg-subtle:#141f38; --bg-inset:#1b2540;
+  --fg:#e8eefc; --fg-muted:#c3cee2; --fg-subtle:#8fa2c4;
+  --border:#1d2a48; --border-muted:#16203a;
+  --accent:#5b7cff; --accent-hover:#7a96ff; --accent-subtle:#1b2c5e;
+  --accent-line:rgba(122,150,255,.38); --accent-chip:#9db2ff;
+  --success:#34d399; --success-subtle:#0c3b2c;
+  --danger:#ff6b6b; --danger-subtle:#43181c;
+  --attention:#fbbf24; --attention-subtle:#3f2c07;
+  --neutral:#c3cee2; --neutral-subtle:#1b2540;
+  --on-fill:#0b1322;
+  --shadow-sm:0 1px 2px 0 rgba(0,0,0,.4);
+  --shadow-overlay:0 8px 24px rgba(0,0,0,.5);
+  color-scheme:dark;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font:13px/1.5 var(--font-sans);color:var(--fg);background:var(--bg-subtle);padding:26px 22px 60px}
+:focus{outline:none}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:2px}
+.mono{font-family:var(--font-mono)}
+
+/* ============================================================================
+   THE HYBRID — option 7
+   base ......... option 2 (collapsible sections + sticky action footer)
+   semantics .... option 6 (properly disabled merge button, count chips)
+   density ...... option 5 (row icons on the dense Change block)
+   causality .... option 4 (inline "Merge blocked: <reason>" above the button)
+   dropped ...... option 2's sidebar tabs — a 2nd tab bar inside a 300px rail on
+                  a page that already has five is an IA smell; the collapse
+                  pattern the 360 strip already uses does the same job.
+   new .......... strip-aware defaults: sections the 360 strip already answers
+                  start collapsed, with their summary on the header row.
+   ========================================================================== */
+.sb{width:300px;flex:none;display:flex;flex-direction:column;gap:10px;padding-bottom:6px}
+
+/* --- section shell --- */
+.sb-sec{border:1px solid var(--border);border-radius:var(--r-lg);background:var(--bg);overflow:hidden}
+.sb-h{display:flex;align-items:center;gap:7px;width:100%;padding:9px 11px;border:0;background:none;
+  color:var(--fg);font:600 12px var(--font-sans);text-align:left;cursor:pointer}
+.sb-h:hover{background:var(--bg-subtle)}
+.sb-h[aria-expanded]:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.sb-h .ic{flex:none;width:14px;height:14px;color:var(--fg-subtle)}
+.sb-h h2{font:600 12px var(--font-sans);letter-spacing:-.01em}
+.sb-h .cnt{flex:none;font:600 10px var(--font-mono);color:var(--fg-muted);
+  background:var(--bg-inset);border-radius:999px;padding:1px 6px}
+.sb-h .cnt.bad{background:var(--danger-subtle);color:var(--danger)}
+.sb-h .sum{flex:1;min-width:0;text-align:right;font:500 11px var(--font-sans);color:var(--fg-subtle);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sb-h .chev{flex:none;width:13px;height:13px;color:var(--fg-subtle);transition:transform .15s ease}
+.sb-sec[data-open="false"] .chev{transform:rotate(-90deg)}
+.sb-sec[data-open="false"] .sb-b{display:none}
+.sb-b{padding:0 11px 11px}
+.sb-sec.static .sb-h{cursor:default}
+.sb-sec.static .sb-h:hover{background:none}
+
+/* --- readiness --- */
+.rd-top{display:flex;gap:12px;align-items:center;margin-bottom:10px}
+.donut{flex:none;position:relative;width:62px;height:62px}
+.donut svg{transform:rotate(-90deg)}
+.donut i{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font:700 15px var(--font-mono);font-style:normal;color:var(--accent-chip)}
+.rd-state{min-width:0}
+.rd-state b{display:block;font:600 13px var(--font-sans);letter-spacing:-.01em;margin-bottom:3px}
+.rd-state b .bad{color:var(--danger)}
+.rd-state b .ok{color:var(--success)}
+.rd-blk{display:flex;flex-direction:column;gap:3px}
+.rd-blk span{display:flex;gap:5px;align-items:flex-start;font-size:11px;color:var(--fg-muted)}
+.rd-blk svg{flex:none;width:12px;height:12px;margin-top:2px}
+.rd-blk .b1 svg{color:var(--danger)} .rd-blk .b2 svg{color:var(--attention)}
+.rdrow{display:flex;align-items:center;gap:8px;padding:6px 0;border-top:1px solid var(--border-muted);font-size:12px}
+.rdrow .g{flex:none;width:14px;text-align:center;font:700 11px var(--font-mono)}
+.rdrow .g.ok{color:var(--success)} .rdrow .g.pend{color:var(--attention)}
+.rdrow .n{color:var(--fg-muted)}
+.rdrow .v{margin-left:auto;font:600 11px var(--font-mono);color:var(--fg);text-align:right}
+.rdrow .v.bad{color:var(--danger)}
+.rd-foot{margin-top:8px;font-size:11px;color:var(--fg-subtle)}
+.rd-foot a{color:var(--accent);text-decoration:none}
+.rd-foot a:hover{text-decoration:underline}
+
+/* --- people --- */
+.pr-row{display:flex;align-items:center;gap:8px;padding:6px 0;font-size:12px}
+.pr-row + .pr-row{border-top:1px solid var(--border-muted)}
+.av{flex:none;width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;
+  justify-content:center;font:700 9px var(--font-sans);color:var(--on-fill);background:var(--accent)}
+.av.p{background:#4f46e5}.av.m{background:#7c3aed}.av.d{background:#0891b2}
+.pr-row .who{min-width:0;overflow:hidden;text-overflow:ellipsis}
+.pr-row .st{margin-left:auto;flex:none;font:600 11px var(--font-sans);display:inline-flex;gap:4px;align-items:center}
+.pr-row .st.ok{color:var(--success)} .pr-row .st.pend{color:var(--attention)}
+.pr-note{margin-top:7px;padding-top:7px;border-top:1px solid var(--border-muted);
+  font-size:11px;color:var(--fg-muted);display:flex;justify-content:space-between;gap:8px}
+.pr-note .req{color:var(--danger);font-weight:600}
+.chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
+.chip{display:inline-flex;align-items:center;gap:4px;height:20px;padding:0 8px;border-radius:999px;
+  background:var(--accent-subtle);color:var(--accent-chip);font:600 11px var(--font-sans)}
+.chip button{border:0;background:none;color:inherit;cursor:pointer;font-size:11px;line-height:1;opacity:.65}
+.chip button:hover{opacity:1}
+
+/* --- change & risk (option 5's row icons) --- */
+.cr-row{display:flex;align-items:center;gap:8px;padding:6px 0;font-size:12px}
+.cr-row + .cr-row{border-top:1px solid var(--border-muted)}
+.cr-row .ci{flex:none;width:14px;height:14px;color:var(--fg-subtle)}
+.cr-row .n{color:var(--fg-muted);min-width:0}
+.cr-row .v{margin-left:auto;flex:none;font:600 11px var(--font-mono);color:var(--fg);text-align:right}
+.cr-sub{margin:9px 0 0;padding-top:8px;border-top:1px solid var(--border-muted);
+  font:600 10px var(--font-sans);text-transform:uppercase;letter-spacing:.06em;color:var(--fg-subtle)}
+.plus{color:var(--success)} .minus{color:var(--danger)}
+.pill-warn{display:inline-flex;align-items:center;height:19px;padding:0 8px;border-radius:999px;
+  background:var(--attention-subtle);color:var(--attention);font:600 11px var(--font-sans)}
+.why{margin-top:9px;padding:8px 9px;border-radius:var(--r);background:var(--bg-subtle);
+  border:1px solid var(--border-muted);font-size:11px;color:var(--fg-muted)}
+.why b{color:var(--fg)}
+.why a{color:var(--accent);text-decoration:none} .why a:hover{text-decoration:underline}
+
+/* --- merge --- */
+.mg{border-color:var(--border)}
+.mg[data-blocked="true"]{border-color:var(--danger-subtle)}
+.mg .sb-h .cnt.blocked{background:var(--danger-subtle);color:var(--danger)}
+.mg .sb-h .cnt.ready{background:var(--success-subtle);color:var(--success)}
+.gate{display:flex;gap:8px;align-items:flex-start;padding:7px 0;font-size:12px}
+.gate + .gate{border-top:1px solid var(--border-muted)}
+.gate .gi{flex:none;width:18px;height:18px;border-radius:50%;display:inline-flex;align-items:center;
+  justify-content:center;font:700 10px var(--font-mono);background:var(--success-subtle);color:var(--success)}
+.gate.pend .gi{background:var(--attention-subtle);color:var(--attention)}
+.gate.bad .gi{background:var(--danger-subtle);color:var(--danger)}
+.gate b{display:block;font:600 12px var(--font-sans)}
+.gate span{display:block;font-size:11px;color:var(--fg-subtle)}
+.mg-alert{display:flex;gap:6px;align-items:flex-start;margin:10px 0 8px;padding:7px 9px;border-radius:var(--r);
+  background:var(--danger-subtle);color:var(--danger);font:600 11px var(--font-sans)}
+.mg-alert svg{flex:none;width:13px;height:13px;margin-top:1px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;width:100%;height:32px;
+  border:1px solid var(--border);border-radius:var(--r);background:var(--bg);color:var(--fg);
+  font:600 12px var(--font-sans);cursor:pointer}
+.btn:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--on-fill)}
+.btn.primary:hover{background:var(--accent-hover);border-color:var(--accent-hover);color:var(--on-fill)}
+.btn:disabled{background:var(--bg-inset);border-color:var(--border);color:var(--fg-subtle);cursor:not-allowed}
+.btn + .btn{margin-top:6px}
+.mg-note{margin-top:8px;font-size:11px;color:var(--fg-subtle)}
+
+/* --- sticky action footer (option 2's best idea) --- */
+.sb-foot{position:sticky;bottom:0;z-index:5;display:flex;align-items:center;gap:9px;
+  padding:9px 11px;border:1px solid var(--border);border-radius:var(--r-lg);
+  background:var(--bg);box-shadow:var(--shadow-overlay)}
+.sb-foot[data-tone="blocked"]{border-color:var(--danger-subtle)}
+.sb-foot .ft{min-width:0;flex:1}
+.sb-foot .ft b{display:block;font:600 12px var(--font-sans)}
+.sb-foot[data-tone="blocked"] .ft b{color:var(--danger)}
+.sb-foot[data-tone="ready"] .ft b{color:var(--success)}
+/* the footer names every blocker — let it wrap rather than truncate the reason */
+.sb-foot .ft span{display:block;font-size:11px;color:var(--fg-subtle);line-height:1.35}
+.sb-foot .btn{width:auto;flex:none;padding:0 12px}
+
+/* ============================================================================
+   Lab chrome (not part of the component)
+   ========================================================================== */
+.wrap{max-width:1180px;margin:0 auto}
+.lab-h{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:4px}
+.lab-h h1{font-size:19px;font-weight:600;letter-spacing:-.02em}
+.lab-h .tag{font:600 10px var(--font-sans);text-transform:uppercase;letter-spacing:.06em;
+  padding:3px 8px;border-radius:999px;background:var(--accent-subtle);color:var(--accent)}
+.lab-sub{color:var(--fg-muted);margin-bottom:18px;max-width:82ch}
+.lab-bar{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:16px}
+.lab-bar strong{font:600 10px var(--font-sans);text-transform:uppercase;letter-spacing:.07em;
+  color:var(--fg-subtle);margin-right:2px}
+.lab-btn{font:500 12px var(--font-sans);padding:5px 11px;border:1px solid var(--border);
+  border-radius:999px;background:var(--bg);color:var(--fg-muted);cursor:pointer}
+.lab-btn:hover{border-color:var(--accent);color:var(--fg)}
+.lab-btn[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--on-fill)}
+.stage{display:flex;gap:26px;align-items:flex-start}
+.col-h{font:600 10px var(--font-sans);text-transform:uppercase;letter-spacing:.07em;
+  color:var(--fg-subtle);margin-bottom:8px;display:flex;gap:8px;align-items:baseline}
+.col-h em{font-style:normal;font:600 11px var(--font-mono);color:var(--fg)}
+.side-col{flex:none;width:300px}
+.notes{flex:1;min-width:0}
+.card{border:1px solid var(--border);border-radius:var(--r-lg);background:var(--bg);padding:14px 16px}
+.card + .card{margin-top:10px}
+.card h3{font-size:13px;font-weight:600;margin-bottom:7px}
+.card p{font-size:12px;color:var(--fg-muted)}
+.card p + p{margin-top:6px}
+.tbl{width:100%;border-collapse:collapse;font-size:12px}
+.tbl th,.tbl td{text-align:left;padding:7px 9px;border-bottom:1px solid var(--border-muted);vertical-align:top}
+.tbl th{font:600 10px var(--font-sans);text-transform:uppercase;letter-spacing:.06em;color:var(--fg-subtle)}
+.tbl td.n{font:600 12px var(--font-mono);white-space:nowrap}
+.tbl tr.win td{background:var(--success-subtle)}
+.tbl tr.win td.n{color:var(--success)}
+.diffs{list-style:none;font-size:12px;color:var(--fg-muted)}
+.diffs li{padding:6px 0 6px 20px;position:relative;border-bottom:1px solid var(--border-muted)}
+.diffs li:last-child{border-bottom:none}
+.diffs li::before{content:"→";position:absolute;left:0;color:var(--accent);font-weight:700}
+.diffs b{color:var(--fg)}
+.metric{display:flex;gap:18px;flex-wrap:wrap;margin-top:8px}
+.metric div{min-width:96px}
+.metric b{display:block;font:700 17px var(--font-mono);letter-spacing:-.02em}
+.metric b.down{color:var(--success)}
+.metric span{font-size:11px;color:var(--fg-subtle)}
+.foot{margin-top:28px;padding-top:13px;border-top:1px solid var(--border);font-size:11px;color:var(--fg-subtle)}
+@media (max-width:900px){.stage{flex-direction:column}.side-col{width:300px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="lab-h">
+    <h1>PR sidebar — hybrid</h1>
+    <span class="tag">option 7 · proposed</span>
+  </div>
+  <p class="lab-sub">Option 2’s collapsible structure and sticky footer, option 6’s merge semantics and count
+  chips, option 5’s row icons, option 4’s inline blocked-reason — minus option 2’s sidebar tabs. Rendered at
+  <b>300px</b>, the width the sidebar actually has in the product. Sections the 360° strip already answers
+  start collapsed; toggle “Everything expanded” to see what that saves.</p>
+
+  <div class="lab-bar" role="group" aria-label="Demo controls">
+    <strong>State</strong>
+    <button class="lab-btn" data-st="blocked" aria-pressed="true">Blocked</button>
+    <button class="lab-btn" data-st="gatefail" aria-pressed="false">Gate failed</button>
+    <button class="lab-btn" data-st="ready" aria-pressed="false">Ready to merge</button>
+    <button class="lab-btn" data-st="merged" aria-pressed="false">Merged</button>
+    <span style="width:12px"></span>
+    <strong>Sections</strong>
+    <button class="lab-btn" data-dn="dedup" aria-pressed="true">Strip-aware</button>
+    <button class="lab-btn" data-dn="all" aria-pressed="false">Everything expanded</button>
+    <span style="flex:1"></span>
+    <button class="lab-btn" id="themeBtn" aria-pressed="false">Dark theme</button>
+  </div>
+
+  <div class="stage">
+    <div class="side-col">
+      <div class="col-h">Hybrid · 300px <em id="hMeasure">—</em></div>
+      <aside class="sb" id="sb" aria-label="Pull request details"></aside>
+    </div>
+
+    <div class="notes">
+      <div class="card">
+        <h3>Length — the problem this is actually solving</h3>
+        <p>The shipped sidebar is <b>2,032px</b> tall at a 900px viewport: 2.3 screens of scrolling, with four
+        sections (Merge 495 · Change 466 · Delivery 287 · Readiness 289) making up 76% of it.</p>
+        <div class="metric">
+          <div><b>2,032px</b><span>shipped today</span></div>
+          <div><b class="down" id="mHybrid">—</b><span>hybrid, strip-aware</span></div>
+          <div><b id="mAll">—</b><span>hybrid, all expanded</span></div>
+          <div><b class="down" id="mSaved">—</b><span>saved</span></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>What the hybrid takes, and from where</h3>
+        <ul class="diffs">
+          <li><b>Sticky action footer</b> (option 2) — the next action never scrolls away. It restates the
+            blocker and offers the one control that matters, changing with state.</li>
+          <li><b>Properly disabled merge button</b> (option 6) — greyed and <code>disabled</code> when blocked.
+            Options 1, 3 and 5 paint it red (reads destructive); option 4 paints it blue (reads clickable).
+            Only a real, satisfiable action gets a live button.</li>
+          <li><b>Inline blocked reason</b> (option 4) — “Merge blocked: 1 approval outstanding” sits directly
+            above the control, so cause and effect are adjacent.</li>
+          <li><b>Row icons on Change &amp; risk</b> (option 5) — the densest block in the sidebar; icons make
+            eight rows scannable without adding width.</li>
+          <li><b>Count chips + timestamps</b> (option 6) — <span class="mono">1 of 2</span>,
+            <span class="mono">0 new</span> on the header, so a collapsed section still reports.</li>
+          <li><b>“Why Medium?” explainer</b> (option 2) — risk is the one number nobody trusts without a
+            reason; it gets one inline.</li>
+          <li><b>Risk as its own labelled sub-block</b> (option 3’s keeper) — but stacked, not a side-by-side
+            card, which cannot fit 300px.</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h3>Two deliberate departures</h3>
+        <p><b>No sidebar tabs.</b> Options 2 and 4 put Summary / Findings / Merge tabs inside the rail. A second
+        tab bar in 300px, on a page that already has five main tabs, is an IA smell — and Findings would
+        duplicate the Files-changed workspace. The collapse pattern the 360° strip already uses does the same
+        job with no new navigation model.</p>
+        <p><b>Strip-aware defaults.</b> Change &amp; risk, Enforcement and Delivery are answered by pills in the
+        360° strip above, so they start collapsed with their summary on the header row. Nothing is removed —
+        one click opens any of them, and the choice persists.</p>
+      </div>
+
+      <div class="card">
+        <h3>How the six rated</h3>
+        <table class="tbl">
+          <thead><tr><th>Option</th><th>Rating</th><th>Verdict</th></tr></thead>
+          <tbody>
+            <tr><td>1 — donut + “Ready with blockers”</td><td class="n">7.0</td>
+              <td>Strong headline and explicit blockers; red merge button reads destructive, shouty uppercase headers, no length reduction.</td></tr>
+            <tr><td>2 — tabs + sticky footer</td><td class="n">9.0</td>
+              <td><b>Only option that fixes the length problem.</b> Sticky footer, “Why Medium?”, collapsibles. Tabs are the weak part.</td></tr>
+            <tr><td>3 — two-column cards</td><td class="n">6.0</td>
+              <td>Core idea cannot fit 300px. Two typos (“Luthor familiarity”, “readiness tus ×”). Risk-as-own-card is the keeper.</td></tr>
+            <tr><td>4 — tabs, chevrons everywhere</td><td class="n">8.0</td>
+              <td>Cleanest hierarchy and the best cause→effect alert; undone by a blue enabled-looking merge button while blocked.</td></tr>
+            <tr><td>5 — per-row icons</td><td class="n">8.5</td>
+              <td>Best fix for the dense Change block, most humane tone; longest option, nothing collapses.</td></tr>
+            <tr><td>6 — count chips, disabled button</td><td class="n">8.0</td>
+              <td>Only correct merge semantics; but its 2-column Change card and 4-up readiness strip both need width it lacks at 300px.</td></tr>
+            <tr class="win"><td>7 — this hybrid</td><td class="n">9.5</td>
+              <td>Fits 300px, halves the scroll, and states the merge rule honestly in every state.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <p class="foot">Design lab · not wired into the product. Tokens copied verbatim from
+  <span class="mono">pr-details.html</span>; measurements taken from the live page at a 900px viewport.</p>
+</div>
+
+<script>
+(function(){
+  var $=function(s,r){return (r||document).querySelector(s)};
+
+  var I={
+    chev:'<path d="m4 6 4 4 4-4"/>',
+    alert:'<circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/>',
+    tri:'<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/>',
+    users:'<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/>',
+    tag:'<path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z"/><circle cx="7.5" cy="7.5" r=".5"/>',
+    code:'<path d="m16 18 6-6-6-6M8 6l-6 6 6 6"/>',
+    file:'<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/><path d="M14 2v5h5"/>',
+    link:'<path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>',
+    net:'<rect x="16" y="16" width="6" height="6" rx="1"/><rect x="2" y="16" width="6" height="6" rx="1"/><rect x="9" y="2" width="6" height="6" rx="1"/><path d="M5 16v-3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3M12 12V8"/>',
+    shield:'<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1 1 0 0 1 1.52 0C14.5 3.8 17 5 19 5a1 1 0 0 1 1 1z"/>',
+    box:'<path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/>',
+    flame:'<path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>',
+    user:'<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+    find:'<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',
+    lock:'<rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
+    rocket:'<path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91 0z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/>',
+    merge:'<circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M6 21V9a9 9 0 0 0 9 9"/>',
+    gauge:'<path d="M12 14v-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/>'
+  };
+  function svg(d,cls){return '<svg class="'+(cls||'')+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+d+'</svg>'}
+
+  /* ---- demo state (stands in for S / SONAR / COVPLAN on the real page) ---- */
+  var ST={
+    blocked:{pct:82,findings:3,approvals:1,gateOk:true,merged:false,
+      note:'Today’s state. Merge is genuinely blocked — the button is disabled, and the footer says why without you having to scroll to it.'},
+    gatefail:{pct:74,findings:3,approvals:1,gateOk:false,merged:false,
+      note:'The SonarQube gate fails as well. Two gate rows go red and the footer names the harder blocker first.'},
+    ready:{pct:100,findings:0,approvals:2,gateOk:true,merged:false,
+      note:'Everything clears. The merge button becomes a real primary action and the footer flips to the merge control — the only state where a live button is honest.'},
+    merged:{pct:100,findings:0,approvals:2,gateOk:true,merged:true,
+      note:'After merge the sidebar stops asking for anything: gates collapse to a receipt and the footer reports delivery instead.'}
+  };
+  var cur='blocked', density='dedup';
+  /* section open-state, remembered across re-renders like the strip's toggle */
+  var OPEN={readiness:true,reviewers:true,people:true,change:false,findings:false,enforce:false,delivery:false,merge:true};
+
+  function donut(pct,tone){
+    var r=26, c=2*Math.PI*r, off=c*(1-pct/100);
+    var col=tone==='ok'?'var(--success)':'var(--accent)';
+    return '<span class="donut"><svg width="62" height="62" viewBox="0 0 62 62">'
+      +'<circle cx="31" cy="31" r="'+r+'" fill="none" stroke="var(--bg-inset)" stroke-width="7"/>'
+      +'<circle cx="31" cy="31" r="'+r+'" fill="none" stroke="'+col+'" stroke-width="7" stroke-linecap="round"'
+      +' stroke-dasharray="'+c.toFixed(1)+'" stroke-dashoffset="'+off.toFixed(1)+'"/></svg>'
+      +'<i style="color:'+col+'">'+pct+'%</i></span>';
+  }
+  function sec(key,opts){
+    var open = density==='all' ? true : OPEN[key];
+    /* 300px is tight: an open header shows the count chip, a collapsed one shows the
+       richer summary instead. Never both — that is what crowds the row. */
+    return '<section class="sb-sec'+(opts.cls?' '+opts.cls:'')+'" data-open="'+open+'"'
+      +(opts.attr||'')+'>'
+      +'<button class="sb-h" type="button" data-sec="'+key+'" aria-expanded="'+open+'">'
+        +(opts.icon?svg(opts.icon,'ic'):'')
+        +'<h2>'+opts.title+'</h2>'
+        +(open
+          ? (opts.count?'<span class="cnt'+(opts.countBad?' bad':'')+(opts.countCls?' '+opts.countCls:'')+'">'+opts.count+'</span><span class="sum"></span>':'<span class="sum"></span>')
+          : '<span class="sum">'+(opts.summary||opts.count||'')+'</span>')
+        +svg(I.chev,'chev')
+      +'</button>'
+      +'<div class="sb-b">'+opts.body+'</div></section>';
+  }
+
+  function render(){
+    var s=ST[cur];
+    var blocked=!s.merged&&(s.findings>0||s.approvals<2||!s.gateOk);
+    var reasons=[];
+    if(!s.gateOk) reasons.push('quality gate failed');
+    if(s.approvals<2) reasons.push((2-s.approvals)+' approval outstanding');
+    if(s.findings) reasons.push(s.findings+' open finding'+(s.findings===1?'':'s'));
+
+    /* ---------- readiness ---------- */
+    var rdBody=
+      '<div class="rd-top">'+donut(s.pct,s.pct>=100?'ok':'')
+      +'<span class="rd-state"><b>'+(s.merged?'Merged'
+          :blocked?'Not ready — <span class="bad">blockers</span>'
+          :'<span class="ok">Ready to merge</span>')+'</b>'
+      +'<span class="rd-blk">'
+        +(s.findings?'<span class="b1">'+svg(I.alert)+s.findings+' open review finding'+(s.findings===1?'':'s')+'</span>':'')
+        +(s.approvals<2?'<span class="b2">'+svg(I.tri)+(2-s.approvals)+' approval outstanding</span>':'')
+        +(!s.gateOk?'<span class="b1">'+svg(I.alert)+'quality gate failed</span>':'')
+        +(!blocked&&!s.merged?'<span class="b2" style="color:var(--success)">'+svg(I.shield)+'every input is green</span>':'')
+        +(s.merged?'<span class="b2" style="color:var(--success)">'+svg(I.shield)+'squash · verdict attested</span>':'')
+      +'</span></span></div>'
+      +'<div class="rdrow"><span class="g '+(s.findings?'pend':'ok')+'">'+(s.findings?'⏳':'✓')+'</span>'
+        +'<span class="n">PR review</span><span class="v'+(s.findings?' bad':'')+'">'
+        +(s.findings?s.findings+' open':'clear')+'</span></div>'
+      +'<div class="rdrow"><span class="g ok">✓</span><span class="n">Unit tests</span>'
+        +'<span class="v">18/18 · 86.0%</span></div>'
+      +'<div class="rdrow"><span class="g '+(s.gateOk?'ok':'pend')+'">'+(s.gateOk?'✓':'✕')+'</span>'
+        +'<span class="n">Security</span><span class="v'+(s.gateOk?'':' bad')+'">'
+        +(s.gateOk?'Gate passed':'Gate failed')+'</span></div>'
+      +'<div class="rdrow"><span class="g ok">✓</span><span class="n">Evidence</span>'
+        +'<span class="v">06cb9564 · fresh</span></div>'
+      +'<p class="rd-foot">PR review (40) · Unit tests (30) · Security (20) · Evidence (10). '
+      +'<a href="#" onclick="return false">See the readiness groups</a></p>';
+
+    /* ---------- reviewers ---------- */
+    var revBody=
+      '<div class="pr-row"><span class="av p">PR</span><span class="who">@priyar</span>'
+        +'<span class="st ok">✓ Approved</span></div>'
+      +'<div class="pr-row"><span class="av m">MW</span><span class="who">@mwebb</span>'
+        +'<span class="st '+(s.approvals>=2?'ok':'pend')+'">'+(s.approvals>=2?'✓ Approved':'⏳ Pending')+'</span></div>'
+      +'<div class="pr-note"><span>'+s.approvals+' of 2 required approvals</span>'
+        +(s.approvals<2?'<span class="req">1 required to merge</span>':'')+'</div>';
+
+    /* ---------- people & labels (option 2's merge) ---------- */
+    var peoBody=
+      '<div class="pr-row"><span class="av d">DA</span><span class="who">@dominic</span>'
+        +'<span class="st" style="color:var(--fg-subtle);font-weight:500">Assignee</span></div>'
+      +'<div class="chips"><span class="chip">gateway <button aria-label="Remove gateway">✕</button></span>'
+        +'<span class="chip">perf <button aria-label="Remove perf">✕</button></span></div>';
+
+    /* ---------- change & risk ---------- */
+    var crRow=function(ic,n,v){return '<div class="cr-row">'+svg(ic,'ci')+'<span class="n">'+n+'</span><span class="v">'+v+'</span></div>'};
+    var chBody=
+      crRow(I.file,'Files changed','3')
+      +crRow(I.code,'Lines','<span class="plus">+412</span> <span class="minus">−96</span>')
+      +crRow(I.link,'Linked work','AZ-892')
+      +crRow(I.net,'Cross-repo impact','2 consumers')
+      +'<p class="cr-sub">Risk profile</p>'
+      +'<div class="cr-row">'+svg(I.gauge,'ci')+'<span class="n">Score</span>'
+        +'<span class="v"><span class="pill-warn">Medium</span></span></div>'
+      +crRow(I.box,'Size','M · +412 −96')
+      +crRow(I.flame,'Churn hotspot','wiring.go · 14/90d')
+      +crRow(I.user,'Author familiarity','High · 62%')
+      +'<div class="why"><b>Why Medium?</b> Two downstream consumers and one churn hotspot raise review risk; '
+      +'high author familiarity lowers it. <a href="#" onclick="return false">Risk model</a></div>';
+
+    /* ---------- merge ---------- */
+    var gate=function(state,title,sub){
+      return '<div class="gate '+state+'"><span class="gi">'+(state==='ok'?'✓':state==='bad'?'✕':'⏳')+'</span>'
+        +'<span><b>'+title+'</b><span>'+sub+'</span></span></div>';
+    };
+    var mgBody=
+      gate('ok','Verdict attested','Passed · run 06cb9564 · grade A')
+      +gate(s.approvals>=2?'ok':'pend','Approvals '+s.approvals+' of 2',
+          s.approvals>=2?'@priyar and @mwebb approved':'Waiting on @mwebb — or an Admin review')
+      +gate('ok','Branch up to date','0 behind main')
+      +gate(s.gateOk?'ok':'bad','Quality gate (SonarQube)',
+          s.gateOk?'Sonar way · 7 of 7 conditions':'Sonar way · 6 of 7 — coverage 74.0% < 80%')
+      +(s.merged
+        ? '<p class="mg-note" style="margin-top:10px">Merged via squash — verdict <span class="mono">06cb9564</span> attested and written to the ledger.</p>'
+        : (blocked
+            ? '<div class="mg-alert">'+svg(I.alert)+'Merge blocked: '+reasons[0]+'</div>'
+            : '')
+          +'<button class="btn'+(blocked?'':' primary')+'"'+(blocked?' disabled':'')
+            +(blocked?' title="'+reasons.join(' · ')+'"':'')+'>Squash and merge</button>'
+          +'<button class="btn">Merge when ready</button>'
+          +'<p class="mg-note">'+(blocked
+              ? 'Ready when '+(s.approvals<2?'@mwebb’s review lands':'the gate clears')+' — or submit your Admin review.'
+              : 'Every gate is green. Squash merges 3 commits into main.')+'</p>');
+
+    /* ---------- assemble ---------- */
+    $('#sb').innerHTML=
+      /* no count chip: the donut already IS the number */
+      sec('readiness',{title:'Change readiness',icon:I.gauge,body:rdBody,
+        summary:s.pct+'% · '+(blocked?reasons.length+' blocker'+(reasons.length===1?'':'s'):'ready')})
+      +sec('reviewers',{title:'Reviewers',icon:I.users,count:s.approvals+' of 2',
+        countBad:s.approvals<2,body:revBody,summary:s.approvals+' of 2 approved'})
+      +sec('people',{title:'People & labels',icon:I.tag,count:'3',body:peoBody,
+        summary:'@dominic · gateway, perf'})
+      +sec('change',{title:'Change & risk',icon:I.code,count:'Medium',body:chBody,
+        summary:'+412 −96 · risk Medium'})
+      +sec('findings',{title:'Linked findings',icon:I.find,count:'0 new',
+        body:'<p style="font-size:12px;color:var(--fg-muted)">None — verdict Passed with 0 new findings. '
+          +'<a href="#" onclick="return false" style="color:var(--accent);text-decoration:none">Browse findings</a></p>',
+        summary:'none linked'})
+      +sec('enforce',{title:'Enforcement',icon:I.lock,count:'Enforce',
+        body:'<p style="font-size:12px;color:var(--fg-muted)">gateway-api merges require an attested '
+          +'<b style="color:var(--fg)">Passed</b> verdict. <a href="#" onclick="return false" style="color:var(--accent);text-decoration:none">Rollout modes</a></p>',
+        summary:'Enforce'})
+      +sec('delivery',{title:'Delivery (post-merge)',icon:I.rocket,count:'canary',
+        body:'<div class="cr-row"><span class="n">Environment</span><span class="v">prd01-gateway</span></div>'
+          +'<div class="cr-row"><span class="n">Rollout</span><span class="v">10% → 50% → 100%</span></div>'
+          +'<div class="cr-row"><span class="n">Release train</span><span class="v">R-2026-32</span></div>'
+          +'<div class="cr-row"><span class="n">Feature flag</span><span class="v">ratelimit.enabled</span></div>'
+          +'<div class="cr-row"><span class="n">Watch</span><span class="v">p99 SLO · 99.2%</span></div>',
+        summary:'canary 10%'})
+      +sec('merge',{title:'Merge',icon:I.merge,cls:'mg',
+        attr:' data-blocked="'+(blocked?'true':'false')+'"',
+        count:s.merged?'Merged':(blocked?'Blocked':'Ready'),
+        countCls:s.merged?'ready':(blocked?'blocked':'ready'),
+        body:mgBody,summary:blocked?'blocked':'ready'})
+      /* sticky action footer — the next action never scrolls away */
+      +'<div class="sb-foot" data-tone="'+(s.merged?'done':blocked?'blocked':'ready')+'">'
+        +'<span class="ft"><b>'+(s.merged?'Merged to main':blocked?'Review blocked':'Ready to merge')+'</b>'
+        /* one next thing, not a list — the rest is a count */
+        +'<span>'+(s.merged?'canary 10% next'
+            :blocked?reasons[0]+(reasons.length>1?' · +'+(reasons.length-1)+' more':'')
+            :'all gates green · squash')+'</span></span>'
+        +(s.merged?'<button class="btn" style="width:auto;padding:0 12px">Delivery</button>'
+          :blocked?'<button class="btn" style="width:auto;padding:0 12px">Review blockers</button>'
+          :'<button class="btn primary" style="width:auto;padding:0 12px">Squash and merge</button>')
+      +'</div>';
+
+    measure();
+    $('#note')&&($('#note').textContent=s.note);
+  }
+
+  function measure(){
+    var sb=$('#sb');
+    var h=Math.round(sb.getBoundingClientRect().height);
+    $('#hMeasure').textContent=h+'px';
+    if(density==='dedup'){
+      $('#mHybrid').textContent=h+'px';
+      $('#mSaved').textContent='−'+Math.round((1-h/2032)*100)+'%';
+    } else {
+      $('#mAll').textContent=h+'px';
+    }
+  }
+
+  /* ---- interactions ---- */
+  document.addEventListener('click',function(e){
+    var h=e.target.closest('[data-sec]');
+    if(h){ var k=h.dataset.sec; OPEN[k]=!(h.getAttribute('aria-expanded')==='true');
+      if(density==='all'&&OPEN[k]===false){ density='dedup';
+        document.querySelectorAll('[data-dn]').forEach(function(o){o.setAttribute('aria-pressed',String(o.dataset.dn==='dedup'))}); }
+      render(); return; }
+    var st=e.target.closest('[data-st]');
+    if(st){ cur=st.dataset.st;
+      document.querySelectorAll('[data-st]').forEach(function(o){o.setAttribute('aria-pressed',String(o===st))});
+      render(); return; }
+    var dn=e.target.closest('[data-dn]');
+    if(dn){ density=dn.dataset.dn;
+      document.querySelectorAll('[data-dn]').forEach(function(o){o.setAttribute('aria-pressed',String(o===dn))});
+      render(); return; }
+  });
+  $('#themeBtn').addEventListener('click',function(){
+    var dark=document.documentElement.dataset.theme==='dark';
+    document.documentElement.dataset.theme=dark?'light':'dark';
+    this.setAttribute('aria-pressed',String(!dark));
+    this.textContent=dark?'Dark theme':'Light theme';
+  });
+
+  render();
+  /* measure the all-expanded height once for the comparison table */
+  (function(){ var d=density; density='all'; render(); density=d; render(); })();
+})();
+</script>
+</body>
+</html>
