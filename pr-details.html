@@ -509,34 +509,68 @@ a.verdict:hover{text-decoration:none;box-shadow:0 0 0 1px var(--fg-subtle)}
   border-radius:var(--r);background:var(--danger-subtle);color:var(--danger);
   font:600 11px var(--font-sans)}
 .mg-alert svg{flex:none;width:13px;height:13px;margin-top:1px}
-/* sticky action footer — the next action never scrolls away */
-.sb-foot{position:sticky;bottom:0;z-index:5;display:flex;align-items:center;gap:9px;padding:9px 11px;
-  border:1px solid var(--border);border-radius:var(--r-lg);background:var(--bg);
-  box-shadow:var(--shadow-overlay)}
-.sb-foot[data-tone="blocked"]{border-color:var(--danger-subtle)}
-.sb-foot .ft{min-width:0;flex:1}
-.sb-foot .ft b{display:block;font:600 12px var(--font-sans)}
-.sb-foot[data-tone="blocked"] .ft b{color:var(--danger)}
-.sb-foot[data-tone="ready"] .ft b{color:var(--success)}
-.sb-foot .ft span{display:block;font-size:11px;color:var(--fg-subtle);line-height:1.35}
-.sb-foot .btn{flex:none;padding:0 12px}
+/* ---- page-level sticky action bar (option 2) ---------------------------------
+   Promoted out of the sidebar: one action surface for the whole page, spanning the
+   content column so the primary control sits where the eye already is. The sidebar
+   footer it replaces is retired; #pendBar lifts above this bar so they never stack. */
+.prbar{position:sticky;bottom:0;z-index:30;display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  margin:16px 0 0;padding:9px 12px;border:1px solid var(--border);border-radius:var(--r-lg);
+  background:var(--bg);box-shadow:var(--shadow-overlay)}
+.prbar[data-tone="blocked"]{border-color:var(--danger-subtle)}
+.prbar[data-tone="ready"]{border-color:var(--success-subtle)}
+.prbar-st{min-width:0;flex:1;display:flex;flex-direction:column;gap:1px}
+.prbar-st b{font:600 12px var(--font-sans)}
+.prbar[data-tone="blocked"] .prbar-st b{color:var(--danger)}
+.prbar[data-tone="ready"] .prbar-st b{color:var(--success)}
+.prbar-st span{font-size:11px;color:var(--fg-subtle)}
+/* ---- conversation tools (option 2): sort · activity roll-up · unresolved emphasis --- */
+.cv-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.cv-head h2{font-size:13px;font-weight:600;letter-spacing:-.01em}
+.cv-tools{margin-left:auto;display:flex;align-items:center;gap:12px;font-size:12px;color:var(--fg-muted)}
+.cv-tools label{display:inline-flex;align-items:center;gap:6px;cursor:pointer;white-space:nowrap}
+.cv-tools input{width:14px;height:14px;accent-color:var(--accent)}
+.cv-sel{height:26px;padding:0 8px;border:1px solid var(--border);border-radius:var(--r);
+  background:var(--bg);color:var(--fg);font:500 12px var(--font-sans);cursor:pointer}
+.cv-roll{display:flex;align-items:center;gap:9px;width:100%;padding:7px 10px;border:1px dashed var(--border);
+  border-radius:var(--r);background:none;color:var(--fg-subtle);font:500 11px var(--font-sans);
+  cursor:pointer;text-align:left}
+.cv-roll:hover{border-color:var(--accent);color:var(--accent)}
+.cv-roll .n{flex:none;font-family:var(--font-mono);font-weight:600}
+.cv-roll .more{margin-left:auto;flex:none}
+/* an unresolved thread has to be findable from across the page — inset shadow rather
+   than a border so nothing shifts when it resolves */
+.convo .msg.unres{box-shadow:inset 3px 0 0 var(--attention)}
+.prbar-acts{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.prbar .dot{flex:none;width:7px;height:7px;border-radius:50%;background:var(--danger)}
+.prbar[data-tone="ready"] .dot{background:var(--success)}
+.prbar[data-tone="done"] .dot{background:var(--attest)}
+@media (max-width:760px){.prbar-acts{width:100%}.prbar-acts .btn{flex:1}}
 /* header row: the toggle is a button, so the metric "?" (mounted into .lbl by
    mountMetricDefs) must sit OUTSIDE it — nested buttons are invalid. */
-.sb-h{display:flex;align-items:center;gap:0;margin:0;padding-right:9px}
+/* The chevron used to be the last thing in the toggle, so any trailing control ("?" on
+   metric cards, "＋" on Reviewers) shoved it left — chevrons landed 21 / 45 / 57px from
+   the card edge and the right margin read as ragged. The slot is now reserved and the
+   chevron pinned to it, so every card closes on the same column. It stays a child of
+   the toggle button, so clicking it still toggles. */
+.sb-h{display:flex;align-items:center;gap:0;margin:0;padding-right:34px;position:relative}
+.sb-h .sb-chev{position:absolute;right:12px;top:50%;transform:translateY(-50%)}
+.sb-sec[data-open="false"] .sb-h .sb-chev{transform:translateY(-50%) rotate(-90deg)}
 /* sentence case, not the old uppercase rail label — these are card titles now */
 .sb-h .sb-tog h2{font-size:12px;color:var(--fg);text-transform:none;letter-spacing:-.01em;flex:none}
 .sb-h .lbl{flex:none;font-size:0;display:inline-flex;align-items:center}
 .sb-h .lbl .mdef{font-size:11px}
 .sb-h .menuwrap{flex:none;margin-left:4px}
-.sb-sec:first-child{padding-top:0}
-.sb-h{display:flex;align-items:center;gap:8px;margin-bottom:8px}
-.sb-h h2{font-size:11px;color:var(--fg-muted);text-transform:uppercase;letter-spacing:.06em;flex:1}
 .plist{list-style:none;display:flex;flex-direction:column;gap:8px}
 .plist li{display:flex;align-items:center;gap:8px;font-size:13px}
 .plist .st{margin-left:auto;font:600 11px var(--font-mono);white-space:nowrap}
 .st.ok{color:var(--success)} .st.pend{color:var(--attention)} .st.chg{color:var(--danger)}
 .lblrow{display:flex;gap:6px;flex-wrap:wrap}
-.lblrow .label button{position:relative;border:none;background:none;color:currentColor;cursor:pointer;font-size:10px;padding:0 0 0 4px;line-height:1}
+/* a 16px glyph in an 18px button inside a 20px chip reads as an oversized ✕ crowding
+   its own label — the mark is now proportional to the chip; the ::after below keeps
+   the 24×24 hit target regardless of the visual size. */
+.lblrow .label button{position:relative;display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;flex:none;margin-left:3px;border:none;border-radius:3px;background:none;color:currentColor;cursor:pointer;padding:0;line-height:1}
+.lblrow .label button svg{width:11px;height:11px}
+.lblrow .label button:hover{background:var(--accent-line);color:var(--fg)}
 /* Keep the chip visually small but give the control a 24px pointer target (WCAG 2.5.8). */
 .lblrow .label button::after{content:"";position:absolute;top:50%;left:50%;width:24px;height:24px;transform:translate(-50%,-50%)}
 /* Merge panel */
@@ -610,6 +644,85 @@ tr.crow td{padding:8px 10px;background:var(--bg-subtle);white-space:normal}
 .tl time{font-family:var(--font-mono);font-size:11px;color:var(--fg-subtle);white-space:nowrap}
 .tl .tll{background:none;border:none;padding:0;font:inherit;color:var(--accent);cursor:pointer;text-decoration:none}
 .tl .tll:hover{text-decoration:underline}
+/* ============================================================================
+   Conversation — timeline-rail redesign
+   One continuous rail with every avatar and icon sitting ON it. Plain comments
+   lose their card chrome so that only EMBEDDED ARTIFACTS — diffs, verified
+   reviews, bot summaries — read as objects. Presentation only: no markup, ids or
+   handlers change, so recount(), addEntry() and the thread logic are untouched.
+   ========================================================================== */
+.convo{padding-left:46px;gap:26px}
+.convo::before{content:"";position:absolute;left:14px;top:6px;bottom:6px;width:2px;
+  background:var(--border);border-radius:2px}
+/* every rail marker punches a hole in the line with a page-coloured ring */
+.convo .msg > .msg-h > .avatar,
+.convo .azbot > .az-h > .avatar,
+.convo .sysrow > .tlic,
+.convo .tl > .tlic{position:absolute;left:-46px;width:30px;height:30px;font-size:11px;
+  box-shadow:0 0 0 4px var(--bg);z-index:1}
+.convo .msg > .msg-h > .avatar,
+.convo .azbot > .az-h > .avatar{top:-4px}
+.convo .sysrow > .tlic,
+.convo .tl > .tlic{top:-3px;left:-45px;width:28px;height:28px;border-radius:50%;
+  background:var(--bg-inset);border:1px solid var(--border);display:inline-flex;
+  align-items:center;justify-content:center;color:var(--fg-subtle)}
+.convo .sysrow > .tlic{background:var(--attest-subtle);border-color:transparent;color:var(--attest)}
+/* plain comments: text on the page, not a card */
+.convo .msg{border:0;border-radius:0;background:none;box-shadow:none}
+.convo .msg.approve,.convo .msg.reqchg{border:0}
+.convo .msg > .msg-h{padding:0 0 6px;background:none;border-bottom:0;border-radius:0;
+  gap:7px;align-items:baseline}
+/* quiet sans timestamps — mono next to a name reads like a log, not a conversation */
+.convo .msg > .msg-h > time,.convo .tl time,.convo .azbot .az-h time{
+  margin-left:0;font:12px var(--font-sans);color:var(--fg-subtle)}
+/* trailing controls still right-align once the timestamp sits next to the name */
+.convo .msg > .msg-h > button:first-of-type{margin-left:auto}
+.convo .msg > .msg-b{padding:0}
+.convo .msg > .rxbar{padding:8px 0 0}
+/* borderless parent — the diff excerpt keeps its own card, but loses the side
+   margins that assumed a card around it */
+.convo .msg > .mini-ctx{margin:10px 0 0}
+/* replies: the border-top belonged to the old card; standalone it floated mid-air */
+.convo .msg > .replies{border-top:0;padding:10px 0 0;gap:8px}
+/* reply composer rests as a single quiet line; the chrome appears on engagement and
+   STAYS while a draft exists (:placeholder-shown) — blur must never bury typed text */
+.convo .replies .gc .gc-top{display:none}
+.convo .replies .gc .gc-foot{display:none}
+.convo .replies .gc textarea{min-height:36px}
+.convo .replies .gc:focus-within .gc-top,
+.convo .replies .gc:has(textarea:not(:placeholder-shown)) .gc-top{display:flex}
+.convo .replies .gc:focus-within .gc-foot,
+.convo .replies .gc:has(textarea:not(:placeholder-shown)) .gc-foot{display:flex}
+.convo .replies .gc:focus-within textarea,
+.convo .replies .gc:has(textarea:not(:placeholder-shown)) textarea{min-height:88px}
+/* the bot post joins the system: name on the rail, card below holds the summary */
+.convo .ithread.azbot.azintro{border:0;background:none;box-shadow:none}
+.convo .ithread.azbot.azintro > .az-h{background:none;border-bottom:0;border-radius:0;
+  padding:0 0 6px}
+.convo .ithread.azbot.azintro > .it-b{border:1px solid var(--accent-line);
+  border-radius:var(--r-lg);background:var(--bg);box-shadow:var(--shadow-sm);padding:14px}
+.convo .ithread.azbot.azintro > .rxbar{padding:8px 0 0}
+/* timeline rows read as one quiet line. position:relative matters — .msg and
+   .sysrow get it from an earlier rule but .tl does not, and without it the icon
+   anchors to .convo instead of its own row. */
+.convo .tl{position:relative;gap:0;align-items:baseline;color:var(--fg-muted)}
+.convo .tl > .tlb{padding-top:4px}
+/* unresolved marker: an absolute stripe, so flagging a thread never shifts the
+   row and drags its rail avatar out of alignment */
+.convo .msg.unres{box-shadow:none}
+.convo .msg.unres::before{content:"";position:absolute;left:-10px;top:2px;bottom:2px;
+  width:2px;border-radius:2px;background:var(--attention)}
+/* collapsed minor activity — a marker across the rail, not a dashed box */
+.cv-roll{justify-content:center;gap:8px;border:0;border-radius:999px;padding:6px 14px;
+  background:var(--bg-subtle);color:var(--fg-subtle);font-size:11px}
+.cv-roll:hover{background:var(--bg-inset);color:var(--fg);border:0}
+.cv-roll .more{margin-left:0;flex:none}
+@media (max-width:640px){
+  .convo{padding-left:38px}
+  .convo .msg > .msg-h > .avatar,.convo .azbot > .az-h > .avatar{left:-38px;width:26px;height:26px}
+  .convo .tl > .tlic{left:-37px;width:24px;height:24px}
+  .convo::before{left:12px}
+}
 
 /* ---- Emoji reactions ---- */
 .rxbar{display:flex;flex-wrap:wrap;gap:6px;padding:0 12px 12px;align-items:center}
@@ -635,8 +748,26 @@ tr.crow td{padding:8px 10px;background:var(--bg-subtle);white-space:normal}
 .gc-tools .menuwrap{display:inline-flex}
 .gc-tools .menu{min-width:210px}
 .gc-tools .menu button{width:100%;height:auto;justify-content:flex-start;font-weight:400;padding:6px 10px}
-.gc-body{padding:8px}
+.gc-body{padding:10px}
 .gc-body textarea{min-height:76px}
+/* The .gc panel already draws the boundary — a bordered field inside it renders as a
+   double border with an 8px moat. The field goes flush and the panel takes the focus
+   ring, so the composer still shows an active state (and keyboard focus stays visible). */
+.gc .gc-body textarea.input{border:0;border-radius:0;padding:0;background:none}
+.gc .gc-body textarea.input:focus-visible{outline:none}
+.gc:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-subtle)}
+/* …and the same doubling one level up: a HEADERLESS card whose only content is a
+   composer row is decoration wrapped around a panel that already has a border. A
+   titled card (e.g. "Your review", which also holds radios and the consequence line)
+   is a real container and keeps its chrome. Dropping the padding also lands the
+   avatar in the same column as the conversation rail above it. */
+.card:not(:has(.card-h)):has(> .card-b > .gcrow){border:0;background:none;box-shadow:none}
+.card:not(:has(.card-h)):has(> .card-b > .gcrow) > .card-b{padding:0}
+/* match the conversation rail exactly: 30px avatar + 16px gap puts this composer's
+   left edge on the same column as every comment above it. Scoped — .gcrow is also
+   used by JS-built comment lists that must keep their compact 20px avatars. */
+.card:not(:has(.card-h)):has(> .card-b > .gcrow) .gcrow{gap:16px}
+.card:not(:has(.card-h)):has(> .card-b > .gcrow) .gcrow > .avatar{width:30px;height:30px;font-size:11px;margin-top:0}
 .gc-prev{min-height:76px;padding:4px 2px;font-size:13px;overflow-wrap:anywhere}
 .gc-prev p+p,.gc-prev ul+p,.gc-prev p+ul{margin-top:8px}
 .gc-prev ul{margin-left:18px}
@@ -652,7 +783,7 @@ tr.crow td{padding:8px 10px;background:var(--bg-subtle);white-space:normal}
 .gcrow>.avatar{margin-top:4px}
 
 /* ---- Pending review batch ---- */
-.pendbar{position:fixed;right:16px;bottom:16px;z-index:50;display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end;padding:8px 10px 8px 14px;background:var(--bg);border:1px solid var(--accent-line);border-radius:999px;box-shadow:var(--shadow-overlay);font-size:12px;max-width:calc(100vw - 32px)}
+.pendbar{position:fixed;right:16px;bottom:76px;z-index:50;display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end;padding:8px 10px 8px 14px;background:var(--bg);border:1px solid var(--accent-line);border-radius:999px;box-shadow:var(--shadow-overlay);font-size:12px;max-width:calc(100vw - 32px)}
 .pendbar .pbl{color:var(--fg-muted);min-width:0;overflow-wrap:anywhere}
 .pendrow{display:flex;gap:8px;align-items:flex-start;padding:8px 10px;border:1px dashed var(--attention);border-radius:var(--r);background:var(--attention-subtle);font-size:12px;flex-wrap:wrap}
 .pendrow .pbody{flex:1;min-width:180px;overflow-wrap:anywhere;color:var(--fg)}
@@ -660,6 +791,34 @@ tr.crow td{padding:8px 10px;background:var(--bg-subtle);white-space:normal}
 .rvsum{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
 .rvsum .radio{border:1px solid var(--border);border-radius:var(--r);padding:8px 10px}
 .rvsum .radio:hover{background:var(--bg-subtle)}
+/* ---- Your-review decision bar --------------------------------------------------
+   Horizontal 3-up with tone following the selection. Scoped to #reviewBody —
+   .rvsum is REUSED by the dismissal-reason dialog, which stays stacked. */
+#reviewBody .rvsum{flex-direction:row;gap:8px}
+#reviewBody .rvsum .radio{flex:1;min-width:0;margin:0}
+#reviewBody .rvsum .radio:has(input:checked){border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-subtle)}
+#reviewBody .rvsum .radio:has(input[value="approve"]:checked){border-color:var(--success);box-shadow:0 0 0 3px var(--success-subtle)}
+#reviewBody .rvsum .radio:has(input[value="request"]:checked){border-color:var(--danger);box-shadow:0 0 0 3px var(--danger-subtle)}
+@media (max-width:900px){#reviewBody .rvsum{flex-direction:column}}
+/* live consequence line — the panel says what submit will DO, from live state */
+.rv-why{margin:0 0 12px;padding:8px 11px;border-radius:var(--r);background:var(--bg-subtle);
+  border:1px solid var(--border-muted);font-size:12px;color:var(--fg-muted)}
+.rv-why b{color:var(--fg)}
+.rv-why[data-tone="ok"]{background:var(--success-subtle);border-color:transparent;color:var(--success)}
+.rv-why[data-tone="ok"] b{color:var(--success)}
+.rv-why[data-tone="bad"]{background:var(--danger-subtle);border-color:transparent;color:var(--danger)}
+.rv-why[data-tone="bad"] b{color:var(--danger)}
+/* review composer rests compact. The FOOTER stays visible — it holds the submit
+   button, and the panel's primary action must never hide behind a focus state. */
+#reviewComposer .gc .gc-top{display:none}
+#reviewComposer .gc textarea{min-height:38px}
+#reviewComposer .gc:focus-within .gc-top,
+#reviewComposer .gc:has(textarea:not(:placeholder-shown)) .gc-top{display:flex}
+#reviewComposer .gc:focus-within textarea,
+#reviewComposer .gc:has(textarea:not(:placeholder-shown)) textarea{min-height:88px}
+/* success-fill verb for Approve */
+.btn.ok{background:var(--success);border-color:var(--success);color:var(--on-fill)}
+.btn.ok:hover{filter:brightness(1.08)}
 .ithread{border:1px solid var(--border);border-radius:var(--r);background:var(--bg);font-size:12px}
 .ithread .it-h{display:flex;align-items:center;gap:8px;padding:6px 10px;background:var(--bg-subtle);border-bottom:1px solid var(--border-muted);border-radius:var(--r) var(--r) 0 0;flex-wrap:wrap}
 .ithread .it-h time{margin-left:auto;font:11px var(--font-mono);color:var(--fg-subtle)}
@@ -962,6 +1121,8 @@ table.diff.split .ln{width:40px;min-width:40px}
    Groups are one row each with the label inline — side-by-side blocks re-wrap
    unpredictably as pill membership changes. See design-lab/360-strip/. */
 .p360{margin:2px 0 14px;border:1px solid var(--border);border-radius:var(--r-lg);background:var(--bg)}
+/* In Conversation, the overview is a distinct section before the timeline. */
+#panel-conversation>.p360{margin:0 0 24px}
 .p360-spine{display:flex;list-style:none;margin:0;padding:12px 14px 11px;overflow-x:auto}
 /* min-width:auto (not 0) so a step never shrinks below its own label — otherwise
    the text overlaps the next step instead of the spine scrolling. */
@@ -1504,20 +1665,6 @@ html[data-theme="dark"] .railgrp::before{color:#9aabc6}
           <button class="icon-btn x" style="width:24px;height:24px" aria-label="Dismiss banner" onclick="document.getElementById('fromFailedBanner').hidden=true"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x" aria-hidden="true"><path d="M18 6 6 18" /> <path d="m6 6 12 12" /></svg></button>
         </div>
 
-        <!-- 360° strip: lifecycle spine + one pill per review dimension. Rendered by
-             render360() from live state; sits outside #wsLegacy so the workspace
-             observer never repaints it. Inherits loading-hide from the wrapper above. -->
-        <section class="p360" id="pr360" role="group" aria-label="360-degree overview of this pull request" data-pills="open">
-          <ol class="p360-spine" id="p360Spine"></ol>
-          <button type="button" class="p360-tog" id="p360Tog" aria-expanded="true" aria-controls="p360Pills" title="Collapse overview details">
-            <span class="p360-tog-sum" id="p360TogSum">Overview details</span>
-            <span class="p360-tog-act" aria-hidden="true">
-              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="m4 6 4 4 4-4"/></svg>
-            </span>
-          </button>
-          <div class="p360-groups" id="p360Pills"></div>
-        </section>
-
         <div class="prgrid">
         <div class="prmain">
 
@@ -1535,6 +1682,28 @@ html[data-theme="dark"] .railgrp::before{color:#9aabc6}
           </div>
 
           <div id="panel-conversation" role="tabpanel" aria-labelledby="tab-conversation" tabindex="0">
+            <div class="cv-head">
+              <h2>Review conversation</h2>
+              <span class="cv-tools">
+                <label><input type="checkbox" id="cvCollapse" autocomplete="off" checked> Collapse minor activity</label>
+                <select class="cv-sel" id="cvSort" aria-label="Sort the conversation">
+                  <option value="old" selected>Oldest first</option>
+                  <option value="new">Newest first</option>
+                </select>
+              </span>
+            </div>
+            <!-- 360° overview belongs with the review discussion. It remains outside
+                 #wsLegacy, so the Files-changed workspace observer never repaints it. -->
+            <section class="p360" id="pr360" role="group" aria-label="360-degree overview of this pull request" data-pills="open">
+              <ol class="p360-spine" id="p360Spine"></ol>
+              <button type="button" class="p360-tog" id="p360Tog" aria-expanded="true" aria-controls="p360Pills" title="Collapse overview details">
+                <span class="p360-tog-sum" id="p360TogSum">Overview details</span>
+                <span class="p360-tog-act" aria-hidden="true">
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="m4 6 4 4 4-4"/></svg>
+                </span>
+              </button>
+              <div class="p360-groups" id="p360Pills"></div>
+            </section>
             <div class="convo" id="convoList">
 
               <!-- Aziron Pulse posts this automatically on every PR once analysis lands.
@@ -1607,6 +1776,7 @@ html[data-theme="dark"] .railgrp::before{color:#9aabc6}
               </div>
 
               <div class="sysrow" aria-label="System entry — attestation receipt from pulse-auditor">
+                <span class="tlic" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1 1 0 0 1 1.52 0C14.5 3.8 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg></span>
                 <div class="receipt receipt-mini">
                   <div class="rrow"><span>pulse-auditor · attestation</span><span><time datetime="2026-08-03T09:41:00">Aug 3, 09:41</time></span></div>
                   <div class="rdiv" aria-hidden="true"></div>
@@ -1673,6 +1843,7 @@ html[data-theme="dark"] .railgrp::before{color:#9aabc6}
                   <label class="radio"><input type="radio" name="rvtype" value="approve" class="act" checked><span><strong>Approve</strong><br><span class="small muted">Counts toward the 2-approval gate</span></span></label>
                   <label class="radio"><input type="radio" name="rvtype" value="request" class="act"><span><strong>Request changes</strong><br><span class="small muted">Blocks merge until resolved</span></span></label>
                 </div>
+                <p class="rv-why" id="rvWhy" data-tone="ok" aria-live="polite"><!-- rendered by renderRvWhy --></p>
                 <div id="reviewComposer"></div>
               </div>
               <div class="card-b" id="reviewDone" hidden><p class="small" id="reviewDoneTxt" aria-live="polite"></p><button class="btn sm act" id="dismissReviewBtn" hidden>Dismiss review</button></div>
@@ -2268,11 +2439,10 @@ html[data-theme="dark"] .railgrp::before{color:#9aabc6}
                 </span>
               </div>
               <p class="small subtle" id="crNote" aria-live="polite" hidden>Held by 2 open review findings and 1 approval outstanding.</p>
-              <div class="ckrow"><span class="cgl pend" id="glCrPr" role="img" aria-label="Pending">⏳</span><span class="cnm">PR review</span><span class="cdt" id="dtCrPr" aria-live="polite">2 open findings</span></div>
-              <div class="ckrow"><span class="cgl ok" role="img" aria-label="Pass">✓</span><span class="cnm">Unit tests</span><span class="cdt" id="crUtDt">18 of 18 · coverage 86.0%</span></div>
-              <div class="ckrow"><span class="cgl ok" role="img" aria-label="Pass">✓</span><span class="cnm">Security</span><span class="cdt">Gate passed</span></div>
-              <div class="ckrow"><span class="cgl ok" role="img" aria-label="Pass">✓</span><span class="cnm">Evidence</span><span class="cdt"><a href="run-details.html" class="mono">06cb9564</a> · fresh</span></div>
-              <p class="small subtle" style="margin-top:8px">PR review (40) · Unit tests (30) · Security (20) · Evidence (10). <button type="button" class="lnkbtn" data-goto="checks">See the readiness groups</button></p>
+              <!-- the four check rows and the weight formula moved out: they repeated
+                   the gates, the Checks card and the 360 strip. The blocker verbs above are
+                   this card's unique value; detail lives one click away. -->
+              <p class="small subtle" style="margin-top:2px"><button type="button" class="lnkbtn" data-goto="checks">See the readiness groups →</button></p>
             </div>
           </section>
 
@@ -2280,7 +2450,7 @@ html[data-theme="dark"] .railgrp::before{color:#9aabc6}
             <div class="sb-h">
               <button type="button" class="sb-tog" data-sbsec="reviewers" aria-expanded="true" aria-controls="sbb-reviewers">
                 <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/></svg>
-                <h2 id="revH">Reviewers</h2><span class="sb-cnt" id="revCnt">1 of 2</span><span class="sb-sum" id="revSum"></span>
+                <h2 id="revH">People</h2><span class="sb-cnt" id="revCnt">1 of 2</span><span class="sb-sum" id="revSum"></span>
                 <svg class="sb-chev" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m4 6 4 4 4-4"/></svg>
               </button>
               <div class="menuwrap">
@@ -2297,20 +2467,8 @@ html[data-theme="dark"] .railgrp::before{color:#9aabc6}
                 <li><span class="avatar sm" aria-hidden="true">MW</span>@mwebb<span class="st pend">⏳ Pending</span></li>
               </ul>
               <p class="small subtle" id="revNote" aria-live="polite" style="margin-top:8px"><span class="mono">1 of 2</span> required approvals</p>
-            </div>
-          </section>
-
-          <!-- assignees + labels merged: two short lists that never needed two cards -->
-          <section class="sb-sec" data-open="true" data-sb="people">
-            <div class="sb-h">
-              <button type="button" class="sb-tog" data-sbsec="people" aria-expanded="true" aria-controls="sbb-people">
-                <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z"/><circle cx="7.5" cy="7.5" r=".5"/></svg>
-                <h2 id="asgH">People &amp; labels</h2><span class="sb-sum" id="peopleSum"></span>
-                <svg class="sb-chev" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m4 6 4 4 4-4"/></svg>
-              </button>
-            </div>
-            <div class="sb-b" id="sbb-people">
-              <ul class="plist" id="asgList" aria-labelledby="asgH">
+              <p class="sb-sub">Assignee &amp; labels</p>
+              <ul class="plist" id="asgList" aria-label="Assignees">
                 <li><span class="avatar sm" aria-hidden="true">DA</span>@dominic</li>
               </ul>
               <div class="lblrow" id="labelRow">
@@ -2411,6 +2569,24 @@ html[data-theme="dark"] .railgrp::before{color:#9aabc6}
             </div>
           </section>
 
+          <!-- full checks list (option 2): every check this PR runs, enumerated in one
+               place. Rendered from live state by renderChecks so the sims flip rows. -->
+          <!-- collapsed by default: the header chip carries the count, and the rows
+               repeat the 360° strip pill-for-pill. One click opens the detail. -->
+          <section class="sb-sec" data-open="false" data-sb="checks">
+            <div class="sb-h">
+              <button type="button" class="sb-tog" data-sbsec="checks" aria-expanded="false" aria-controls="sbb-checks">
+                <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                <h2>Checks</h2><span class="sb-cnt" id="ckChip">9 of 9</span><span class="sb-sum" id="ckSum"></span>
+                <svg class="sb-chev" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m4 6 4 4 4-4"/></svg>
+              </button>
+            </div>
+            <div class="sb-b" id="sbb-checks">
+              <div id="ckList"></div>
+              <p class="small subtle" style="margin-top:8px">All checks run on <a href="run-details.html" class="mono">06cb9564</a> against head <span class="mono">7e0a93c5</span>. <button type="button" class="lnkbtn" data-goto="checks">Open the Checks tab</button></p>
+            </div>
+          </section>
+
           <section class="sb-sec mg" data-open="true" data-sb="merge" data-blocked="true">
             <div class="sb-h">
               <button type="button" class="sb-tog" data-sbsec="merge" aria-expanded="true" aria-controls="sbb-merge">
@@ -2425,7 +2601,9 @@ html[data-theme="dark"] .railgrp::before{color:#9aabc6}
               <div class="gate pend" id="gateAppr"><span class="gi" aria-hidden="true">⏳</span><div><strong id="gaTitle">Approvals 1 of 2</strong><span id="gaSub">Waiting on @mwebb — or an Admin review completes it</span></div></div>
               <div class="gate ok" id="gateBranch"><span class="gi" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check" aria-hidden="true"><path d="M20 6 9 17l-5-5" /></svg></span><div><strong>Branch up to date</strong><span class="mono">0</span> behind main</div></div>
               <div class="gate ok" id="gateSonar"><span class="gi" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check" aria-hidden="true"><path d="M20 6 9 17l-5-5" /></svg></span><div><strong id="gsTitle">Quality gate (SonarQube)</strong><span id="gsSub">Sonar way · 7 of 7 conditions · analysis <span class="mono">AQ4x82c9</span></span></div></div>
-              <div class="updrow">
+              <!-- 0 behind main — a permanently disabled control is noise; the row
+                   returns only when there is actually something to bring in -->
+              <div class="updrow" hidden>
                 <span class="small muted">No commits on <span class="mono">main</span> since this branch forked.</span>
                 <span data-tip="Already up to date with main — nothing to bring in" tabindex="0" style="flex:none">
                   <button class="btn sm act" id="updateBranchBtn" disabled aria-disabled="true">Update branch</button>
@@ -2442,6 +2620,9 @@ html[data-theme="dark"] .railgrp::before{color:#9aabc6}
                   <button role="menuitemradio" aria-checked="false" data-method="rebase"><span class="mm"><strong>Rebase and merge</strong><span>The <span class="mono mcount">3</span> commits are replayed onto <span class="mono">main</span></span></span></button>
                 </div>
               </div>
+              <!-- consequence caption for the SELECTED method — the menu explains the
+                   options, this states what the button will actually do (renderMgWhy) -->
+              <p class="small subtle" id="mgWhy" style="margin-top:7px" aria-live="polite"></p>
               <button class="btn act" id="autoMergeBtn" style="width:100%;justify-content:center;margin-top:8px">Merge when ready</button>
               <button class="btn primary act" id="readyBtn" hidden style="width:100%;justify-content:center;margin-top:8px">Ready for review</button>
               <div class="automsg" id="autoMsg" hidden>
@@ -2464,13 +2645,23 @@ html[data-theme="dark"] .railgrp::before{color:#9aabc6}
             </div>
           </section>
 
-          <!-- sticky action footer: the one next step, always in reach (renderMerge) -->
-          <div class="sb-foot" id="sbFoot" data-tone="blocked">
-            <span class="ft"><b id="sbFootT">Review blocked</b><span id="sbFootS">1 approval outstanding</span></span>
-            <button type="button" class="btn sm act" id="sbFootBtn">Review blockers</button>
-          </div>
+          <!-- the sticky action surface moved out of the rail to the page-level
+               #prBar below the grid — one action bar, not two. -->
         </aside>
         </div><!-- /prgrid -->
+
+        <!-- page-level sticky action bar: status on the left, the one primary control
+             on the right. Rendered by renderPrBar() from the same gates as the merge box. -->
+        <div class="prbar" id="prBar" data-tone="blocked" role="region" aria-label="Pull request actions">
+          <span class="dot" aria-hidden="true"></span>
+          <span class="prbar-st"><b id="prBarT">Review blocked</b><span id="prBarS">1 approval outstanding</span></span>
+          <span class="prbar-acts">
+            <button type="button" class="btn sm" id="prBarFiles">View files changed</button>
+            <button type="button" class="btn sm act" id="prBarIde">Open in IDE</button>
+            <button type="button" class="btn sm act" id="prBarUpd" disabled aria-disabled="true" data-tip="Already up to date with main — nothing to bring in">Update branch</button>
+            <button type="button" class="btn sm primary act" id="prBarGo">Review blockers</button>
+          </span>
+        </div>
 
         <div class="pendbar" id="pendBar" hidden>
           <span class="pbl" aria-live="polite"><strong class="mono" id="pendCount">0</strong> pending comment(s) — not posted yet</span>
@@ -4185,6 +4376,42 @@ const PS = (() => {
     const ta=$('#reviewComposer textarea'); if(ta) ta.focus();
   });
 
+  /* ---- review panel: live consequence line + verb-labeled submit --------------
+     The decision control states what submit will DO, computed from live state:
+     approvals, other merge gates, and open findings (advisory — named as such
+     precisely because they do not block). Hooked into renderSbFoot so every
+     renderMerge path refreshes it; also fires on radio change. */
+  function renderRvWhy(){
+    const el=$('#rvWhy'); if(!el) return;
+    const sel=$('input[name="rvtype"]:checked'); if(!sel) return;
+    const t=sel.value, open=aiOpen(), appr=S.approvals;
+    const others=S.verdictStale||SONAR.status==='ERROR';
+    const findNote=open?' The '+open+' open finding'+(open===1?' is':'s are')+' advisory and stay'+(open===1?'s':'')+' open — <button type="button" class="lnkbtn" data-goto="files">review them first</button>.':'';
+    let tone='',html='';
+    if(t==='approve'){
+      tone='ok';
+      html=appr>=2
+        ? '<b>✓ The 2-approval gate is already met</b> — your approval is recorded alongside it.'
+        : '<b>✓ Yours is the '+(appr===1?'2nd':'1st')+' of 2 required approvals</b>'
+          +(appr===1?(others?' — completes the approval gate; other gates still hold merge.':' — merge unlocks on submit.'):' — one more will still be needed.');
+      html+=findNote;
+    } else if(t==='request'){
+      tone='bad';
+      html='<b>✕ Blocks merge for everyone</b> until you dismiss this review — the Dismiss control appears after submit. A written summary is required.';
+    } else {
+      html='<b>Posts to the conversation</b> without affecting the 2-approval gate.'+findNote;
+    }
+    el.dataset.tone=tone; el.innerHTML=html;
+    const b=$('#reviewComposer [data-gcact="submit"]');
+    if(b){
+      b.textContent=t==='approve'?'Approve':t==='request'?'Request changes':'Comment';
+      b.className='btn act '+(t==='approve'?'ok':t==='request'?'danger':'primary');
+    }
+  }
+  document.addEventListener('change',e=>{
+    if(e.target.closest('#reviewBody input[name="rvtype"]')) renderRvWhy();
+  });
+
   /* ---- review panel: batch submit (Comment / Approve / Request changes) ---- */
   function submitReview(txt){
     const type=$('input[name="rvtype"]:checked').value;
@@ -4296,7 +4523,7 @@ const PS = (() => {
     }
   });
   mkComposer($('#reviewComposer'),{
-    label:'Review summary', ph:'Review summary — required when you request changes',
+    label:'Review summary', ph:'Add a review comment (optional) — required when you request changes',
     buttons:[{k:'submit',label:'Submit review',cls:'btn primary',main:true}],
     submit:(txt)=>{
       if($('input[name="rvtype"]:checked').value==='request' && !txt && !S.pending.length){
@@ -4318,7 +4545,21 @@ const PS = (() => {
     $('#autoMethod').textContent=METHODS[m].word;
     $('#mergeMethodBtn').setAttribute('aria-label','Choose a merge method — currently '+METHODS[m].btn.toLowerCase());
     $$('#mergeWrap [data-method]').forEach(b=>b.setAttribute('aria-checked',String(b.dataset.method===m)));
+    renderMgWhy();
     if(announce) PS.toast('Merge method: '+METHODS[m].btn);
+  }
+  /* what the merge button will do to history, from the selected method + live commit
+     count — plus the one fact GitHub cannot say: the attested verdict follows the
+     result into the ledger. Re-rendered by renderSbFoot so the count stays live. */
+  function renderMgWhy(){
+    const el=$('#mgWhy'); if(!el) return;
+    const n=S.commits;
+    const hist={
+      squash:'<b>'+n+' commits become one</b> on <span class="mono">main</span> — the full history stays on the PR.',
+      merge:'All <b>'+n+' commits</b> land on <span class="mono">main</span>, plus a merge commit marking the PR.',
+      rebase:'The <b>'+n+' commits</b> are replayed onto <span class="mono">main</span> one by one — linear history, no merge commit.'
+    }[S.method];
+    el.innerHTML=hist+' Verdict <span class="mono">06cb9564</span> is recorded against the result in the ledger.';
   }
   $$('#mergeWrap [data-method]').forEach(b=>b.addEventListener('click',()=>{ if(!isRO()) setMethod(b.dataset.method,true); }));
 
@@ -4405,6 +4646,9 @@ const PS = (() => {
     const az=$('#azIntroSec');
     if(az){ az.textContent=all.length?(all.length+' '+worst):'Clean'; az.className=all.length?'bad':'ok'; }
     render360();
+    /* the SCA + security sims reach the page through here, not through renderMerge,
+       so the checks list has to be refreshed on this path too */
+    renderChecks();
   }
   function renderScaBlock(){
     const host=$('#scaBlock'); if(!host) return;
@@ -4519,7 +4763,7 @@ const PS = (() => {
      footer reports review pressure, which also counts open findings. A finding never
      blocks a merge in this product, so it never appears in the merge alert. */
   function renderSbFoot(){
-    const foot=$('#sbFoot'); if(!foot) return;
+    const foot=$('#prBar'); if(!foot) return;
     const sec=$('.sb-sec.mg'), chip=$('#mgChip'), al=$('#mgAlert'), alt=$('#mgAlertTxt');
     const gates=[];
     if(S.verdictStale) gates.push('verdict re-analyzing');
@@ -4536,19 +4780,57 @@ const PS = (() => {
     }
     if(al){ al.hidden=done||!gates.length;
       if(alt&&gates.length) alt.textContent='Merge blocked: '+gates[0]; }
+    /* the footnote repeats the alert when both show — cause once, not twice */
+    const mn=$('#mergeNote'); if(mn&&al) mn.hidden=!al.hidden;
     const ms=$('#mgSum'); if(ms&&chip) ms.textContent=chip.textContent.toLowerCase();
-    const t=$('#sbFootT'), s=$('#sbFootS'), b=$('#sbFootBtn');
+    const t=$('#prBarT'), s=$('#prBarS'), b=$('#prBarGo');
     foot.dataset.tone=done?'done':(review.length?'blocked':'ready');
-    if(S.merged){ t.textContent='Merged to main'; s.textContent='canary 10% on the next train'; b.textContent='Delivery'; }
+    if(S.merged){ t.textContent='Merged to main'; s.textContent='canary 10% on the next train'; b.textContent='View delivery'; }
     else if(S.closed){ t.textContent='Closed without merging'; s.textContent='verdict 06cb9564 retained'; b.textContent='Reopen'; }
     else if(review.length){ t.textContent='Review blocked';
-      s.textContent=review[0]+(review.length>1?' · +'+(review.length-1)+' more':'');
+      /* if every merge gate is clear and only findings remain, say so — the merge
+         control in the rail is live, and hiding that would misrepresent the state */
+      s.textContent=review.join(' · ')+(gates.length?'':' · merge is available');
       b.textContent='Review blockers'; }
-    else { t.textContent='Ready to merge'; s.textContent='all gates green · '+S.method; b.textContent=METHODS[S.method].btn; }
+    else { t.textContent='Ready to merge'; s.textContent='every gate is green · '+S.method; b.textContent=METHODS[S.method].btn; }
+    /* the bar's primary is only a live merge control when merge is actually possible */
+    b.className='btn sm act'+((!done&&!review.length)?' primary':'');
+    const upd=$('#prBarUpd'); if(upd) upd.hidden=done;
+    $('#prBarFiles').hidden=done; $('#prBarIde').hidden=done;
     sbCounts();
+    renderRvWhy();
+    renderMgWhy();
+  }
+  /* full checks list — one row per check this PR actually runs, all read from live
+     state so the states-panel sims flip rows instead of contradicting them. */
+  function renderChecks(){
+    const host=$('#ckList'); if(!host) return;
+    const sec=secFindings().filter(x=>x.t.state==='open').length;
+    const adv=SCA.advisories.length;
+    const pct=covPct(), stale=S.verdictStale;
+    const rows=[
+      {n:'Pulse verification', ok:!stale, pend:stale, d:stale?'analyzing head '+(S.headSha||''):'Passed · grade A'},
+      {n:'Unit tests', ok:true, d:'18 of 18 passed'},
+      {n:'Changed-line coverage', ok:pct>=80, d:pct.toFixed(1)+'% · '+covBand(pct)},
+      {n:'Pulse SAST', ok:!sec, d:sec?sec+' new · High':'0 new'},
+      {n:'SonarQube quality gate', ok:SONAR.status!=='ERROR', d:SONAR.conditions.filter(c=>c.ok).length+' of '+SONAR.conditions.length+' conditions'},
+      {n:'Dependency scan (SCA)', ok:!adv, d:adv?adv+' new advisory':'no manifest changes'},
+      {n:'Secrets scan', ok:true, d:'0 across 3 files'},
+      {n:'Performance budgets', ok:true, d:'4 of 4 within budget'},
+      {n:'Attestation', ok:!stale, pend:stale, d:stale?'awaiting re-attestation':'signed ed25519'}
+    ];
+    host.innerHTML=rows.map(r=>
+      '<div class="ckrow"><span class="cgl '+(r.pend?'pend':r.ok?'ok':'bad')+'" role="img" aria-label="'
+      +(r.pend?'Pending':r.ok?'Pass':'Fail')+'">'+(r.pend?'⏳':r.ok?'✓':'✕')+'</span>'
+      +'<span class="cnm">'+r.n+'</span><span class="cdt">'+r.d+'</span></div>').join('');
+    const pass=rows.filter(r=>r.ok&&!r.pend).length, chip=$('#ckChip'), sum=$('#ckSum');
+    if(chip){ chip.textContent=pass+' of '+rows.length;
+      chip.className='sb-cnt'+(pass===rows.length?' ok':' bad'); }
+    if(sum) sum.textContent=pass+' of '+rows.length+' passed';
   }
   /* header count chips — a collapsed section still has to report honestly */
   function sbCounts(){
+    renderChecks();
     const rc=$('#revCnt');
     if(rc){ rc.textContent=S.approvals+' of 2';
       rc.className='sb-cnt'+(S.changesRequested?' bad':S.approvals>=2?' ok':' bad'); }
@@ -4558,13 +4840,73 @@ const PS = (() => {
     if(ps){ const a=$$('#asgList li').length, l=$$('#labelRow .label').length;
       ps.textContent=a+' assignee'+(a===1?'':'s')+' · '+l+' label'+(l===1?'':'s'); }
   }
-  $('#sbFootBtn')?.addEventListener('click',()=>{
+  $('#prBarGo')?.addEventListener('click',()=>{
     if(isRO()) return;
     if(S.merged){ $('#sbDelivery')?.scrollIntoView({block:'center'}); return; }
     if(!S.closed && !aiOpen() && gatesOk()){ $('#mergeBtn')?.click(); return; }
     if(aiOpen()){ goTab('files'); return; }
     $('.sb-sec.mg')?.scrollIntoView({block:'center'});
   });
+  /* ---- conversation tools (option 2) -------------------------------------------
+     Sorting is applied with CSS `order`, never by moving nodes, so addEntry(),
+     recount() and every existing handler keep working on the original elements.
+     The bot's auto-post stays pinned first in both orders — it is the entry point
+     the whole flow starts from, not just the oldest entry. */
+  function cvApply(){
+    const list=$('#convoList'); if(!list) return;
+    const newest=$('#cvSort')?.value==='new';
+    const rolled=$('#cvCollapse')?.checked!==false;
+    [...list.children].forEach((el,i)=>{
+      el.style.order = el.id==='azIntro' ? -9999 : (newest ? -i : i);
+    });
+    $$('#convoList [data-cvroll]').forEach(el=>{ el.hidden=rolled; });
+    $$('#convoList [data-cvrollbtn]').forEach(b=>{ b.hidden=!rolled; });
+    cvUnres();
+  }
+  /* group runs of consecutive minor timeline rows behind one expandable control */
+  function cvBuildRolls(){
+    const list=$('#convoList'); if(!list||list.dataset.rolls) return;
+    list.dataset.rolls='1';
+    let run=[], g=0;
+    const flush=()=>{
+      if(run.length>=2){
+        const id='g'+(++g);
+        const b=document.createElement('button');
+        b.type='button'; b.className='cv-roll'; b.dataset.cvrollbtn=id;
+        b.innerHTML='<span class="n">'+run.length+'</span><span>minor events collapsed</span>'
+          +'<svg class="more" viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m4 6 4 4 4-4"/></svg>';
+        b.setAttribute('aria-label','Show '+run.length+' collapsed minor events');
+        run[0].before(b);
+        run.forEach(el=>{ el.dataset.cvroll=id; });
+      }
+      run=[];
+    };
+    [...list.children].forEach(el=>{
+      if(el.dataset.cvrollbtn) return;
+      if(el.classList.contains('tl')) run.push(el); else flush();
+    });
+    flush();
+  }
+  /* an unresolved thread earns a standing marker, not just a chip */
+  function cvUnres(){
+    $$('#convoList .msg').forEach(m=>{
+      const chip=m.querySelector('.label.attention');
+      m.classList.toggle('unres', !!chip && /unresolved/i.test(chip.textContent||''));
+    });
+  }
+  $('#cvSort')?.addEventListener('change',cvApply);
+  $('#cvCollapse')?.addEventListener('change',cvApply);
+  document.addEventListener('click',e=>{
+    const b=e.target.closest('[data-cvrollbtn]');
+    if(b){ const id=b.dataset.cvrollbtn;
+      $$('#convoList [data-cvroll="'+id+'"]').forEach(el=>{ el.hidden=false; });
+      b.hidden=true; return; }
+    /* resolve / reopen re-render the chip — re-read it after the handler runs */
+    if(e.target.closest('#resolveBtn,#reopenThreadBtn')) setTimeout(cvUnres,60);
+  });
+  $('#prBarFiles')?.addEventListener('click',()=>goTab('files'));
+  $('#prBarIde')?.addEventListener('click',()=>{ if(!isRO())
+    PS.toast('Opens PR #482 in the VS Code panel — configure the editor bridge in Integrations'); });
   /* collapsible sections — remembers the reader's choice, like the 360° strip toggle */
   document.addEventListener('click',e=>{
     const t=e.target.closest('[data-sbsec]'); if(!t) return;
@@ -5722,6 +6064,8 @@ const PS = (() => {
   renderSonarCard();
   renderSecSummary();
   syncCoverage();
+  cvBuildRolls();
+  cvApply();
   renderMerge();
   syncHash();
   wsInit();
