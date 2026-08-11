@@ -111,8 +111,35 @@ h3{font-size:14px;font-weight:600;line-height:1.25}
 .searchbtn{display:flex;align-items:center;gap:8px;height:30px;padding:0 10px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg);color:var(--fg-subtle);font-size:12px;cursor:pointer;min-width:180px}
 .searchbtn:hover{background:var(--bg-inset);border-color:var(--fg-subtle)}
 .searchbtn kbd{margin-left:auto;font:11px var(--font-mono);border:1px solid var(--border);border-radius:4px;padding:0 4px;background:var(--bg-subtle)}
-.avatar{width:28px;height:28px;border-radius:50%;background:var(--accent);color:var(--on-fill);display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex:none}
+/* Avatars are identity, not emphasis — a page of saturated fills competes with the
+   status colours that actually mean something. A flat tint carries the hue without
+   a ring, matching the avatar treatment on every other page.
+   The hue is picked per-person by hashing the initials (paintAvatars), so it is
+   varied but STABLE — a random pick per render would make faces flicker. */
+.avatar{width:28px;height:28px;border-radius:50%;background:var(--av-bg,var(--accent-subtle));color:var(--av-fg,var(--accent-chip));display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex:none}
 .avatar.sm{width:20px;height:20px;font-size:9px}
+/* seven hues, spaced around the wheel so neighbours in a list stay tellable apart.
+   Seven (not six) because it is the smallest modulus that gives this cast — DA, ES,
+   MW, PR, SO — zero collisions under the FNV hash in paintAvatars. */
+.avatar[data-av="0"]{--av-bg:#e8edff;--av-fg:#4338ca}
+.avatar[data-av="1"]{--av-bg:#e0f2fe;--av-fg:#0369a1}
+.avatar[data-av="2"]{--av-bg:#d5f5ef;--av-fg:#0d6a63}
+.avatar[data-av="3"]{--av-bg:#fce7f3;--av-fg:#be185d}
+/* amber and teal ran closest to the 4.5 floor — darkened for headroom, since 9px
+   bold initials are exactly the case where a marginal ratio stops being readable */
+.avatar[data-av="4"]{--av-bg:#fef3c7;--av-fg:#96450a}
+.avatar[data-av="5"]{--av-bg:#ede9fe;--av-fg:#6d28d9}
+.avatar[data-av="6"]{--av-bg:#e7eaf0;--av-fg:#475569}
+html[data-theme="dark"] .avatar[data-av="0"]{--av-bg:#1e1b4b;--av-fg:#a5b4fc}
+html[data-theme="dark"] .avatar[data-av="1"]{--av-bg:#0c2b45;--av-fg:#7dd3fc}
+html[data-theme="dark"] .avatar[data-av="2"]{--av-bg:#0c3b34;--av-fg:#5eead4}
+html[data-theme="dark"] .avatar[data-av="3"]{--av-bg:#4a1d33;--av-fg:#f9a8d4}
+html[data-theme="dark"] .avatar[data-av="4"]{--av-bg:#3f2c07;--av-fg:#fbbf24}
+html[data-theme="dark"] .avatar[data-av="5"]{--av-bg:#2e1065;--av-fg:#c4b5fd}
+html[data-theme="dark"] .avatar[data-av="6"]{--av-bg:#1b2540;--av-fg:#c3cee2}
+/* the bot is a different KIND of actor, not another person — it is held out of the
+   people palette entirely, the same reasoning as Verified-vs-Approved on reviewers */
+.azbot .avatar,.avatar.bot{--av-bg:var(--attest-subtle);--av-fg:var(--attest)}
 .layout{display:flex;flex:1;min-height:calc(100vh - var(--topbar-h))}
 .content{flex:1;min-width:0;padding:24px 36px;display:flex;flex-direction:column}
 .container{width:100%;max-width:none;margin:0;flex:1}
@@ -458,7 +485,14 @@ a.verdict:hover{text-decoration:none;box-shadow:0 0 0 1px var(--fg-subtle)}
    start collapsed with their value on the header row; a card is a real region so
    a collapsed one still reports. ---------------------------------------------- */
 .prside{min-width:0;display:flex;flex-direction:column;gap:10px}
-.sb-sec{border:1px solid var(--border);border-radius:var(--r-lg);background:var(--bg);overflow:hidden}
+/* overflow must stay visible: the ＋ Assignee / ＋ Label menus are absolutely
+   positioned inside the card and were being clipped by it. The header's hover fill is
+   rounded explicitly below instead of relying on the card to crop it. */
+.sb-sec{border:1px solid var(--border);border-radius:var(--r-lg);background:var(--bg);overflow:visible}
+/* a card holding an OPEN menu must paint above the cards that follow it in the DOM */
+.sb-sec:has(.menu:not([hidden])){position:relative;z-index:30}
+.sb-sec > .sb-h:first-child .sb-tog{border-radius:var(--r-lg) 0 0 0}
+.sb-sec[data-open="false"] > .sb-h:first-child .sb-tog{border-radius:var(--r-lg) 0 0 var(--r-lg)}
 .sb-tog{flex:1;min-width:0;display:flex;align-items:center;gap:7px;padding:9px 11px;margin:0;
   border:0;background:none;color:var(--fg);font:600 12px var(--font-sans);text-align:left;cursor:pointer}
 .sb-tog:hover{background:var(--bg-subtle)}
@@ -564,7 +598,9 @@ a.verdict:hover{text-decoration:none;box-shadow:0 0 0 1px var(--fg-subtle)}
 .plist li{display:flex;align-items:center;gap:8px;font-size:13px}
 .plist .st{margin-left:auto;font:600 11px var(--font-mono);white-space:nowrap}
 .st.ok{color:var(--success)} .st.pend{color:var(--attention)} .st.chg{color:var(--danger)}
-.lblrow{display:flex;gap:6px;flex-wrap:wrap}
+.lblrow{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+/* removable chips need a touch more right padding so the ✕ isn't hard against the edge */
+.lblrow .label{padding-right:5px}
 /* a 16px glyph in an 18px button inside a 20px chip reads as an oversized ✕ crowding
    its own label — the mark is now proportional to the chip; the ::after below keeps
    the 24×24 hit target regardless of the visual size. */
@@ -2926,8 +2962,16 @@ const PS = (() => {
   function closeMenus(){ $$('.menu').forEach(m=>m.hidden=true); $$('[aria-haspopup]').forEach(b=>b.setAttribute('aria-expanded','false')); }
   document.addEventListener('click', e=>{
     const btn = e.target.closest('[aria-haspopup="menu"],[aria-haspopup="true"]');
-    if(btn){ const m = btn.parentElement.querySelector('.menu'); if(m){ const was=m.hidden; closeMenus(); m.hidden=!was; btn.setAttribute('aria-expanded',String(was)); e.stopPropagation(); return; } }
-    if(!e.target.closest('.menu')) closeMenus();
+    if(btn){ const m = btn.parentElement.querySelector('.menu'); if(m){ const was=m.hidden; closeMenus(); m.hidden=!was; btn.setAttribute('aria-expanded',String(was));
+      /* open upward when there is no room below — a tall menu near the page bottom (the
+         266px merge-method list) otherwise runs past the viewport with its last option
+         unreachable. Reset first so re-opening re-measures instead of sticking flipped. */
+      if(!m.hidden){ m.style.top=''; m.style.bottom='';
+        if(m.getBoundingClientRect().bottom > innerHeight-8){ m.style.top='auto'; m.style.bottom='calc(100% + 4px)'; } }
+      e.stopPropagation(); return; } }
+    /* a menu item that performs an action should dismiss its own menu — only clicks on
+       inert parts of a menu (padding, headings) leave it open */
+    if(!e.target.closest('.menu') || e.target.closest('[role="menuitem"],[role="menuitemradio"]')) closeMenus();
   });
 
   /* tabs */
@@ -3357,11 +3401,27 @@ const PS = (() => {
 
   /* ---- conversation: comment cards + GitHub-style timeline events ---- */
   function recount(){ $('#convoCnt').textContent=String($$('#convoList .msg').length+$$('#convoList .sysrow').length); }
+  /* Give each set of initials a stable hue from the six-tint people palette. Hashing
+     rather than randomising is the point: the same person must keep the same colour
+     across every render, or faces flicker as the page updates. Bot avatars are held
+     out — they are a kind, not a person, and keep the attestation hue. */
+  function paintAvatars(root){
+    $$('.avatar',root||document).forEach(a=>{
+      if(a.dataset.av||a.classList.contains('bot')||a.closest('.azbot')) return;
+      const t=(a.textContent||'').trim().toUpperCase();
+      if(!t) return;
+      /* FNV-1a: mixes two-letter initials far better than a *31 sum, which bucketed
+         ES/MW and PR/SO onto the same hue */
+      let h=2166136261;
+      for(let i=0;i<t.length;i++){ h^=t.charCodeAt(i); h=Math.imul(h,16777619)>>>0; }
+      a.dataset.av=String(h%7);
+    });
+  }
   function addEntry(html){
     const end=$('#convoEnd');
     end.insertAdjacentHTML('beforebegin',html);
     const el=end.previousElementSibling;
-    PS.hydrateTimes(el); mountRx(el); applyRole(); recount();
+    PS.hydrateTimes(el); mountRx(el); applyRole(); recount(); paintAvatars(el);
     el.scrollIntoView({block:'nearest',behavior:'smooth'});
     return el;
   }
@@ -4831,6 +4891,7 @@ const PS = (() => {
   /* header count chips — a collapsed section still has to report honestly */
   function sbCounts(){
     renderChecks();
+    paintAvatars();
     const rc=$('#revCnt');
     if(rc){ rc.textContent=S.approvals+' of 2';
       rc.className='sb-cnt'+(S.changesRequested?' bad':S.approvals>=2?' ok':' bad'); }
@@ -6064,6 +6125,7 @@ const PS = (() => {
   renderSonarCard();
   renderSecSummary();
   syncCoverage();
+  paintAvatars();
   cvBuildRolls();
   cvApply();
   renderMerge();
