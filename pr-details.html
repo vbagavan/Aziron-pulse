@@ -150,7 +150,11 @@ html[data-theme="dark"] .avatar[data-av="6"]{--av-bg:#1b2540;--av-fg:#c3cee2}
 .section{margin-bottom:24px}
 .section>h2{margin-bottom:12px}
 footer.pfoot{max-width:none;margin:32px 0 0;width:100%;padding-top:16px;border-top:1px solid var(--border-muted);display:flex;align-items:center;gap:16px;font-size:12px;color:var(--fg-subtle)}
-footer.pfoot .flinks{margin-left:auto;display:flex;gap:16px;align-items:center}
+footer.pfoot .flinks{margin-left:auto;display:flex;gap:16px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+/* Prototype-only run controls live with the other prototype utilities at the
+   bottom of the page. Keep the dashed treatment visible (unlike invisible link
+   buttons) so a demo-only state switch cannot be mistaken for product navigation. */
+footer.pfoot .atl-proto{flex:none}
 /* ---------- Buttons & controls ---------- */
 .btn{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 12px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg-subtle);color:var(--fg);font:600 13px var(--font-sans);cursor:pointer;white-space:nowrap;box-shadow:var(--shadow-sm)}
 .btn:hover{background:var(--bg-inset);border-color:var(--fg-subtle)}
@@ -187,6 +191,9 @@ textarea.input{height:auto;padding:8px 10px;resize:vertical;min-height:72px}
 .segmented button{height:30px;padding:0 12px;border:none;background:var(--bg);font:600 12px var(--font-sans);color:var(--fg-muted);cursor:pointer;border-right:1px solid var(--border)}
 .segmented button:last-child{border-right:none}
 .segmented button[aria-pressed="true"]{background:var(--accent-subtle);color:var(--accent-chip)}
+/* scoped to a commit that is not the head: pressed would be a lie, unpressed hides that
+   a scope is active at all */
+.segmented button.other{background:var(--bg-subtle);color:var(--fg);box-shadow:inset 0 -2px 0 var(--accent)}
 /* ---------- Theme toggle ---------- */
 #themeBtn .ic-moon{display:none}
 html[data-theme="dark"] #themeBtn .ic-sun{display:none}
@@ -436,7 +443,7 @@ html[data-rail-open="0"] .syshealth{display:none}
   /* the rail is the only nav now, so it stays reachable — expanded it overlays the page */
   .rail[data-expanded="true"]{position:fixed;box-shadow:var(--shadow-overlay)}
 }
-@media (max-width:640px){ .searchbtn{min-width:0} .searchbtn .sbtxt,.searchbtn kbd{display:none} .col-optional{display:none} .statrow{grid-template-columns:repeat(2,minmax(0,1fr))} .kv{grid-template-columns:1fr;gap:2px 0} .kv dt{margin-top:6px} }
+@media (max-width:640px){ .searchbtn{min-width:0} .searchbtn .sbtxt,.searchbtn kbd{display:none} .col-optional{display:none} .statrow{grid-template-columns:repeat(2,minmax(0,1fr))} .kv{grid-template-columns:1fr;gap:2px 0} .kv dt{margin-top:6px} footer.pfoot{align-items:flex-start;flex-direction:column;gap:10px} footer.pfoot .flinks{margin-left:0;justify-content:flex-start;gap:8px 12px} }
 html.surface-vscode{--topbar-h:40px}
 html.surface-vscode body{font-size:12px}
 html.surface-vscode .topbar{padding:0 8px;gap:8px}
@@ -469,7 +476,11 @@ a.verdict:hover{text-decoration:none;box-shadow:0 0 0 1px var(--fg-subtle)}
 .prmeta-group:first-child{border-left:0;padding-left:0}
 .prmeta-label{color:var(--fg-subtle);font:600 10px var(--font-sans);letter-spacing:.06em;text-transform:uppercase}
 .prmeta-group .mono{white-space:nowrap}
-.branch{font-family:var(--font-mono);font-size:12px;background:var(--accent-subtle);color:var(--accent-chip);border-radius:4px;padding:2px 6px;overflow-wrap:anywhere}
+/* break-word, not anywhere: `anywhere` lowers the chip's min-content width, so at 375px
+   the flex row squeezed `main` into "mai/n". Long branch names still wrap. */
+.branch{font-family:var(--font-mono);font-size:12px;background:var(--accent-subtle);color:var(--accent-chip);border-radius:4px;padding:2px 6px;overflow-wrap:break-word;border:0}
+button.branch{cursor:pointer;font-size:12px}
+button.branch:hover{text-decoration:underline}
 @media (max-width:720px){.prmeta{align-items:flex-start;flex-direction:column;gap:5px}.prmeta-group{border-left:0;padding:0}}
 /* Two-column layout */
 .prgrid{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:24px;align-items:start}
@@ -578,7 +589,9 @@ a.verdict:hover{text-decoration:none;box-shadow:0 0 0 1px var(--fg-subtle)}
 .prbar .dot{flex:none;width:7px;height:7px;border-radius:50%;background:var(--danger)}
 .prbar[data-tone="ready"] .dot{background:var(--success)}
 .prbar[data-tone="done"] .dot{background:var(--attest)}
-@media (max-width:760px){.prbar-acts{width:100%}.prbar-acts .btn{flex:1}}
+/* the bar is sticky-bottom, so it floats over the column while scrolling; reserve a
+   scroll runway on narrow screens or the last rows can never be read clear of it */
+@media (max-width:760px){.prbar-acts{width:100%}.prbar-acts .btn{flex:1}.prmain{padding-bottom:104px}}
 /* header row: the toggle is a button, so the metric "?" (mounted into .lbl by
    mountMetricDefs) must sit OUTSIDE it — nested buttons are invalid. */
 /* The chevron used to be the last thing in the toggle, so any trailing control ("?" on
@@ -937,16 +950,29 @@ table.diff.split .ln{width:40px;min-width:40px}
 .diffnote{font-size:11px;color:var(--fg-subtle);padding:6px 12px;border-top:1px solid var(--border-muted)}
 
 /* ---- Commits tab ---- */
+.cnote{margin-bottom:10px}
 .cgroup{font-size:12px;color:var(--fg-muted);padding:0 0 8px 2px}
 .clist{border:1px solid var(--border);border-radius:var(--r);background:var(--bg);box-shadow:var(--shadow-sm);overflow:hidden}
 .crow2{display:flex;gap:10px;align-items:flex-start;padding:12px;border-bottom:1px solid var(--border-muted);flex-wrap:wrap}
 .crow2:last-child{border-bottom:none}
+/* The head commit is the row the verdict binds to, so it carries a rail on the leading
+   edge — the right-hand verdict chip alone left the row indistinguishable while scanning
+   down the left margin. */
+.crow2.is-head{background:var(--bg-subtle);box-shadow:inset 2px 0 0 var(--success)}
 .crow2 .cmain{flex:1;min-width:180px}
 .crow2 .cmsg{font-size:13px;font-weight:600;overflow-wrap:anywhere}
+.crow2 .cmsg-link{font:inherit;color:inherit;background:none;border:0;padding:0;text-align:left;cursor:pointer;border-radius:3px}
+.crow2 .cmsg-link:hover{color:var(--accent);text-decoration:underline}
+.crow2 .cmsg-link:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .crow2 .cmeta{font-size:12px;color:var(--fg-muted);margin-top:2px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+/* A signature check and a verdict are different claims; only the verdict earns green. */
+.crow2 .vsig{gap:4px}
 .crow2 .cright{display:flex;gap:6px;align-items:center;flex-wrap:wrap;flex:none}
+.clist-foot{font-size:12px;color:var(--fg-subtle);padding:10px 12px;border-top:1px solid var(--border-muted);background:var(--bg-subtle)}
 .sha{font:12px var(--font-mono);color:var(--fg);border:1px solid var(--border);border-radius:4px;padding:2px 6px;background:var(--bg-subtle)}
-.shacopy{width:24px;height:24px;flex:none}
+button.sha{cursor:pointer}
+button.sha:hover{border-color:var(--fg-subtle)}
+.shacopy{flex:none}
 
 /* ---- Merge panel: method split button + auto-merge ---- */
 .mergewrap{position:relative;display:flex;gap:1px;width:100%}
@@ -1254,32 +1280,16 @@ tr.crow:has(.azbot) td{padding:10px 12px}
 #panel-intel[data-atlas="healthy"] .ci-deg{display:none}
 #panel-intel[data-atlas="degraded"] .ci-ok{display:none}
 
-/* A — prediction → proof hero */
-.ci-hero{border-color:var(--accent-line)}
-.ci-hero>.card-h{background:var(--accent-subtle);border-bottom-color:var(--accent-line);border-radius:var(--r) var(--r) 0 0;flex-wrap:wrap}
-.ci-lede{font-size:14px;line-height:1.6;overflow-wrap:anywhere;color:var(--fg)}
-.ci-lede strong{font-family:var(--font-mono);font-size:13px}
-.ci-steps{list-style:none;margin:18px 0 0;padding:0}
-.ci-steps .step{min-width:104px;padding:22px 4px 0}
-.ci-steps .sv{display:block;font:700 16px var(--font-mono);color:var(--fg);line-height:1.2}
-.ci-steps .sl{display:block;font-size:11px;color:var(--fg-muted);margin-top:3px;overflow-wrap:anywhere}
-.ci-frame{margin-top:16px;padding-top:12px;border-top:1px dashed var(--border);font-size:13px;color:var(--fg-muted);overflow-wrap:anywhere}
-.ci-frame strong{color:var(--fg)}
-.ci-degnote{margin-top:10px;font-size:12px;color:var(--fg-muted);overflow-wrap:anywhere}
-.ci-acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
-
-/* B — impact summary */
+/* shared bits still used by the rebuilt panel */
 .ci-engine{font-family:var(--font-mono);font-size:10px;letter-spacing:.02em}
-.ci-hd{display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-width:0}
-.ci-hd h2{flex:1;min-width:140px}
-.ci-stats{margin-bottom:0;grid-template-columns:repeat(auto-fit,minmax(196px,1fr))}
-.ci-stats .val{font-size:20px}
 .ci-note{font-size:11px;color:var(--fg-subtle);margin-top:4px;overflow-wrap:anywhere}
 .ci-ctx{margin-top:16px;border:1px dashed var(--border);border-radius:var(--r);background:var(--bg-subtle);padding:10px 12px;min-width:0}
 .ci-ctx h3{font:600 11px var(--font-sans);color:var(--fg-muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
 .ci-ctx p{font:12px/1.9 var(--font-mono);color:var(--fg-muted);overflow-wrap:anywhere}
 .ci-ctx b{color:var(--fg);font-weight:700}
-.ci-gate{display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap;margin-top:16px;padding:10px 12px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg-subtle);font-size:13px;color:var(--fg)}
+/* --bg, not --bg-subtle: inside .atl the card is already --bg-subtle, so the
+   strip had no contrast against it */
+.ci-gate{display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap;margin-top:16px;padding:10px 12px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg);font-size:13px;color:var(--fg)}
 .ci-gate .cig{flex:1;min-width:180px;overflow-wrap:anywhere;color:var(--fg-muted)}
 .ci-gate .cig strong{color:var(--fg)}
 
@@ -1325,12 +1335,6 @@ tr.crow:has(.azbot) td{padding:10px 12px}
 .ci-cf .cfp{font:600 12px var(--font-mono);color:var(--accent);background:none;border:none;padding:0;cursor:pointer;text-align:left;overflow-wrap:anywhere;min-width:0}
 .ci-cf .cfp:hover{text-decoration:underline}
 .ci-cf p{font-size:12px;color:var(--fg-muted);overflow-wrap:anywhere}
-.ci-files{list-style:none;display:flex;flex-direction:column;gap:1px;min-width:0}
-.ci-files li{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:4px 6px;border-radius:4px;min-width:0}
-.ci-files li[hidden]{display:none}
-.ci-files li:hover{background:var(--bg-subtle)}
-.ci-files .fp{font:12px var(--font-mono);color:var(--fg);overflow-wrap:anywhere;min-width:0}
-.ci-files .ft{margin-left:auto;flex:none}
 .ci-more{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px}
 
 /* E — provenance */
@@ -1338,6 +1342,260 @@ tr.crow:has(.azbot) td{padding:10px 12px}
 .ci-prov dd>span{overflow-wrap:anywhere;min-width:0}
 .ci-cp{width:24px;height:24px;min-width:24px;flex:none}
 @media (max-width:520px){.kv.ci-prov{grid-template-columns:minmax(0,1fr)}.kv.ci-prov dd{margin-bottom:6px}}
+
+/* ---------- Atlas analysis card ----------
+   One card holds the whole tab: scope → impact → three collapsibles. Every colour
+   comes from a token, so dark mode and the restricted skin need no extra rules. */
+.atl{border-radius:var(--r-lg);border-color:var(--border);background:var(--bg-subtle);padding:16px;min-width:0}
+.atl-ic{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:8px;background:var(--attest-subtle);color:var(--attest);flex:none}
+.atl-ic.accent{background:var(--accent-subtle);color:var(--accent)}
+.atl-ic.sm{width:22px;height:22px;border-radius:6px}
+.atl-dot{gap:6px}
+.atl-dot::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor;flex:none}
+.atl-gate{margin-top:16px}
+
+/* ---------- Atlas head region ----------
+   The verdict is a sentence, the rail says which phase produced it, and only the
+   metrics that failed get card weight. Class names are all .atl- prefixed on
+   purpose: .rail is the global nav sidebar, and .card/.label/.dot/.gate/.verdict
+   are all taken too — bare names from the design lab would silently restyle.
+   Both run states are written into the markup and switched by the existing
+   #panel-intel[data-atlas] rules above; no JS renders this. */
+.atl-hd{display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin-bottom:13px;min-width:0}
+.atl-ttl{display:flex;align-items:center;gap:9px;flex:1 1 260px;min-width:0}
+.atl-ttl h2{font-size:15px;font-weight:650;letter-spacing:-.01em;min-width:0;overflow-wrap:anywhere}
+.atl-status{display:flex;align-items:center;gap:9px;flex-wrap:wrap;min-width:0}
+.atl-phct{font:500 11.5px var(--font-mono);color:var(--fg-muted);white-space:nowrap}
+/* marks a control that only exists to drive the prototype, so it does not read
+   as product navigation in a demo */
+.atl-proto{border-style:dashed}
+.atl-proto::before{content:"PROTOTYPE · ";font-weight:700;letter-spacing:.05em}
+
+/* headline. NOTE --bg, not --bg-subtle: .atl already sets --bg-subtle on the
+   card, so the lab's subtle-on-white would vanish here. */
+.atl-head{display:flex;gap:14px;align-items:flex-start;padding:14px 16px;border-radius:var(--r);background:var(--bg);border:1px solid var(--border);min-width:0}
+.atl-hic{width:38px;height:38px;border-radius:var(--r-lg);display:flex;align-items:center;justify-content:center;flex:none;background:var(--success-subtle);color:var(--success)}
+.atl-head.u .atl-hic{background:var(--attention-subtle);color:var(--attention)}
+.atl-htx{min-width:0}
+.atl-ht{font-size:16.5px;font-weight:650;letter-spacing:-.012em;line-height:1.35;overflow-wrap:anywhere}
+.atl-head.u .atl-ht{color:var(--attention)}
+.atl-hs{font-size:12.5px;color:var(--fg-muted);margin-top:5px;overflow-wrap:anywhere}
+.atl-hs b{color:var(--fg);font-weight:650}
+/* rail legend — only meaningful once a run has degraded; in a healthy run every
+   dot is the same and a key for one symbol is noise */
+.atl-plegend{display:flex;gap:16px;flex-wrap:wrap;margin-top:9px;font-size:11px;color:var(--fg-muted)}
+.atl-plegend span{display:inline-flex;align-items:center;gap:6px}
+.atl-plegend i{width:9px;height:9px;border-radius:50%;flex:none}
+.atl-plegend .k-ok{background:var(--success)}
+.atl-plegend .k-bad{background:var(--attention)}
+.atl-plegend .k-skip{background:var(--bg);border:2px dashed var(--border)}
+
+/* phase rail — carries what each phase produced, so this is where a number is
+   explained rather than merely listed. The ledger below is scope only: the rail
+   says what Atlas *did*, the ledger says what Atlas *read*. Written once in its
+   healthy shape; the three phases that change carry .ci-ok/.ci-deg twins. */
+.atl-prail{list-style:none;display:flex;margin-top:13px;overflow-x:auto;padding-bottom:2px;min-width:0}
+.atl-ph{flex:1;min-width:120px;position:relative;padding:0 3px}
+.atl-pv{display:block;font:600 15px var(--font-mono);color:var(--fg);margin-top:3px;line-height:1.2;overflow-wrap:anywhere}
+.atl-pv.ok{color:var(--success)}
+/* a phase that did not produce a value says so in words, not as a dash */
+.atl-pv.bad,.atl-pv.skip{font:700 10px var(--font-sans);letter-spacing:.05em;text-transform:uppercase}
+.atl-pv.bad{color:var(--attention)}
+.atl-pv.skip{color:var(--fg-subtle)}
+.atl-pc{display:block;font-size:11px;color:var(--fg-muted);margin-top:3px;line-height:1.35;overflow-wrap:anywhere}
+/* the injected "?" is 16px, which overwhelms an 11px phase name — shrink it here
+   only, so the seven definitions that moved off the ledger stay reachable */
+.atl-ph .lbl .mdef{width:13px;height:13px;font-size:9px}
+.atl-pdot{width:13px;height:13px;border-radius:50%;background:var(--success);display:flex;align-items:center;justify-content:center;color:var(--on-fill);position:relative;z-index:2}
+.atl-pline{position:absolute;left:calc(50% + 10px);right:calc(-50% + 10px);top:6px;height:2px;background:var(--success);z-index:1}
+.atl-ph:last-child .atl-pline{display:none}
+.atl-pn{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:500;color:var(--fg-muted);margin-top:7px;line-height:1.3;overflow-wrap:anywhere}
+/* state is announced, not just coloured */
+.atl-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;border:0}
+#panel-intel[data-atlas="degraded"] .atl-ph[data-ph="xrepo"] .atl-pdot{background:var(--attention)}
+#panel-intel[data-atlas="degraded"] .atl-ph[data-ph="xrepo"] .atl-pn{color:var(--attention);font-weight:650}
+#panel-intel[data-atlas="degraded"] .atl-ph[data-ph="contracts"] .atl-pdot,
+#panel-intel[data-atlas="degraded"] .atl-ph[data-ph="risk"] .atl-pdot{background:var(--bg);border:2px dashed var(--border)}
+#panel-intel[data-atlas="degraded"] .atl-ph[data-ph="contracts"] .atl-pn,
+#panel-intel[data-atlas="degraded"] .atl-ph[data-ph="risk"] .atl-pn{color:var(--fg-subtle)}
+#panel-intel[data-atlas="degraded"] .atl-ph[data-ph="xrepo"] .atl-pline,
+#panel-intel[data-atlas="degraded"] .atl-ph[data-ph="contracts"] .atl-pline,
+#panel-intel[data-atlas="degraded"] .atl-ph[data-ph="risk"] .atl-pline{background:repeating-linear-gradient(90deg,var(--border) 0 4px,transparent 4px 8px)}
+#panel-intel[data-atlas="degraded"] .atl-ph[data-ph="xrepo"] .atl-pdot svg,
+#panel-intel[data-atlas="degraded"] .atl-ph[data-ph="contracts"] .atl-pdot svg,
+#panel-intel[data-atlas="degraded"] .atl-ph[data-ph="risk"] .atl-pdot svg{display:none}
+
+.atl-lbl{display:flex;align-items:center;gap:7px;margin:16px 0 9px;font:600 11px var(--font-sans);letter-spacing:.04em;text-transform:uppercase;color:var(--fg-muted);min-width:0}
+.atl-lbl svg{flex:none;color:currentColor}
+.atl-lbl.u{color:var(--attention)}
+.atl-rule{flex:1;min-width:12px;height:1px;background:var(--border)}
+.atl-lbl.u .atl-rule{background:var(--attention-subtle)}
+.atl-ct{flex:none;font:500 10.5px var(--font-mono);color:var(--fg-subtle);text-transform:none;letter-spacing:0}
+
+/* unresolved zone — the one place on this panel that has earned card weight */
+.atl-ugrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;min-width:0}
+@media (max-width:900px){.atl-ugrid{grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}}
+.atl-uq{border:1px dashed var(--attention);background:var(--attention-subtle);border-radius:var(--r);padding:12px 14px;min-width:0;display:flex;flex-direction:column;gap:6px}
+.atl-uq .lbl{display:flex;align-items:center;gap:6px;font:600 10px var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--attention);min-width:0}
+.atl-uq .lbl svg{flex:none}
+/* the injected "?" is --fg-subtle on --border, invisible on amber */
+.atl-uq .lbl .mdef{border-color:color-mix(in srgb,var(--attention) 45%,transparent);color:var(--attention)}
+.atl-uq .lbl .mdef:hover{color:var(--fg);border-color:var(--attention)}
+.atl-uq .q{font-size:12.5px;font-weight:650;color:var(--fg);overflow-wrap:anywhere}
+.atl-uq .a{font:700 13px var(--font-sans);letter-spacing:.02em;color:var(--attention);overflow-wrap:anywhere}
+.atl-uq .w{font-size:11.5px;line-height:1.45;color:var(--attention);overflow-wrap:anywhere}
+
+/* scope strip — two facts do not justify a bordered container and a row grid;
+   they read as one line each. The .e rule is what the old .atl-cap never had:
+   captions used to inherit --fg at 13px, darker than their own label. */
+.atl-scope{display:flex;flex-wrap:wrap;gap:8px 28px;min-width:0}
+.atl-sc{display:flex;align-items:baseline;gap:8px;min-width:0;font-size:12px}
+.atl-sc .lbl{display:inline-flex;align-items:center;gap:6px;font-weight:500;color:var(--fg);white-space:nowrap}
+.atl-sc .lbl svg{flex:none;color:var(--fg-subtle)}
+.atl-sc .v{font:600 15px var(--font-mono);color:var(--fg)}
+.atl-sc .e{color:var(--fg-muted);min-width:0;overflow-wrap:anywhere}
+
+.atl-led{border:1px solid var(--border);border-radius:var(--r);background:var(--bg);overflow:hidden;min-width:0}
+.atl-lr{display:grid;grid-template-columns:minmax(150px,210px) 96px minmax(0,1fr);gap:14px;align-items:center;padding:6px 13px;border-bottom:1px solid var(--border-muted)}
+.atl-lr:last-child{border-bottom:0}
+.atl-lr .lbl{display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:500;min-width:0}
+.atl-lr .lbl svg{flex:none;color:var(--fg-subtle)}
+.atl-lr .v{font:600 16px var(--font-mono);color:var(--fg);text-align:right;white-space:nowrap}
+.atl-lr .v.ok{color:var(--success)}
+.atl-lr .e{font-size:12px;color:var(--fg-muted);min-width:0;overflow-wrap:anywhere}
+@media (max-width:720px){
+  .atl-lr{grid-template-columns:minmax(0,1fr) auto;gap:3px 12px;padding:9px 13px}
+  .atl-lr .e{grid-column:1/-1}
+}
+
+/* Evidence tabs keep all three information spaces discoverable without stacking
+   disclosure controls. The selected panel is linked through native tab semantics. */
+.atl-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;margin-top:12px;border:1px solid var(--border);border-radius:var(--r-lg) var(--r-lg) 0 0;background:var(--bg-subtle);overflow:hidden}
+/* evidence disclosure — the strip keeps its counts visible either way, so the
+   three tabs still give the at-a-glance summary the old drawers did */
+.atl-evdtog{display:flex;align-items:center;gap:7px;width:100%;padding:9px 14px;border:1px solid var(--border);border-top:0;border-radius:0 0 var(--r-lg) var(--r-lg);background:var(--bg-subtle);color:var(--fg-muted);font:500 12px var(--font-sans);cursor:pointer;text-align:left}
+.atl-evdtog:hover{background:var(--bg-inset);color:var(--fg)}
+.atl-evdtog[aria-expanded="true"]{border-radius:0}
+.atl-evdchev{flex:none;transition:transform .15s}
+.atl-evdtog[aria-expanded="true"] .atl-evdchev{transform:rotate(90deg)}
+@media (prefers-reduced-motion:reduce){.atl-evdchev{transition:none}}
+.atl-tabs [role="tab"]{position:relative;display:flex;align-items:flex-start;gap:10px;min-width:0;min-height:64px;padding:12px 14px;border:0;border-right:1px solid var(--border);background:transparent;color:var(--fg-muted);font:inherit;text-align:left;cursor:pointer}
+.atl-tabs [role="tab"]:last-child{border-right:0}
+.atl-tabs [role="tab"]:hover{background:var(--bg-inset);color:var(--fg)}
+.atl-tabs [role="tab"]:focus-visible{z-index:1;outline:2px solid var(--accent);outline-offset:-3px}
+.atl-tabs [role="tab"][aria-selected="true"]{background:var(--bg);color:var(--fg)}
+.atl-tabs [role="tab"][aria-selected="true"]::after{content:"";position:absolute;right:12px;bottom:0;left:12px;height:3px;border-radius:3px 3px 0 0;background:var(--accent)}
+.atl-dt{flex:1 1 auto;min-width:0}
+.atl-dt b{display:block;font-size:13px;font-weight:650;color:currentColor}
+.atl-dt span{display:block;margin-top:2px;font:400 11px var(--font-sans);color:var(--fg-subtle);overflow-wrap:anywhere}
+.atl-dcount{flex:none;margin-top:1px;font:500 11px var(--font-mono);color:var(--fg-subtle);border:1px solid var(--border);border-radius:999px;padding:2px 9px;white-space:nowrap}
+#panel-intel[data-atlas="degraded"] #ciPathsTab .atl-dcount{border-color:var(--attention);color:var(--attention)}
+.atl-tabpanel{border:1px solid var(--border);border-top:0;border-radius:0 0 var(--r-lg) var(--r-lg);background:var(--bg);box-shadow:var(--shadow-sm)}
+.atl-tabpanel.ci-dd{padding:14px 12px}
+.atl-tabpanel:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+@media(max-width:760px){
+  .atl-tabs{display:flex;overflow-x:auto}
+  .atl-tabs [role="tab"]{flex:0 0 250px}
+}
+
+/* sub-cards inside the collapsibles */
+.atl-card{border:1px solid var(--border);border-radius:var(--r-lg);background:var(--bg);padding:14px;min-width:0}
+.atl-ch{display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap;margin-bottom:12px;min-width:0}
+.atl-ch .t{flex:1 1 200px;min-width:0}
+.atl-ch .t h3{font-size:13px;font-weight:650;overflow-wrap:anywhere}
+.atl-ch .t p{font-size:11px;color:var(--fg-subtle);margin-top:2px;overflow-wrap:anywhere}
+.atl-ch .pills{display:flex;gap:6px;flex-wrap:wrap;margin-left:auto}
+.atl-mgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(136px,1fr));gap:10px;min-width:0}
+.atl-mstat{border:1px solid var(--border);border-radius:var(--r);background:var(--bg-subtle);padding:10px 12px;min-width:0}
+.atl-mstat .v{font:600 21px var(--font-mono);color:var(--fg);line-height:1.1}
+.atl-mstat .k{margin-top:4px;font:600 10px var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--fg-muted);overflow-wrap:anywhere}
+.atl-rows{display:flex;flex-direction:column;gap:9px;min-width:0}
+.atl-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;min-width:0}
+.atl-row .t{flex:1 1 180px;min-width:0}
+.atl-row .t b{display:block;font-size:12px;font-weight:650;color:var(--fg);overflow-wrap:anywhere}
+.atl-row .t span{display:block;font-size:11px;color:var(--fg-subtle);overflow-wrap:anywhere}
+.atl-row .v{font:600 12px var(--font-mono);color:var(--accent);flex:none;margin-left:auto;white-space:nowrap}
+.atl-sect{font:600 10px var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--fg-muted);margin:14px 0 8px;display:flex;align-items:center;gap:8px}
+.atl-sect .n{margin-left:auto;font-family:var(--font-mono);font-weight:400;text-transform:none;letter-spacing:0;color:var(--fg-subtle);text-align:right;min-width:0}
+.atl-fchips{list-style:none;display:flex;flex-direction:column;gap:6px;min-width:0}
+.atl-fchips li{display:flex;align-items:center;gap:8px;padding:7px 10px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg-subtle);min-width:0}
+.atl-fchips li[hidden]{display:none}
+.atl-fchips .fp{font:12px var(--font-mono);color:var(--accent-chip);overflow-wrap:anywhere;min-width:0}
+.atl-fchips .ft{margin-left:auto;flex:none}
+
+/* blast radius: diagram left, evidence rail right */
+.atl-br{display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap;min-width:0}
+.atl-brmain{flex:1 1 440px;min-width:0;display:flex;flex-direction:column;align-self:stretch}
+.atl-rail{flex:1 1 288px;min-width:0;max-width:370px;display:flex;flex-direction:column;gap:8px}
+@media (max-width:900px){.atl-rail{max-width:none;flex-basis:100%}}
+.atl-brh{display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap;margin-bottom:6px;min-width:0}
+.atl-brh .t{flex:1 1 220px;min-width:0}
+.atl-brh .t h4{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;font-size:13px;font-weight:650;min-width:0}
+.atl-brh .t h4 em{font:400 11px var(--font-mono);font-style:normal;color:var(--fg-subtle);overflow-wrap:anywhere}
+.atl-brh .t p{font:11px var(--font-mono);color:var(--fg-subtle);margin-top:2px;overflow-wrap:anywhere}
+.atl-legend{display:flex;gap:11px;flex-wrap:wrap;margin-left:auto;font-size:11px;color:var(--fg-muted)}
+.atl-legend span{display:inline-flex;align-items:center;gap:5px}
+.atl-legend i{width:8px;height:8px;border-radius:50%;flex:none}
+.atl-canvas{flex:1;display:flex;flex-direction:column;justify-content:center;border:1px solid var(--border);border-radius:var(--r-lg);background:var(--bg);padding:10px;min-width:0;overflow:hidden}
+.atl-svg{display:block;width:100%;height:auto;max-width:600px;margin:0 auto}
+.atl-ring{fill:none;stroke:var(--border-muted);stroke-dasharray:3 5}
+.atl-spoke{stroke:var(--border);stroke-width:1;stroke-dasharray:2 4;opacity:.75}
+.atl-hub{fill:var(--accent)}
+.atl-hubt{font:700 13px var(--font-sans);fill:var(--on-fill);text-anchor:middle}
+.atl-cap-t{font:600 11px var(--font-sans);fill:var(--fg-muted);text-anchor:middle}
+.atl-node{cursor:pointer;outline:none}
+.atl-node .halo{fill:var(--bg);stroke-width:1.5}
+.atl-node .core{stroke:none}
+.atl-node .focus-ring{fill:none;stroke-width:1.5;opacity:0}
+.atl-node.sel .focus-ring{opacity:1}
+.atl-node .nl{font:600 10px var(--font-sans);fill:var(--fg-muted)}
+.atl-node.sel .nl{fill:var(--fg)}
+.atl-node.sev-high .halo{stroke:var(--danger)}
+.atl-node.sev-high .core,.atl-node.sev-high .focus-ring{fill:var(--danger);stroke:var(--danger)}
+.atl-node.sev-med .halo{stroke:var(--attention)}
+.atl-node.sev-med .core,.atl-node.sev-med .focus-ring{fill:var(--attention);stroke:var(--attention)}
+.atl-node.sev-low .halo{stroke:var(--success)}
+.atl-node.sev-low .core,.atl-node.sev-low .focus-ring{fill:var(--success);stroke:var(--success)}
+.atl-node .focus-ring{fill:none}
+.atl-node:hover .halo,.atl-node:focus-visible .halo{stroke-width:3}
+.atl-badge{fill:var(--danger)}
+.atl-badget{font:700 9px var(--font-sans);fill:var(--on-fill);text-anchor:middle}
+.atl-foot{display:flex;gap:7px;align-items:flex-start;margin-top:10px;padding-top:10px;border-top:1px dashed var(--border);font-size:11px;color:var(--fg-subtle);overflow-wrap:anywhere}
+.atl-foot svg{flex:none;margin-top:1px}
+
+/* evidence rail */
+.atl-focus{border:1px solid color-mix(in srgb,var(--danger) 26%,var(--border));border-radius:var(--r-lg);background:var(--bg);padding:12px;min-width:0}
+.atl-focus.sev-med{border-color:color-mix(in srgb,var(--attention) 26%,var(--border))}
+.atl-focus.sev-low{border-color:var(--border)}
+.atl-fh{display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-width:0}
+.atl-fname{font:700 13px var(--font-mono);color:var(--danger);overflow-wrap:anywhere;min-width:0}
+.atl-focus.sev-med .atl-fname{color:var(--attention)}
+.atl-focus.sev-low .atl-fname{color:var(--fg)}
+.atl-fpath{font:11px var(--font-mono);color:var(--fg-subtle);margin-top:4px;overflow-wrap:anywhere}
+.atl-fdesc{font-size:11.5px;line-height:1.65;color:var(--fg-muted);margin-top:9px;overflow-wrap:anywhere}
+.atl-dstats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:11px}
+.atl-dstat{border:1px solid var(--border-muted);border-radius:var(--r);background:var(--bg-subtle);padding:8px 4px;text-align:center;min-width:0}
+.atl-dstat b{display:block;font:600 15px var(--font-mono);color:var(--fg)}
+.atl-dstat span{display:block;margin-top:2px;font:600 9px var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--fg-muted)}
+.atl-dstat.add{background:var(--success-subtle);border-color:transparent}
+.atl-dstat.add b{color:var(--success)}
+.atl-dstat.del{background:var(--danger-subtle);border-color:transparent}
+.atl-dstat.del b{color:var(--danger)}
+.atl-find{border:1px solid var(--border);border-radius:var(--r);background:var(--bg-subtle);padding:10px;min-width:0}
+.atl-find .fh{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:6px}
+.atl-find p{font-size:11.5px;line-height:1.65;color:var(--fg-muted);overflow-wrap:anywhere}
+.atl-syms{display:flex;flex-wrap:wrap;gap:6px;min-width:0}
+.atl-sym{display:inline-flex;align-items:center;gap:6px;max-width:100%;padding:4px 9px;border:1px solid var(--border);border-radius:999px;background:var(--bg-subtle);font:11px var(--font-mono);color:var(--fg);overflow-wrap:anywhere}
+.atl-sym i{font-style:normal;color:var(--fg-subtle)}
+/* the diff block is a code surface, not a themed one — it stays dark in both themes,
+   so its own +/− palette keeps contrast instead of inverting with the page */
+.atl-diff{--dbg:#0e1830;--dfg:#e6edf7;--dplus:#86efac;--dminus:#fca5a5;--dhunk:#93c5fd;border:1px solid rgba(148,163,184,.22);border-radius:var(--r);background:var(--dbg);color:var(--dfg);padding:10px 12px;font:11px/1.75 var(--font-mono);white-space:pre;overflow-x:auto;min-width:0}
+.atl-diff .ad{color:var(--dplus)}
+.atl-diff .rm{color:var(--dminus)}
+.atl-diff .hk{color:var(--dhunk)}
+.atl-diff .cm{opacity:.62}
+.atl-nodiff{font-size:11.5px;color:var(--fg-subtle);overflow-wrap:anywhere}
+@media (prefers-reduced-motion:reduce){.atl-node,.atl-node *{transition:none!important}}
 
 /* Restricted (Analyst) — controls stay hoverable so the tooltip explains why */
 html[data-pstate="restricted"] .act{opacity:.55;cursor:not-allowed;pointer-events:auto!important}
@@ -1671,7 +1929,7 @@ html[data-theme="dark"] .railgrp::before{color:#9aabc6}
           <div class="prmeta" aria-label="Pull request metadata">
             <span class="prmeta-group">
               <span class="prmeta-label">Change</span>
-              <span class="branch">feat/rate-limit-middleware</span> → <span class="branch">main</span>
+              <button type="button" class="branch act" id="branchCopy" data-tip="Copy branch name">feat/rate-limit-middleware</button> → <span class="branch">main</span>
             </span>
             <span class="prmeta-group">
               <span class="prmeta-label">Activity</span>
@@ -1784,7 +2042,7 @@ html[data-theme="dark"] .railgrp::before{color:#9aabc6}
               </div>
 
               <article class="msg" id="prDesc" aria-label="Pull request description by @priyar" data-rx='{"👍":3,"🚀":2}'>
-                <div class="msg-h"><span class="avatar sm" aria-hidden="true">PR</span><strong>@priyar</strong><span class="label outline">Author</span><span class="label neutral">Maintainer</span><time datetime="2026-08-03T09:32:00">Aug 3, 09:32</time></div>
+                <div class="msg-h"><span class="avatar sm" aria-hidden="true">PN</span><strong>@priyar</strong><span class="label outline">Author</span><span class="label neutral">Maintainer</span><time datetime="2026-08-03T09:32:00">Aug 3, 09:32</time></div>
                 <div class="msg-b">
                   <p>Adds a token-bucket rate limiter at gateway ingress. Buckets are per-client-key on a shared refill clock; burst allowance is capped at <span class="mono">2×</span> steady rate and waiters back off with bounded jitter.</p>
                   <ul>
@@ -1824,7 +2082,7 @@ html[data-theme="dark"] .railgrp::before{color:#9aabc6}
               </div>
 
               <article class="msg approve" aria-label="Review by @priyar — approved" data-rx='{"🎉":1,"👍":1}'>
-                <div class="msg-h"><span class="avatar sm" aria-hidden="true">PR</span><strong>@priyar</strong><span class="label success">✓ Approved</span><time datetime="2026-08-03T09:50:00">Aug 3, 09:50</time></div>
+                <div class="msg-h"><span class="avatar sm" aria-hidden="true">PN</span><strong>@priyar</strong><span class="label success">✓ Approved</span><time datetime="2026-08-03T09:50:00">Aug 3, 09:50</time></div>
                 <div class="msg-b"><p>Token bucket bounds look right — verified the burst case in the run evidence.</p></div>
                 <div class="rxbar" data-rxbar></div>
               </article>
@@ -1852,7 +2110,7 @@ html[data-theme="dark"] .railgrp::before{color:#9aabc6}
                 <div id="rBody" hidden>
                   <div class="msg-b"><p>Should <span class="mono">TestRefillJitterBounded</span> pin the seed? A 1,000-sample peak check can drift on a loaded runner and land in the flake docket instead of failing honestly.</p></div>
                   <div class="replies">
-                    <div class="reply"><span class="avatar sm" aria-hidden="true">PR</span><div class="rb"><strong>@priyar</strong> <span class="rt"><time datetime="2026-08-03T10:22:00">Aug 3, 10:22</time></span><p>Shadow replay ran it 12 times in run <a href="run-details.html" class="mono">06cb9564</a> — 12 of 12 stable, so it is not in the docket. Seed stays unpinned on purpose: the bound has to hold for any seed.</p></div></div>
+                    <div class="reply"><span class="avatar sm" aria-hidden="true">PN</span><div class="rb"><strong>@priyar</strong> <span class="rt"><time datetime="2026-08-03T10:22:00">Aug 3, 10:22</time></span><p>Shadow replay ran it 12 times in run <a href="run-details.html" class="mono">06cb9564</a> — 12 of 12 stable, so it is not in the docket. Seed stays unpinned on purpose: the bound has to hold for any seed.</p></div></div>
                   </div>
                   <div class="rxbar" data-rxbar></div>
                 </div>
@@ -1888,55 +2146,43 @@ html[data-theme="dark"] .railgrp::before{color:#9aabc6}
           </div>
 
           <div id="panel-commits" role="tabpanel" aria-labelledby="tab-commits" tabindex="0" hidden>
-            <div class="card" style="margin-bottom:16px"><div class="card-b" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
-              <p class="small muted" style="flex:1;min-width:200px" id="commitsNote" aria-live="polite"><span class="mono">3</span> commits by <strong>@priyar</strong> on <span class="mono">feat/rate-limit-middleware</span> — the head commit carries the attested verdict.</p>
-              <button class="btn sm act" id="copyBranchBtn">Copy branch name</button>
-            </div></div>
-            <p class="cgroup">Commits on <time datetime="2026-08-03T09:32:00">Aug 3, 2026</time></p>
+            <p class="small muted cnote" id="commitsNote" aria-live="polite">The head commit carries the attested verdict — <span class="mono">3</span> commits by <strong>@priyar</strong> on <span class="mono">feat/rate-limit-middleware</span>.</p>
+            <p class="cgroup">Commits on <time datetime="2026-08-03T09:32:00" data-abs="date">Aug 3, 2026</time></p>
             <div class="clist" id="commitList">
               <div class="crow2">
-                <span class="avatar sm" aria-hidden="true">PR</span>
+                <span class="avatar sm" aria-hidden="true">PN</span>
                 <div class="cmain">
-                  <p class="cmsg">Add token-bucket limiter with a shared refill clock</p>
-                  <p class="cmeta"><strong>@priyar</strong> committed <time datetime="2026-08-03T09:20:00">Aug 3, 09:20</time><span class="label success" tabindex="0" data-tip="Commit signature verified — ed25519 key for @priyar">✓ Verified</span></p>
+                  <p class="cmsg"><button type="button" class="cmsg-link" data-cscope="4a7c9e02">Add token-bucket limiter with a shared refill clock</button></p>
+                  <p class="cmeta"><strong>@priyar</strong> committed <time datetime="2026-08-03T09:20:00" data-abs="time">Aug 3, 09:20</time><span class="label neutral vsig" tabindex="0" data-tip="Commit signature verified — ed25519 key for @priyar"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shield-check" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1 1 0 0 1 1.52 0C14.5 3.8 17 5 19 5a1 1 0 0 1 1 1z" /><path d="m9 12 2 2 4-4" /></svg>Verified</span></p>
                 </div>
                 <div class="cright">
-                  <span class="sha">4a7c9e02</span>
-                  <button class="icon-btn act shacopy" aria-label="Copy full SHA for commit 4a7c9e02" data-sha="4a7c9e02" data-tip="Copy SHA">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-copy" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2" ry="2" /> <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" /></svg>
-                  </button>
+                  <button class="sha act shacopy" aria-label="Copy full SHA for commit 4a7c9e02" data-sha="4a7c9e02" data-tip="Copy SHA">4a7c9e02</button>
                 </div>
               </div>
               <div class="crow2">
-                <span class="avatar sm" aria-hidden="true">PR</span>
+                <span class="avatar sm" aria-hidden="true">PN</span>
                 <div class="cmain">
-                  <p class="cmsg">Cover burst cap and refill-jitter bounds</p>
-                  <p class="cmeta"><strong>@priyar</strong> committed <time datetime="2026-08-03T09:27:00">Aug 3, 09:27</time><span class="label success" tabindex="0" data-tip="Commit signature verified — ed25519 key for @priyar">✓ Verified</span></p>
+                  <p class="cmsg"><button type="button" class="cmsg-link" data-cscope="b1d5f730">Cover burst cap and refill-jitter bounds</button></p>
+                  <p class="cmeta"><strong>@priyar</strong> committed <time datetime="2026-08-03T09:27:00" data-abs="time">Aug 3, 09:27</time><span class="label neutral vsig" tabindex="0" data-tip="Commit signature verified — ed25519 key for @priyar"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shield-check" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1 1 0 0 1 1.52 0C14.5 3.8 17 5 19 5a1 1 0 0 1 1 1z" /><path d="m9 12 2 2 4-4" /></svg>Verified</span></p>
                 </div>
                 <div class="cright">
-                  <span class="sha">b1d5f730</span>
-                  <button class="icon-btn act shacopy" aria-label="Copy full SHA for commit b1d5f730" data-sha="b1d5f730" data-tip="Copy SHA">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-copy" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2" ry="2" /> <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" /></svg>
-                  </button>
+                  <button class="sha act shacopy" aria-label="Copy full SHA for commit b1d5f730" data-sha="b1d5f730" data-tip="Copy SHA">b1d5f730</button>
                 </div>
               </div>
-              <div class="crow2">
-                <span class="avatar sm" aria-hidden="true">PR</span>
+              <div class="crow2 is-head">
+                <span class="avatar sm" aria-hidden="true">PN</span>
                 <div class="cmain">
-                  <p class="cmsg">Wire limiter into gateway ingress, drop the fixed window</p>
-                  <p class="cmeta"><strong>@priyar</strong> committed <time datetime="2026-08-03T09:32:00">Aug 3, 09:32</time><span class="label success" tabindex="0" data-tip="Commit signature verified — ed25519 key for @priyar">✓ Verified</span><span class="label outline">head</span></p>
+                  <p class="cmsg"><button type="button" class="cmsg-link" data-cscope="7e0a93c5">Wire limiter into gateway ingress, drop the fixed window</button></p>
+                  <p class="cmeta"><span class="label accent">head</span><strong>@priyar</strong> committed <time datetime="2026-08-03T09:32:00" data-abs="time">Aug 3, 09:32</time><span class="label neutral vsig" tabindex="0" data-tip="Commit signature verified — ed25519 key for @priyar"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shield-check" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1 1 0 0 1 1.52 0C14.5 3.8 17 5 19 5a1 1 0 0 1 1 1z" /><path d="m9 12 2 2 4-4" /></svg>Verified</span></p>
                 </div>
                 <div class="cright">
                   <a class="verdict passed" href="run-details.html" data-tip="Run 06cb9564 — grade A · attested">Passed</a>
                   <a class="btn sm" href="run-details.html">Evidence <span class="mono">06cb9564</span></a>
-                  <span class="sha">7e0a93c5</span>
-                  <button class="icon-btn act shacopy" aria-label="Copy full SHA for commit 7e0a93c5" data-sha="7e0a93c5" data-tip="Copy SHA">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-copy" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2" ry="2" /> <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" /></svg>
-                  </button>
+                  <button class="sha act shacopy" aria-label="Copy full SHA for commit 7e0a93c5" data-sha="7e0a93c5" data-tip="Copy SHA">7e0a93c5</button>
                 </div>
               </div>
+              <p class="clist-foot">Only the head commit is verified on its own — <span class="mono">4a7c9e02</span> and <span class="mono">b1d5f730</span> were pushed in the same batch and are covered by run <a href="run-details.html" class="mono">06cb9564</a>.</p>
             </div>
-            <p class="small subtle" style="margin-top:8px">Only the head commit is verified on its own — <span class="mono">4a7c9e02</span> and <span class="mono">b1d5f730</span> were pushed in the same batch and are covered by run <a href="run-details.html" class="mono">06cb9564</a>.</p>
           </div>
 
           <div id="panel-checks" role="tabpanel" aria-labelledby="tab-checks" tabindex="0" hidden>
@@ -2209,182 +2455,209 @@ html[data-theme="dark"] .railgrp::before{color:#9aabc6}
           <div id="panel-intel" role="tabpanel" aria-labelledby="tab-intel" tabindex="0" data-atlas="healthy" hidden>
             <div class="ci">
 
-              <!-- ===== A. Prediction → proof (ours, not on the Atlas board) ===== -->
-              <section class="card ci-hero" aria-labelledby="ciHeroT">
-                <div class="card-h">
-                  <h2 id="ciHeroT">Prediction → proof</h2>
-                  <span class="label accent">Atlas informs · Pulse proves</span>
-                </div>
-                <div class="card-b">
-                  <p class="ci-lede">Atlas mapped <strong>86 tests</strong> to the <strong>7</strong> changed symbols → run <a class="mono" href="run-details.html">06cb9564</a> selected <strong>84</strong> → all <strong>84</strong> executed and passed → the <strong>2</strong> unselected were covered by the <strong>12</strong>-sample shadow replay (recall <a class="mono" href="reliability.html#shadow-replay">99.4%</a>).</p>
-                  <ol class="stepper ci-steps" aria-label="Prediction to proof — four steps">
-                    <li class="step done"><span class="sv mono">86</span><span class="sl">Mapped by Atlas</span></li>
-                    <li class="step done"><span class="sv mono">84</span><span class="sl">Selected for the run</span></li>
-                    <li class="step done"><span class="sv mono">84 ✓</span><span class="sl">Executed &amp; passed</span></li>
-                    <li class="step done"><span class="sv mono">99.4%</span><span class="sl">Confirmed by replay</span></li>
-                  </ol>
-                  <p class="ci-frame">Atlas predicts impact. Pulse proves it. <strong>Only the executed verdict gates this merge.</strong></p>
-                  <p class="ci-degnote ci-deg">On this run Atlas could not finish the cross-repo impact phase. The four steps above are executed evidence from run <span class="mono">06cb9564</span> and are unchanged — a failed prediction phase never rewrites a verdict, and never moves the merge gate.</p>
-                  <div class="ci-acts">
-                    <a class="btn" href="run-details.html">Open run evidence <span class="mono">06cb9564</span></a>
-                    <a class="btn" href="reliability.html#shadow-replay">Open shadow replay</a>
-                    <button type="button" class="btn" data-cifile="d-limiter">See the changed symbols</button>
+              <!-- ===== Atlas analysis card — scope, impact, then the three evidence drawers ===== -->
+              <section class="card atl" id="ciAtlas" aria-labelledby="ciAtlT">
+
+                <div class="atl-hd">
+                  <div class="atl-ttl">
+                    <span class="atl-ic" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="16" y="16" width="6" height="6" rx="1"/><rect x="2" y="16" width="6" height="6" rx="1"/><rect x="9" y="2" width="6" height="6" rx="1"/><path d="M5 16v-3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3M12 12V8"/></svg></span>
+                    <h2 id="ciAtlT">Atlas analysis for this PR</h2>
+                  </div>
+                  <div class="atl-status">
+                    <span class="label success atl-dot ci-ok" id="ciOkChip">Atlas ready</span>
+                    <span class="label attention atl-dot ci-deg" id="ciPartialChip">Atlas partial</span>
+                    <!-- the count earns its place only when it is not "all of them";
+                         at 8 of 8 it just restates the Atlas ready chip beside it -->
+                    <span class="atl-phct ci-deg">5 of 8 phases resolved</span>
                   </div>
                 </div>
-              </section>
 
-              <!-- ===== B. Impact summary ===== -->
-              <section class="card" id="ciImpact" aria-labelledby="ciImpT">
-                <div class="card-h ci-hd">
-                  <h2 id="ciImpT">Atlas code intelligence</h2>
-                  <span class="label outline ci-engine">ATLAS ENGINE · INDEX c1a7b930</span>
-                  <span class="label success ci-ok" id="ciOkChip">✓ All phases complete</span>
-                  <span class="label attention ci-deg" id="ciPartialChip">⚠ Atlas partial</span>
-                  <button type="button" class="btn sm" id="ciStateBtn">View degraded run</button>
-                </div>
-                <div class="card-b">
-                  <div class="banner info">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-info" style="flex:none;margin-top:1px" aria-hidden="true"><circle cx="12" cy="12" r="10" /> <path d="M12 16v-4" /> <path d="M12 8h.01" /></svg>
-                    <span><strong>Evidence only · merge policy unchanged.</strong> Atlas indexes this repository and predicts what a change touches. Pulse executes the tests and pulse-auditor attests the result. Everything on this tab informs the review — <strong>none of it gates the merge</strong>.</span>
+                <!-- The verdict is a sentence. Both states are written out and switched by the
+                     #panel-intel[data-atlas] rules; the cause sits inside the block rather than
+                     in a second amber band, which would say the same thing twice. -->
+                <div class="atl-head ci-ok">
+                  <span class="atl-hic" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></span>
+                  <div class="atl-htx">
+                    <div class="atl-ht">Blast radius is contained to the ingress path.</div>
+                    <p class="atl-hs">All eight phases resolved. <b>2</b> downstream consumers and <b>2</b> route contracts are affected, both inside the surface Atlas already indexes.</p>
                   </div>
-
-                  <div class="statrow ci-stats" id="ciStats">
-                    <div class="stat" data-metric="atlas-impact-risk">
-                      <div class="lbl">Impact risk</div>
-                      <div class="val"><span class="ci-ok">Low</span><span class="ci-deg">—</span></div>
-                      <p class="ci-note ci-ok">Blast radius stays inside the ingress path Atlas already indexed.</p>
-                      <p class="ci-note ci-deg">Not established — the impact phase did not complete.</p>
-                    </div>
-                    <div class="stat" data-metric="atlas-downstream">
-                      <div class="lbl">Downstream repos</div>
-                      <div class="val"><span class="ci-ok">2</span><span class="ci-deg">—</span></div>
-                      <p class="ci-note ci-ok"><span class="mono">orion-web</span> and <span class="mono">relay-workers</span> call this ingress path.</p>
-                      <p class="ci-note ci-deg">Impact unavailable — Pulse reports <span class="mono">—</span>, never <span class="mono">0</span>.</p>
-                    </div>
-                    <div class="stat" data-metric="atlas-impacted-files">
-                      <div class="lbl">Impacted files</div>
-                      <div class="val">12</div>
-                      <p class="ci-note">3 changed + 9 in-repo callers of the changed symbols.</p>
-                    </div>
-                    <div class="stat" data-metric="atlas-suggested-tests">
-                      <div class="lbl">Suggested tests</div>
-                      <div class="val">86</div>
-                      <p class="ci-note">Run <span class="mono">06cb9564</span> executed 84 of them; 2 were replay-covered.</p>
-                    </div>
-                  </div>
-
-                  <div class="ci-ctx">
-                    <h3>Context used for this review</h3>
-                    <p><b>1,842</b> indexed files · <b>28,410</b> indexed symbols · <b>141,220</b> dependency edges · <b>18</b> context files · <b>2.1K</b> context tokens · <b>7</b> changed symbols</p>
-                  </div>
-
-                  <p class="ci-gate">
-                    <span class="verdict passed">Passed</span>
-                    <span class="cig"><strong>Merge gate unaffected.</strong> Whatever Atlas reports here — complete or partial — the gate on <span class="mono">gateway-api</span> is the attested verdict <a class="mono" href="run-details.html">06cb9564</a> plus the approval policy (<span class="mono">1 of 2</span>). <strong>Atlas never gates a merge.</strong> The merge panel and the verdict chip on this page read the same in both states.</span>
-                  </p>
                 </div>
-              </section>
-
-              <!-- ===== C. Review context details ===== -->
-              <details class="az-d ci-d" id="ciCtxD">
-                <summary>Review context details <span class="cis">index · enrichment · budget</span></summary>
-                <div class="az-dd ci-dd" role="group" aria-label="Review context details">
-
-                  <section class="ci-sub ci-phase">
-                    <h3>Code index — phase audit</h3>
-                    <div class="barrow"><span class="blbl">git sync + worktree</span><span class="btrack"><i class="bar" style="width:1%"></i></span><span class="bval">0.1s</span></div>
-                    <div class="barrow"><span class="blbl">snapshot save (pg)</span><span class="btrack"><i class="bar" style="width:100%"></i></span><span class="bval">14s</span></div>
-                    <div class="barrow"><span class="blbl">semantic embed</span><span class="btrack"><i class="bar async" style="width:100%"></i></span><span class="bval">async</span></div>
-                    <p>Embeddings continue in the background; existing vectors stay live until the new set is upserted.</p>
-                  </section>
-
-                  <section class="ci-sub">
-                    <h3>Advanced code index <span class="label outline">graph + lexical + semantic</span></h3>
-                    <ul class="ci-rows">
-                      <li><span class="rn">Files indexed</span><span class="rd">Whole repository snapshot at commit <span class="mono">7e0a93c5</span></span><span class="rv">1,842</span></li>
-                      <li><span class="rn">Symbols indexed</span><span class="rd">Functions, methods, types and package-level values</span><span class="rv">28,410</span></li>
-                      <li><span class="rn">Symbols in diff</span><span class="rd">Symbols added or modified by this pull request</span><span class="rv">7</span></li>
-                      <li><span class="rn">Dependency edges</span><span class="rd">Call and import edges in the symbol graph</span><span class="rv">141,220</span></li>
-                      <li><span class="rn">Packages</span><span class="rd">External packages resolved for this diff</span><span class="rv">0</span></li>
-                    </ul>
-                  </section>
-
-                  <section class="ci-sub">
-                    <h3>Context enrichment — signal map <span class="label accent">18 files kept</span> <span class="label outline ci-engine">BUNDLE 86d69837</span></h3>
-                    <ul class="ci-rows">
-                      <li><span class="rn">PR diff files</span><span class="rd">The files this pull request changes</span><span class="rv">3 files</span></li>
-                      <li><span class="rn">Similarity retrieval</span><span class="rd">BM25 + vector fusion over the symbol index</span><span class="rv">+6</span></li>
-                      <li><span class="rn">Graph blast radius</span><span class="rd">Callers/callees of matched symbols</span><span class="rv">+7</span></li>
-                      <li><span class="rn">Dependency signals</span><span class="rd">Imports/edges + external packages</span><span class="rv">2 signals</span></li>
-                      <li class="tot"><span class="rn">Kept in bundle</span><span class="rd">budget gate: kept 18 files · ~2.1k tokens</span><span class="rv">18 files</span></li>
-                    </ul>
-                  </section>
-
-                  <section class="ci-sub">
-                    <h3>Dependency signals in bundle <span class="label outline">3 edges</span></h3>
-                    <ul class="ci-edges">
-                      <li><span class="label neutral">calls</span><span class="ep">internal/ingress/router.go</span><span class="et">→ ratelimit.Limiter.Allow</span></li>
-                      <li><span class="label neutral">calls</span><span class="ep">internal/upstream/pool.go</span><span class="et">→ ratelimit.Bucket.Refill</span></li>
-                      <li><span class="label neutral">imports</span><span class="ep">cmd/gateway/main.go</span><span class="et">→ internal/ratelimit</span></li>
-                    </ul>
-                    <p>Edges are read from the index, not from the diff — they say what <em>could</em> reach the change, never what did.</p>
-                  </section>
-
-                  <section class="ci-sub">
-                    <h3>Token savings — context engine <span class="label success">~98% input tokens</span></h3>
-                    <div class="barrow"><span class="blbl">Whole-file (naive)</span><span class="btrack"><i class="bar naive" style="width:100%"></i></span><span class="bval">128.6K</span></div>
-                    <div class="barrow"><span class="blbl">Enriched bundle</span><span class="btrack"><i class="bar" style="width:1.6%"></i></span><span class="bval">2.1K</span></div>
-                    <p><span class="mono">126.5K</span> tokens saved on this review — the bundle carries the 18 files the signal map kept, not the 1,842 the index holds.</p>
-                  </section>
-
+                <div class="atl-head u ci-deg">
+                  <span class="atl-hic" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/><path d="M12 9v4M12 17h.01"/></svg></span>
+                  <div class="atl-htx">
+                    <div class="atl-ht">Cross-repo impact is unresolved on this run.</div>
+                    <!-- no "Why:" line here: the rail below states the cause against the
+                         phase it happened to, which is where it means something -->
+                    <p class="atl-hs">The in-repo analysis completed and stands: <b>12 impacted files</b> across 9 callers. Downstream consumers, route contracts and the risk score all depend on the phase that failed — Pulse reports them as unknown rather than as zero.</p>
+                  </div>
                 </div>
-              </details>
 
-              <!-- ===== D. Impact paths ===== -->
-              <details class="az-d ci-d" id="ciPathsD">
-                <summary>Impact paths <span class="cis">blast radius · changed files · context files</span></summary>
-                <div class="az-dd ci-dd" role="group" aria-label="Impact paths">
+                <!-- Each phase carries what it produced, so a number is explained where it is
+                     shown. The three phases that differ between runs carry .ci-ok/.ci-deg twins;
+                     the rest are state-invariant. data-metric moves here with the value, which is
+                     why these seven no longer appear in the ledger below. -->
+                <ol class="atl-prail" aria-label="Atlas analysis phases">
+                  <li class="atl-ph" data-ph="index">
+                    <span class="atl-pline" aria-hidden="true"></span>
+                    <span class="atl-pdot" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></span>
+                    <span class="atl-pn lbl">Snapshot index</span>
+                    <span class="atl-pv">1.4M</span>
+                    <span class="atl-pc">symbols indexed</span>
+                  </li>
+                  <li class="atl-ph" data-ph="symbols" data-metric="atlas-changed-symbols">
+                    <span class="atl-pline" aria-hidden="true"></span>
+                    <span class="atl-pdot" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></span>
+                    <span class="atl-pn lbl">Symbol resolve</span>
+                    <span class="atl-pv">7</span>
+                    <span class="atl-pc">changed symbols</span>
+                  </li>
+                  <li class="atl-ph" data-ph="callers" data-metric="atlas-impacted-files">
+                    <span class="atl-pline" aria-hidden="true"></span>
+                    <span class="atl-pdot" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></span>
+                    <span class="atl-pn lbl">In-repo callers</span>
+                    <span class="atl-pv">12</span>
+                    <span class="atl-pc">impacted files</span>
+                  </li>
+                  <li class="atl-ph" data-ph="xrepo" data-metric="atlas-downstream">
+                    <span class="atl-pline" aria-hidden="true"></span>
+                    <span class="atl-pdot" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></span>
+                    <span class="atl-pn lbl">Cross-repo</span>
+                    <span class="atl-pv ci-ok">2</span>
+                    <span class="atl-pv bad ci-deg">Timed out</span>
+                    <span class="atl-pc ci-ok">consumer repos</span>
+                    <span class="atl-pc ci-deg">30s against the org graph</span>
+                  </li>
+                  <li class="atl-ph" data-ph="contracts" data-metric="atlas-api-contracts">
+                    <span class="atl-pline" aria-hidden="true"></span>
+                    <span class="atl-pdot" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></span>
+                    <span class="atl-pn lbl">Contracts</span>
+                    <span class="atl-pv ci-ok">2</span>
+                    <span class="atl-pv skip ci-deg">Skipped</span>
+                    <span class="atl-pc ci-ok">route contracts</span>
+                    <span class="atl-pc ci-deg">depends on cross-repo</span>
+                  </li>
+                  <li class="atl-ph" data-ph="risk" data-metric="atlas-impact-risk">
+                    <span class="atl-pline" aria-hidden="true"></span>
+                    <span class="atl-pdot" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></span>
+                    <span class="atl-pn lbl">Risk scoring</span>
+                    <span class="atl-pv ci-ok">Low</span>
+                    <span class="atl-pv skip ci-deg">Skipped</span>
+                    <span class="atl-pc ci-ok">inside the indexed path</span>
+                    <span class="atl-pc ci-deg">depends on cross-repo</span>
+                  </li>
+                  <li class="atl-ph" data-ph="tests" data-metric="atlas-suggested-tests">
+                    <span class="atl-pline" aria-hidden="true"></span>
+                    <span class="atl-pdot" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></span>
+                    <span class="atl-pn lbl">Test selection</span>
+                    <span class="atl-pv">86</span>
+                    <span class="atl-pc">tests selected</span>
+                  </li>
+                  <li class="atl-ph" data-ph="bundle" data-metric="atlas-context-tokens">
+                    <span class="atl-pline" aria-hidden="true"></span>
+                    <span class="atl-pdot" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></span>
+                    <span class="atl-pn lbl">Bundle</span>
+                    <span class="atl-pv">2.1K</span>
+                    <span class="atl-pc">context tokens</span>
+                  </li>
+                </ol>
+                <p class="atl-plegend ci-deg"><span><i class="k-ok" aria-hidden="true"></i>resolved</span><span><i class="k-bad" aria-hidden="true"></i>failed</span><span><i class="k-skip" aria-hidden="true"></i>skipped — depends on a failed phase</span></p>
 
-                  <section class="ci-sub">
-                    <h3>Cross-repo blast radius <span class="label accent ci-ok">2 consumers</span><span class="label attention ci-deg">⚠ unavailable</span></h3>
-                    <ul class="ci-cons ci-ok">
-                      <li>
-                        <div class="ch"><a href="repository-overview.html" class="mono">orion-web</a><span class="mode advisory">Advisory</span></div>
-                        <p class="cp">web/src/api/gateway.ts → POST /v1/ingress → internal/ingress/router.go → ratelimit.Limiter.Allow</p>
-                      </li>
-                      <li>
-                        <div class="ch"><a href="repository-overview.html" class="mono">relay-workers</a><span class="mode shadow">Shadow</span></div>
-                        <p class="cp">src/dispatch/forward.rs → POST /v1/ingress/batch → internal/upstream/pool.go → ratelimit.Bucket.Refill</p>
-                      </li>
-                    </ul>
-                    <p class="ci-ok">Consistent with the sidebar's <strong>Cross-repo impact · 2 consumers</strong>. Neither consumer's suite ran here — this is a predicted path, not executed evidence.</p>
-                    <div class="banner warn ci-deg">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-alert" style="flex:none;margin-top:1px" aria-hidden="true"><circle cx="12" cy="12" r="10" /> <line x1="12" x2="12" y1="8" y2="12" /> <line x1="12" x2="12.01" y1="16" y2="16" /></svg>
-                      <span><strong>Cross-repo blast radius unavailable</strong> — Atlas could not complete this impact phase. Raw backend errors are hidden to protect credentials. Pulse reports the gap as a gap: no consumer list is shown and no "0 impact" is implied.</span>
+                <h3 class="atl-lbl u ci-deg"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/><path d="M12 9v4M12 17h.01"/></svg> Unresolved on this run<span class="atl-rule" aria-hidden="true"></span><span class="atl-ct">3 of 4 impact metrics</span></h3>
+                <div class="atl-ugrid ci-deg">
+                  <div class="atl-uq" data-metric="atlas-impact-risk">
+                    <div class="lbl"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-8 9-4.5-1.5-8-4-8-9V5l8-3 8 3Z"/></svg> Impact risk</div>
+                    <div class="q">How risky is this change?</div>
+                    <div class="a">Not established</div>
+                    <p class="w">Risk scoring needs the cross-repo phase that failed.</p>
+                  </div>
+                  <div class="atl-uq" data-metric="atlas-downstream">
+                    <div class="lbl"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="6" x2="6" y1="3" y2="15"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></svg> Downstream repos</div>
+                    <div class="q">Who consumes this?</div>
+                    <div class="a">Unknown — not zero</div>
+                    <p class="w">Pulse never implies an empty consumer list from a phase that did not run.</p>
+                  </div>
+                  <div class="atl-uq" data-metric="atlas-api-contracts">
+                    <div class="lbl"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v5h5"/><path d="M9 15h6"/></svg> API contracts</div>
+                    <div class="q">Which contracts move?</div>
+                    <div class="a">Not resolved</div>
+                    <p class="w">Route contracts resolve from the consumer graph, which is unavailable.</p>
+                  </div>
+                </div>
+
+                <h3 class="atl-lbl"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg> PR scope<span class="atl-rule" aria-hidden="true"></span><span class="atl-ct">2 facts</span></h3>
+                <!-- scope only: everything Atlas *produced* is on the rail above, against the
+                     phase that produced it. These two describe the diff Atlas was given. -->
+                <div class="atl-scope">
+                  <div class="atl-sc" data-metric="atlas-changed-files">
+                    <span class="lbl"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v5h5"/></svg> Changed files</span>
+                    <span class="v">3</span>
+                    <span class="e">files in this pull-request diff</span>
+                  </div>
+                  <div class="atl-sc" data-metric="atlas-retrieved-context">
+                    <span class="lbl"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg> Retrieved context</span>
+                    <span class="v">15</span>
+                    <span class="e">of 18 bundle files — the other 3 are the diff itself</span>
+                  </div>
+                </div>
+
+                <p class="ci-gate atl-gate">
+                  <span class="verdict passed">Passed</span>
+                  <span class="cig"><strong>Merge gate unaffected.</strong> Whatever Atlas reports here — complete or partial — the gate on <span class="mono">gateway-api</span> is the attested verdict <a class="mono" href="run-details.html">06cb9564</a> plus the approval policy (<span class="mono">1 of 2</span>). <strong>Atlas never gates a merge.</strong></span>
+                </p>
+
+
+              <!-- ===== Atlas evidence tabs ===== -->
+              <div class="atl-tabs" role="tablist" aria-label="Atlas evidence">
+                <button type="button" role="tab" id="ciCtxTab" data-tab="context" aria-controls="ciCtxPanel" aria-selected="false"><span class="atl-dt"><b>Review context</b><span>Diff files, retrieved context, and comment mapping</span></span><span class="atl-dcount">18 files</span></button>
+                <button type="button" role="tab" id="ciPathsTab" data-tab="impact" aria-controls="ciPathsPanel" aria-selected="true"><span class="atl-dt"><b>Impact paths</b><span>Repository graph, API contracts, call sites, and related pull requests</span></span><span class="atl-dcount ci-ok">2 repos · 2 contracts</span><span class="atl-dcount ci-deg">2 phases unresolved</span></button>
+                <button type="button" role="tab" id="ciProvTab" data-tab="provenance" aria-controls="ciProvPanel" aria-selected="false"><span class="atl-dt"><b>Technical provenance</b><span>Snapshot identity, commit freshness, degraded phases, and phase timings</span></span><span class="atl-dcount ci-ok">8 phases · all ok</span><span class="atl-dcount ci-deg">8 phases · 1 failed</span></button>
+              </div>
+
+              <!-- ===== Review context details ===== -->
+              <!-- Evidence is opt-in: the three panels run to ~1800px, and arriving at this tab
+                   should show the verdict, not the audit. The tab strip stays visible either way,
+                   so its three counts still act as the summary the drawers used to give. -->
+              <button type="button" class="atl-evdtog" id="ciEvdTog" aria-expanded="false" aria-controls="ciEvdRegion">
+                <svg class="atl-evdchev" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+                <span class="t">Show evidence</span>
+              </button>
+              <div id="ciEvdRegion" hidden>
+              <div class="atl-tabpanel az-dd ci-dd" id="ciCtxPanel" role="tabpanel" aria-labelledby="ciCtxTab" hidden tabindex="0">
+                  <section class="atl-card">
+                    <div class="atl-ch">
+                      <span class="atl-ic sm accent" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v5h5"/><path d="M8 13h8M8 17h5"/></svg></span>
+                      <div class="t">
+                        <h3>PR review context audit</h3>
+                        <p>diff files, retrieved context, and GitHub comment mapping from the posted review payload</p>
+                      </div>
+                      <div class="pills"><span class="label attest ci-engine">bundle · 86d69837</span><span class="label accent">~2.1k ctx tokens</span></div>
+                    </div>
+                    <div class="atl-mgrid">
+                      <div class="atl-mstat"><div class="v">3</div><div class="k">Changed diff files</div></div>
+                      <div class="atl-mstat"><div class="v">18</div><div class="k">Context files</div></div>
+                      <div class="atl-mstat"><div class="v">15</div><div class="k">Retrieved extras</div></div>
+                      <div class="atl-mstat"><div class="v">1</div><div class="k">Inline comments</div></div>
                     </div>
                   </section>
 
-                  <section class="ci-sub">
-                    <h3>Changed files <span class="label outline">3</span></h3>
-                    <ul class="ci-cf">
-                      <li>
-                        <div class="cfh"><button type="button" class="cfp" data-cifile="d-limiter">internal/ratelimit/limiter.go</button><span class="label success">new file</span><span class="mono"><span class="plus">+218</span> <span class="minus">−0</span></span></div>
-                        <p>Atlas: introduces the token bucket, the shared refill clock and the bounded-jitter backoff — 5 of the 7 changed symbols live here. It does not prove the burst path behaves under contention; run <a class="mono" href="run-details.html">06cb9564</a> does.</p>
-                      </li>
-                      <li>
-                        <div class="cfh"><button type="button" class="cfp" data-cifile="d-limtest">internal/ratelimit/limiter_test.go</button><span class="label success">new file</span><span class="mono"><span class="plus">+164</span> <span class="minus">−0</span></span></div>
-                        <p>Atlas: adds the burst, contention and refill-jitter cases that anchor 31 of the 86 mapped tests. It does not prove coverage is sufficient — changed-line coverage (<span class="mono">86%</span>) is measured by execution, not by reading the file.</p>
-                      </li>
-                      <li>
-                        <div class="cfh"><button type="button" class="cfp" data-cifile="d-wiring">cmd/gateway/wiring.go</button><span class="label attention">modified</span><span class="mono"><span class="plus">+30</span> <span class="minus">−96</span></span></div>
-                        <p>Atlas: swaps the legacy fixed-window throttle out of the middleware chain — this is the edge that reaches both downstream consumers. It does not prove ordering with tracing is correct; that came from the review finding on <span class="mono">L43</span>.</p>
-                      </li>
+                  <section class="atl-card">
+                    <div class="atl-ch">
+                      <span class="atl-ic sm" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 2 9 5-9 5-9-5 9-5Z"/><path d="m3 12 9 5 9-5"/><path d="m3 17 9 5 9-5"/></svg></span>
+                      <div class="t">
+                        <h3>Context enrichment — signal map</h3>
+                        <p>every file in the bundle, traced back to the signal that put it there</p>
+                      </div>
+                      <div class="pills"><span class="label success">✓ changed files kept</span><span class="label accent">+15 retrieved</span></div>
+                    </div>
+                    <ul class="atl-rows">
+                      <li class="atl-row"><span class="atl-ic sm accent" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4 3 20h18Z"/></svg></span><span class="t"><b>PR diff files</b><span>changed files from the GitHub pull-request diff</span></span><span class="v">3 files</span></li>
+                      <li class="atl-row"><span class="atl-ic sm accent" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.6-3.6"/></svg></span><span class="t"><b>Similarity retrieval</b><span>BM25 + vector fusion over the symbol index</span></span><span class="v">+6</span></li>
+                      <li class="atl-row"><span class="atl-ic sm accent" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="5" cy="6" r="2.5"/><circle cx="19" cy="6" r="2.5"/><circle cx="12" cy="18" r="2.5"/><path d="M7 7.5 10.5 16M17 7.5 13.5 16"/></svg></span><span class="t"><b>Graph blast radius</b><span>callers and callees of the matched symbols</span></span><span class="v">+7</span></li>
+                      <li class="atl-row"><span class="atl-ic sm accent" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 8 4.5v9L12 21l-8-4.5v-9Z"/><path d="M12 12v9M4 7.5l8 4.5 8-4.5"/></svg></span><span class="t"><b>Dependency signals</b><span>imports, edges and external packages Pulse resolved</span></span><span class="v">+2</span></li>
+                      <li class="atl-row"><span class="atl-ic sm accent" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h15l-3.5-3.5"/><path d="M20 16H5l3.5 3.5"/></svg></span><span class="t"><b>GitHub comment mapping</b><span>review findings mapped back onto pull-request diff lines</span></span><span class="v">1 inline</span></li>
                     </ul>
-                  </section>
-
-                  <section class="ci-sub">
-                    <h3>In-repo files the agent read for context <span class="label outline">18</span></h3>
-                    <ul class="ci-files" id="ciFiles">
+                    <h4 class="atl-sect">Context files <span class="n small subtle" id="ciMoreNote" aria-live="polite">Showing 10 of 18 · 3 diff · 6 similarity · 7 graph · 2 dependency</span></h4>
+                    <ul class="atl-fchips" id="ciFiles">
                       <li><span class="fp">internal/ratelimit/limiter.go</span><span class="label accent ft">diff</span></li>
                       <li><span class="fp">internal/ratelimit/limiter_test.go</span><span class="label accent ft">diff</span></li>
                       <li><span class="fp">cmd/gateway/wiring.go</span><span class="label accent ft">diff</span></li>
@@ -2404,14 +2677,155 @@ html[data-theme="dark"] .railgrp::before{color:#9aabc6}
                       <li hidden class="cimore"><span class="fp">cmd/gateway/main.go</span><span class="label attest ft">dependency</span></li>
                       <li hidden class="cimore"><span class="fp">go.mod</span><span class="label attest ft">dependency</span></li>
                     </ul>
-                    <div class="ci-more">
-                      <button type="button" class="btn sm" id="ciMoreBtn" aria-expanded="false" aria-controls="ciFiles">Show all 18</button>
-                      <span class="small subtle" id="ciMoreNote" aria-live="polite">Showing 10 of 18 · 3 diff · 6 similarity · 7 graph · 2 dependency</span>
+                    <div class="ci-more"><button type="button" class="btn sm" id="ciMoreBtn" aria-expanded="false" aria-controls="ciFiles">+8 more context files</button></div>
+                  </section>
+
+                  <section class="atl-card">
+                    <div class="atl-ch">
+                      <span class="atl-ic sm" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 14 8.5 9.5"/><circle cx="12" cy="14" r="8"/><path d="M12 6V3M3.5 9 2 8M20.5 9 22 8"/></svg></span>
+                      <div class="t">
+                        <h3>Index &amp; budget audit</h3>
+                        <p>phase timings, repository index size and the token budget this review actually spent</p>
+                      </div>
+                      <div class="pills"><span class="label outline ci-engine">INDEX c1a7b930</span></div>
+                    </div>
+
+                    <section class="ci-sub">
+                      <h3>Code index — phase audit</h3>
+                      <div class="barrow"><span class="blbl">git sync + worktree</span><span class="btrack"><i class="bar" style="width:1%"></i></span><span class="bval">0.1s</span></div>
+                      <div class="barrow"><span class="blbl">snapshot save (pg)</span><span class="btrack"><i class="bar" style="width:100%"></i></span><span class="bval">14s</span></div>
+                      <div class="barrow"><span class="blbl">semantic embed</span><span class="btrack"><i class="bar async" style="width:100%"></i></span><span class="bval">async</span></div>
+                      <p>Embeddings continue in the background; existing vectors stay live until the new set is upserted.</p>
+                    </section>
+
+                    <section class="ci-sub" style="margin-top:18px">
+                      <h3>Advanced code index <span class="label outline">graph + lexical + semantic</span></h3>
+                      <ul class="ci-rows">
+                        <li><span class="rn">Files indexed</span><span class="rd">Whole repository snapshot at commit <span class="mono">7e0a93c5</span></span><span class="rv">1,842</span></li>
+                        <li><span class="rn">Symbols indexed</span><span class="rd">Functions, methods, types and package-level values</span><span class="rv">28,410</span></li>
+                        <li><span class="rn">Symbols in diff</span><span class="rd">Symbols added or modified by this pull request</span><span class="rv">7</span></li>
+                        <li><span class="rn">Dependency edges</span><span class="rd">Call and import edges in the symbol graph</span><span class="rv">141,220</span></li>
+                        <li><span class="rn">Packages</span><span class="rd">External packages resolved for this diff</span><span class="rv">0</span></li>
+                      </ul>
+                    </section>
+
+                    <section class="ci-sub" style="margin-top:18px">
+                      <h3>Dependency signals in bundle <span class="label outline">3 edges</span></h3>
+                      <ul class="ci-edges">
+                        <li><span class="label neutral">calls</span><span class="ep">internal/ingress/router.go</span><span class="et">→ ratelimit.Limiter.Allow</span></li>
+                        <li><span class="label neutral">calls</span><span class="ep">internal/upstream/pool.go</span><span class="et">→ ratelimit.Bucket.Refill</span></li>
+                        <li><span class="label neutral">imports</span><span class="ep">cmd/gateway/main.go</span><span class="et">→ internal/ratelimit</span></li>
+                      </ul>
+                      <p>Edges are read from the index, not from the diff — they say what <em>could</em> reach the change, never what did.</p>
+                    </section>
+
+                    <section class="ci-sub" style="margin-top:18px">
+                      <h3>Token savings — context engine <span class="label success">~98% input tokens</span></h3>
+                      <div class="barrow"><span class="blbl">Whole-file (naive)</span><span class="btrack"><i class="bar naive" style="width:100%"></i></span><span class="bval">128.6K</span></div>
+                      <div class="barrow"><span class="blbl">Enriched bundle</span><span class="btrack"><i class="bar" style="width:1.6%"></i></span><span class="bval">2.1K</span></div>
+                      <p><span class="mono">126.5K</span> tokens saved on this review — the bundle carries the 18 files the signal map kept, not the 1,842 the index holds.</p>
+                    </section>
+                  </section>
+
+              </div>
+
+              <!-- ===== Impact paths ===== -->
+              <div class="atl-tabpanel az-dd ci-dd" id="ciPathsPanel" role="tabpanel" aria-labelledby="ciPathsTab" tabindex="0">
+
+                  <section class="atl-card" id="ciBlast">
+                    <div class="atl-ch">
+                      <span class="atl-ic sm" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/></svg></span>
+                      <div class="t">
+                        <h3>Cross-repo blast radius</h3>
+                        <p>what the symbol graph says this diff can reach — a prediction, never executed evidence</p>
+                      </div>
+                      <div class="pills"><span class="label attest">Pulse only</span><span class="label accent ci-ok">2 consumers</span><span class="label attention ci-deg">⚠ unavailable</span></div>
+                    </div>
+
+                    <div class="ci-ok">
+                      <div class="atl-brh">
+                        <div class="t">
+                          <h4>Blast radius <em>outer ring = 10 selected · node size = P(fail)</em></h4>
+                          <p>aziron/gateway-api · in-repo impact graph</p>
+                        </div>
+                        <div class="atl-legend" aria-hidden="true">
+                          <span><i style="background:var(--danger)"></i>high</span>
+                          <span><i style="background:var(--attention)"></i>medium</span>
+                          <span><i style="background:var(--success)"></i>low</span>
+                        </div>
+                      </div>
+                      <div class="atl-br">
+                        <div class="atl-brmain">
+                          <div class="atl-canvas">
+                            <svg class="atl-svg" id="ciRadius" viewBox="0 0 560 470" role="group" aria-label="Blast radius — ten symbols and call sites around the changed core"></svg>
+                          </div>
+                          <p class="atl-foot"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M18 6l-2.5 2.5M8.5 15.5 6 18"/></svg><span>Click any node to focus the impact rail · the outer ring holds the 10 symbols and call sites Atlas selected, ordered by P(fail) · this in-repo view never fabricates downstream dependencies.</span></p>
+                        </div>
+                        <div class="atl-rail" id="ciRail" aria-live="polite" aria-label="Impact evidence for the focused node"></div>
+                      </div>
+                    </div>
+
+                    <div class="banner warn ci-deg">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-alert" style="flex:none;margin-top:1px" aria-hidden="true"><circle cx="12" cy="12" r="10" /> <line x1="12" x2="12" y1="8" y2="12" /> <line x1="12" x2="12.01" y1="16" y2="16" /></svg>
+                      <span><strong>Cross-repo blast radius unavailable</strong> — Atlas could not complete this impact phase. Raw backend errors are hidden to protect credentials. Pulse reports the gap as a gap: no graph, no consumer list, and no "0 impact" is implied.</span>
                     </div>
                   </section>
 
-                  <section class="ci-sub">
-                    <h3>Code index (repo-wide)</h3>
+                  <section class="atl-card ci-ok">
+                    <div class="atl-ch">
+                      <span class="atl-ic sm accent" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="5" cy="6" r="2.5"/><circle cx="19" cy="6" r="2.5"/><circle cx="12" cy="18" r="2.5"/><path d="M7 7.5 10.5 16M17 7.5 13.5 16"/></svg></span>
+                      <div class="t">
+                        <h3>Downstream consumers</h3>
+                        <p>repositories in the estate whose call path reaches this ingress change</p>
+                      </div>
+                      <div class="pills"><span class="label accent">2 repos</span></div>
+                    </div>
+                    <ul class="ci-cons">
+                      <li>
+                        <div class="ch"><a href="repository-overview.html" class="mono">orion-web</a><span class="mode advisory">Advisory</span></div>
+                        <p class="cp">web/src/api/gateway.ts → POST /v1/ingress → internal/ingress/router.go → ratelimit.Limiter.Allow</p>
+                      </li>
+                      <li>
+                        <div class="ch"><a href="repository-overview.html" class="mono">relay-workers</a><span class="mode shadow">Shadow</span></div>
+                        <p class="cp">src/dispatch/forward.rs → POST /v1/ingress/batch → internal/upstream/pool.go → ratelimit.Bucket.Refill</p>
+                      </li>
+                    </ul>
+                    <p class="ci-note">Consistent with the sidebar's <strong>Cross-repo impact · 2 consumers</strong>. Neither consumer's suite ran here — this is a predicted path, not executed evidence.</p>
+                  </section>
+
+                  <section class="atl-card">
+                    <div class="atl-ch">
+                      <span class="atl-ic sm accent" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4 3 20h18Z"/></svg></span>
+                      <div class="t">
+                        <h3>Changed files</h3>
+                        <p>what Atlas infers from each file in the diff — and what only the run can prove</p>
+                      </div>
+                      <div class="pills"><span class="label outline">3 files</span></div>
+                    </div>
+                    <ul class="ci-cf">
+                      <li>
+                        <div class="cfh"><button type="button" class="cfp" data-cifile="d-limiter">internal/ratelimit/limiter.go</button><span class="label success">new file</span><span class="mono"><span class="plus">+218</span> <span class="minus">−0</span></span></div>
+                        <p>Atlas: introduces the token bucket, the shared refill clock and the bounded-jitter backoff — 5 of the 7 changed symbols live here. It does not prove the burst path behaves under contention; run <a class="mono" href="run-details.html">06cb9564</a> does.</p>
+                      </li>
+                      <li>
+                        <div class="cfh"><button type="button" class="cfp" data-cifile="d-limtest">internal/ratelimit/limiter_test.go</button><span class="label success">new file</span><span class="mono"><span class="plus">+164</span> <span class="minus">−0</span></span></div>
+                        <p>Atlas: adds the burst, contention and refill-jitter cases that anchor 31 of the 86 mapped tests. It does not prove coverage is sufficient — changed-line coverage (<span class="mono">86%</span>) is measured by execution, not by reading the file.</p>
+                      </li>
+                      <li>
+                        <div class="cfh"><button type="button" class="cfp" data-cifile="d-wiring">cmd/gateway/wiring.go</button><span class="label attention">modified</span><span class="mono"><span class="plus">+30</span> <span class="minus">−96</span></span></div>
+                        <p>Atlas: swaps the legacy fixed-window throttle out of the middleware chain — this is the edge that reaches both downstream consumers. It does not prove ordering with tracing is correct; that came from the review finding on <span class="mono">L43</span>.</p>
+                      </li>
+                    </ul>
+                  </section>
+
+                  <section class="atl-card">
+                    <div class="atl-ch">
+                      <span class="atl-ic sm" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 8 4.5v9L12 21l-8-4.5v-9Z"/><path d="M12 12v9M4 7.5l8 4.5 8-4.5"/></svg></span>
+                      <div class="t">
+                        <h3>Code index (repo-wide)</h3>
+                        <p>the graph this prediction was read from</p>
+                      </div>
+                    </div>
                     <ul class="ci-rows">
                       <li><span class="rn">Symbol graph edges</span><span class="rd">aziron/gateway-api · whole repository</span><span class="rv">141,220</span></li>
                       <li><span class="rn">Files indexed</span><span class="rd">Snapshot <span class="mono">3f9c1d84</span></span><span class="rv">1,842</span></li>
@@ -2420,34 +2834,36 @@ html[data-theme="dark"] .railgrp::before{color:#9aabc6}
                     <div class="ci-more"><a class="btn sm" href="code-intelligence.html">Open in Code intelligence</a></div>
                   </section>
 
-                </div>
-              </details>
+              </div>
 
-              <!-- ===== E. Technical provenance ===== -->
-              <details class="az-d ci-d" id="ciProvD">
-                <summary>Technical provenance <span class="cis">snapshot · index · bundle · phases</span></summary>
-                <div class="az-dd ci-dd" role="group" aria-label="Technical provenance">
-                  <dl class="kv ci-prov">
-                    <dt>Review head</dt>
-                    <dd><span>7e0a93c5f1b2</span><button type="button" class="icon-btn ci-cp" data-cicopy="7e0a93c5f1b2" data-cilabel="Review head" aria-label="Copy review head 7e0a93c5f1b2" data-tip="Copy"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-copy" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2" ry="2" /> <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" /></svg></button></dd>
-                    <dt>Snapshot commit</dt>
-                    <dd><span>7e0a93c5</span><button type="button" class="icon-btn ci-cp" data-cicopy="7e0a93c5" data-cilabel="Snapshot commit" aria-label="Copy snapshot commit 7e0a93c5" data-tip="Copy"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-copy" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2" ry="2" /> <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" /></svg></button></dd>
-                    <dt>Snapshot ID</dt>
-                    <dd><span>3f9c1d84-22ab-4e17-9c05-8b6e2d41a7f0</span><button type="button" class="icon-btn ci-cp" data-cicopy="3f9c1d84-22ab-4e17-9c05-8b6e2d41a7f0" data-cilabel="Snapshot ID" aria-label="Copy snapshot ID" data-tip="Copy"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-copy" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2" ry="2" /> <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" /></svg></button></dd>
-                    <dt>Repository index ID</dt>
-                    <dd><span>c1a7b930-5d42-4f88-b6e1-0a93c5f17e0a</span><button type="button" class="icon-btn ci-cp" data-cicopy="c1a7b930-5d42-4f88-b6e1-0a93c5f17e0a" data-cilabel="Repository index ID" aria-label="Copy repository index ID" data-tip="Copy"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-copy" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2" ry="2" /> <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" /></svg></button></dd>
-                    <dt>Context bundle ID</dt>
-                    <dd><span>86d69837-4b21-49ca-9f3d-2e5807ac61bb</span><button type="button" class="icon-btn ci-cp" data-cicopy="86d69837-4b21-49ca-9f3d-2e5807ac61bb" data-cilabel="Context bundle ID" aria-label="Copy context bundle ID" data-tip="Copy"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-copy" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2" ry="2" /> <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" /></svg></button></dd>
-                    <dt>Indexed at</dt>
-                    <dd><span><time datetime="2026-08-03T09:34:00">Aug 3, 09:34</time></span></dd>
-                    <dt>Degraded phases</dt>
-                    <dd><span class="ci-ok">none</span><span class="ci-deg">Cross-repo impact failed</span></dd>
-                    <dt>Phase timings</dt>
-                    <dd><span>atlas_queue_wait_s: 0.0s | index_s: 11s | git_s: 0.1s | save_s: 14s | total_s: 25s</span></dd>
-                  </dl>
-                  <p class="small muted">Snapshot provenance is diagnostic evidence. It does not change the PR verdict or the merge gate.</p>
-                </div>
-              </details>
+
+              <!-- ===== Technical provenance ===== -->
+              <div class="atl-tabpanel az-dd ci-dd" id="ciProvPanel" role="tabpanel" aria-labelledby="ciProvTab" tabindex="0" hidden>
+                  <section class="atl-card">
+                        <dl class="kv ci-prov">
+                          <dt>Review head</dt>
+                          <dd><span>7e0a93c5f1b2</span><button type="button" class="icon-btn ci-cp" data-cicopy="7e0a93c5f1b2" data-cilabel="Review head" aria-label="Copy review head 7e0a93c5f1b2" data-tip="Copy"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-copy" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2" ry="2" /> <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" /></svg></button></dd>
+                          <dt>Snapshot commit</dt>
+                          <dd><span>7e0a93c5</span><button type="button" class="icon-btn ci-cp" data-cicopy="7e0a93c5" data-cilabel="Snapshot commit" aria-label="Copy snapshot commit 7e0a93c5" data-tip="Copy"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-copy" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2" ry="2" /> <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" /></svg></button></dd>
+                          <dt>Snapshot ID</dt>
+                          <dd><span>3f9c1d84-22ab-4e17-9c05-8b6e2d41a7f0</span><button type="button" class="icon-btn ci-cp" data-cicopy="3f9c1d84-22ab-4e17-9c05-8b6e2d41a7f0" data-cilabel="Snapshot ID" aria-label="Copy snapshot ID" data-tip="Copy"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-copy" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2" ry="2" /> <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" /></svg></button></dd>
+                          <dt>Repository index ID</dt>
+                          <dd><span>c1a7b930-5d42-4f88-b6e1-0a93c5f17e0a</span><button type="button" class="icon-btn ci-cp" data-cicopy="c1a7b930-5d42-4f88-b6e1-0a93c5f17e0a" data-cilabel="Repository index ID" aria-label="Copy repository index ID" data-tip="Copy"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-copy" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2" ry="2" /> <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" /></svg></button></dd>
+                          <dt>Context bundle ID</dt>
+                          <dd><span>86d69837-4b21-49ca-9f3d-2e5807ac61bb</span><button type="button" class="icon-btn ci-cp" data-cicopy="86d69837-4b21-49ca-9f3d-2e5807ac61bb" data-cilabel="Context bundle ID" aria-label="Copy context bundle ID" data-tip="Copy"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-copy" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2" ry="2" /> <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" /></svg></button></dd>
+                          <dt>Indexed at</dt>
+                          <dd><span><time datetime="2026-08-03T09:34:00">Aug 3, 09:34</time></span></dd>
+                          <dt>Degraded phases</dt>
+                          <dd><span class="ci-ok">none</span><span class="ci-deg">Cross-repo impact failed</span></dd>
+                          <dt>Phase timings</dt>
+                          <dd><span>atlas_queue_wait_s: 0.0s | index_s: 11s | git_s: 0.1s | save_s: 14s | total_s: 25s</span></dd>
+                        </dl>
+                        <p class="small muted">Snapshot provenance is diagnostic evidence. It does not change the PR verdict or the merge gate.</p>
+                  </section>
+              </div>
+              </div>
+
+              </section><!-- /#ciAtlas -->
 
             </div>
           </div>
@@ -2500,7 +2916,7 @@ html[data-theme="dark"] .railgrp::before{color:#9aabc6}
             </div>
             <div class="sb-b" id="sbb-reviewers">
               <ul class="plist" id="revList" aria-labelledby="revH">
-                <li><span class="avatar sm" aria-hidden="true">PR</span>@priyar<span class="st ok">✓ Approved</span></li>
+                <li><span class="avatar sm" aria-hidden="true">PN</span>@priyar<span class="st ok">✓ Approved</span></li>
                 <li><span class="avatar sm" aria-hidden="true">MW</span>@mwebb<span class="st pend">⏳ Pending</span></li>
               </ul>
               <p class="small subtle" id="revNote" aria-live="polite" style="margin-top:8px"><span class="mono">1 of 2</span> required approvals</p>
@@ -2729,7 +3145,8 @@ html[data-theme="dark"] .railgrp::before{color:#9aabc6}
         <div class="flinks">
           <a href="design-system.html">Design system</a>
           <a href="prototype-guide.html">Prototype guide</a>
-          <button class="btn invisible sm" id="stateBtn" aria-haspopup="true">States</button>
+          <button type="button" class="btn sm atl-proto" id="ciStateFooterBtn" aria-controls="panel-intel">View degraded run</button>
+          <button class="btn invisible sm" id="stateBtn" aria-controls="statePanel" aria-expanded="false">States</button>
         </div>
       </footer>
     </div>
@@ -2960,7 +3377,7 @@ const PS = (() => {
   $('#paletteBtn')?.addEventListener('click',()=>palette());
 
   /* menus */
-  function closeMenus(){ $$('.menu').forEach(m=>m.hidden=true); $$('[aria-haspopup]').forEach(b=>b.setAttribute('aria-expanded','false')); }
+  function closeMenus(){ $$('.menu').forEach(m=>m.hidden=true); $$('[aria-haspopup="menu"]').forEach(b=>b.setAttribute('aria-expanded','false')); }
   document.addEventListener('click', e=>{
     const btn = e.target.closest('[aria-haspopup="menu"],[aria-haspopup="true"]');
     if(btn){ const m = btn.parentElement.querySelector('.menu'); if(m){ const was=m.hidden; closeMenus(); m.hidden=!was; btn.setAttribute('aria-expanded',String(was));
@@ -2989,9 +3406,12 @@ const PS = (() => {
       if(tl.dataset.tabsHash) history.replaceState(null,'','#'+t.dataset.tab);
     };
     tabs.forEach(t=>{ t.addEventListener('click',()=>activate(t));
-      t.addEventListener('keydown',e=>{ const i=tabs.indexOf(t);
-        if(e.key==='ArrowRight'){tabs[(i+1)%tabs.length].focus();tabs[(i+1)%tabs.length].click();}
-        if(e.key==='ArrowLeft'){tabs[(i-1+tabs.length)%tabs.length].focus();tabs[(i-1+tabs.length)%tabs.length].click();}});});
+      t.addEventListener('keydown',e=>{ const i=tabs.indexOf(t); let next=-1;
+        if(e.key==='ArrowRight') next=(i+1)%tabs.length;
+        else if(e.key==='ArrowLeft') next=(i-1+tabs.length)%tabs.length;
+        else if(e.key==='Home') next=0;
+        else if(e.key==='End') next=tabs.length-1;
+        if(next>-1){ e.preventDefault(); tabs[next].focus(); tabs[next].click(); }});});
     const h = location.hash.slice(1);
     const init = tabs.find(t=>t.dataset.tab===h) || tabs.find(t=>t.getAttribute('aria-selected')==='true') || tabs[0];
     if(init) activate(init);
@@ -3125,7 +3545,11 @@ const PS = (() => {
     if(s==='loading' && !q.has('hold')) setTimeout(()=>{ if(document.documentElement.dataset.pstate==='loading') setState('default'); }, 900);
   }
   const initState = q.get('state') || (location.hash.match(/state=(\w+)/)||[])[1] || 'default';
-  function stPanel(force){ const p=$('#statePanel'); p.hidden = force===false ? true : !p.hidden; }
+  function stPanel(force){
+    const p=$('#statePanel');
+    p.hidden = force===false ? true : !p.hidden;
+    $('#stateBtn')?.setAttribute('aria-expanded',String(!p.hidden));
+  }
   $('#stateBtn')?.addEventListener('click',()=>stPanel());
   $$('#statePanel input[name="pstate"]').forEach(r=>r.addEventListener('change',()=>setState(r.value)));
   if($$('[data-state]').length) setState(initState,false);
@@ -3244,10 +3668,30 @@ const PS = (() => {
     const d = new Date(iso); if(isNaN(d)) return '';
     return d.toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'});
   }
+  /* Absolute forms for places where relative time is wrong. A date heading ("Commits on
+     …") and a commit list both need a fixed point: the heading is a calendar bucket, and
+     a commit list's job is order — three pushes eight minutes apart all read "2 hours
+     ago" and the sequence disappears. */
+  function absDate(iso){
+    const d = new Date(iso); if(isNaN(d)) return '';
+    return d.toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric'});
+  }
+  function absTime(iso){
+    const d = new Date(iso); if(isNaN(d)) return '';
+    return d.toLocaleString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit',hour12:false});
+  }
   function hydrateTimes(root){
     $$('time[datetime]', root||document).forEach(t=>{
       if(t.dataset.relDone) return; t.dataset.relDone='1';
       const iso = t.getAttribute('datetime');
+      /* data-abs opts a timestamp out of relative rendering; the tooltip still carries
+         the full absolute string either way */
+      if(t.dataset.abs){
+        const s = t.dataset.abs==='date' ? absDate(iso) : absTime(iso);
+        if(!s) return;
+        if(!t.title) t.title = abs(iso);
+        t.textContent = s; return;
+      }
       const r = rel(iso); if(!r) return;
       if(!t.title) t.title = abs(iso);
       t.textContent = r;
@@ -3417,7 +3861,9 @@ const PS = (() => {
       const t=(a.textContent||'').trim().toUpperCase();
       if(!t) return;
       /* FNV-1a: mixes two-letter initials far better than a *31 sum, which bucketed
-         ES/MW and PR/SO onto the same hue */
+         ES/MW and PR/SO onto the same hue. Seven buckets is still a small space — this
+         cast (DA/PN/MW/ES/SO) is checked to land on five distinct hues, so re-check when
+         adding a person. */
       let h=2166136261;
       for(let i=0;i<t.length;i++){ h^=t.charCodeAt(i); h=Math.imul(h,16777619)>>>0; }
       a.dataset.av=String(h%7);
@@ -3767,6 +4213,36 @@ const PS = (() => {
       source:'GET /atlas/impact/tests?pr=482',
       scope:'packages internal/ratelimit, internal/ingress and cmd/gateway',
       caveat:'Suggestions, not selection. Run 06cb9564 selected 84 of the 86 and executed them; the 2 it dropped were covered by the 12-sample shadow replay at 99.4% recall. These 86 test functions sit inside the 18 selected targets the unit-test readiness group counts, and are a subset of the 1,284 tests the run executed across gateway-api.',
+      sync:'indexed Aug 3, 09:34'},
+    'atlas-api-contracts':{title:'API contracts (Atlas)',
+      formula:'Route contracts whose handler chain reaches a symbol changed by this pull request: POST /v1/ingress and POST /v1/ingress/batch.',
+      source:'GET /atlas/impact/contracts?pr=482',
+      scope:'aziron/gateway-api · 34 indexed route contracts',
+      caveat:'The shape of the contracts is unchanged — only the middleware behind them moved. No request or response schema was edited by this diff, so this counts reachability, not a breaking change. Reads “—” when the impact phase does not complete.',
+      sync:'indexed Aug 3, 09:34'},
+    'atlas-changed-files':{title:'Changed files (Atlas)',
+      formula:'Files present in the GitHub pull-request diff for PR #482.',
+      source:'GET /repos/aziron/gateway-api/pulls/482/files',
+      scope:'head 7e0a93c5f1b2 vs base f09b2ac1',
+      caveat:'The diff itself, not a prediction. It is the floor of the review scope — the bundle carries 15 more files the index retrieved for context.',
+      sync:'indexed Aug 3, 09:34'},
+    'atlas-retrieved-context':{title:'Retrieved context (Atlas)',
+      formula:'Context files the enrichment pass added on top of the 3 diff files: 6 similarity + 7 graph + 2 dependency = 15 (18 in the bundle).',
+      source:'GET /atlas/context/bundle/86d69837',
+      scope:'bundle 86d69837 · index c1a7b930',
+      caveat:'Retrieved for grounding, not because they are predicted to break. Impacted files (12) is the separate reachability count.',
+      sync:'indexed Aug 3, 09:34'},
+    'atlas-context-tokens':{title:'Context tokens (Atlas)',
+      formula:'Tokens in the enriched bundle handed to the review model — 2.1K, against 128.6K if the same 18 files were sent whole.',
+      source:'GET /atlas/context/bundle/86d69837?fields=budget',
+      scope:'PR #482 review only — not the run, not the attestation',
+      caveat:'A cost and precision measure, not a quality one. A smaller bundle is only better if the right files survived the budget gate; the signal map shows which ones did.',
+      sync:'indexed Aug 3, 09:34'},
+    'atlas-changed-symbols':{title:'Changed symbols (Atlas)',
+      formula:'Functions, methods, types and package-level values the diff added or modified, resolved against the symbol index at snapshot 3f9c1d84.',
+      source:'GET /atlas/impact/symbols?pr=482',
+      scope:'3 changed files · 28,410 indexed symbols',
+      caveat:'Resolved from the index, so a symbol renamed and re-added counts once as modified. These 7 symbols are the seed for the 86 mapped tests and for the blast radius below.',
       sync:'indexed Aug 3, 09:34'}
   };
 
@@ -4001,35 +4477,94 @@ const PS = (() => {
   }
   $('#linkedWorkBtn').addEventListener('click',()=>PS.toast('AZ-892 — "Rate-limit middleware for gateway ingress", linked by @priyar · traceability gate satisfied'));
 
-  /* diff scope pills — all files vs the head commit's files */
-  const HEAD={sha:'7e0a93c5',files:['d-wiring']};
+  /* Diff scope: all files, or the files touched by one commit. The commit list is the
+     source of truth and HEAD reads off its tail, so "head" follows an appended commit
+     without a second pointer to keep in sync. Keep this commit→files, never inverted:
+     a suggestion commit re-touches d-limiter, so files are not partitioned. */
+  const COMMITS=[
+    {sha:'4a7c9e02', msg:'Add token-bucket limiter with a shared refill clock',      files:['d-limiter']},
+    {sha:'b1d5f730', msg:'Cover burst cap and refill-jitter bounds',                 files:['d-limtest']},
+    {sha:'7e0a93c5', msg:'Wire limiter into gateway ingress, drop the fixed window', files:['d-wiring']}
+  ];
+  const commitBySha=s=>COMMITS.find(c=>c.sha===s);
+  const HEAD={ get sha(){ return COMMITS[COMMITS.length-1].sha; },
+               get files(){ return COMMITS[COMMITS.length-1].files; } };
+  /* diffScope stays two-valued — a dozen call sites branch on the literal 'head' — and
+     scopeSha carries which commit. Invariant: diffScope==='head' ⟺ scopeSha!==null. */
   let diffScope='all';
+  let scopeSha=null;
+  function scopeFiles(){ const c=scopeSha&&commitBySha(scopeSha); return c?c.files:ORDER; }
+  const inScope=id=>diffScope!=='head'||scopeFiles().indexOf(id)>-1;
   function updateScopeNote(){
-    const n=HEAD.files.length;
-    $('#scopeNote').innerHTML=diffScope==='head'
-      ? 'Showing <span class="mono">'+n+'</span> of <span class="mono">'+ORDER.length+'</span> files — changed by head commit <span class="mono">'+HEAD.sha+'</span> · <span class="mono">'+(ORDER.length-n)+'</span> hidden.'
-      : 'Showing all <span class="mono">'+ORDER.length+'</span> files changed in this pull request.';
+    if(diffScope!=='head'){
+      $('#scopeNote').innerHTML='Showing all <span class="mono">'+ORDER.length+'</span> files changed in this pull request.';
+      return;
+    }
+    const c=commitBySha(scopeSha), n=c.files.length, isHead=c.sha===HEAD.sha;
+    /* off the Commits tab a bare sha is not enough context, so a non-head scope carries
+       the commit message with it */
+    $('#scopeNote').innerHTML='Showing <span class="mono">'+n+'</span> of <span class="mono">'+ORDER.length+'</span> files — changed by '
+      +(isHead?'head commit ':'commit ')+'<span class="mono">'+c.sha+'</span>'
+      +(!isHead&&c.msg?' <span class="subtle">“'+esc(c.msg)+'”</span>':'')
+      +' · <span class="mono">'+(ORDER.length-n)+'</span> hidden.';
   }
   function applyScope(){
-    const head=diffScope==='head';
-    ORDER.forEach(id=>{
-      const on=!head||HEAD.files.indexOf(id)>-1;
-      $('#'+id).hidden=!on;
-    });
-    $('#scopeAll').setAttribute('aria-pressed',String(!head));
-    $('#scopeHead').setAttribute('aria-pressed',String(head));
+    ORDER.forEach(id=>{ $('#'+id).hidden=!inScope(id); });
+    /* scoped to a non-head commit, neither pill is truthfully pressed — #scopeHead goes
+       muted rather than lying, and #scopeNote (aria-live) carries the real state */
+    const scoped=diffScope==='head', atHead=scoped&&scopeSha===HEAD.sha;
+    $('#scopeAll').setAttribute('aria-pressed',String(!scoped));
+    $('#scopeHead').setAttribute('aria-pressed',String(atHead));
+    $('#scopeHead').classList.toggle('other',scoped&&!atHead);
+    $('#scopeHead').title=scoped&&!atHead?'Scoped to commit '+scopeSha+' — click for the latest commit':'';
     updateScopeNote();
     renderFtree();
   }
-  function setHeadCommit(sha,files){ HEAD.sha=sha; HEAD.files=files; applyScope(); }
-  $('#scopeAll').addEventListener('click',()=>{ if(diffScope==='all') return; diffScope='all'; applyScope(); PS.toast('Diff scope: all files in PR #482'); });
-  $('#scopeHead').addEventListener('click',()=>{ if(diffScope==='head') return; diffScope='head'; applyScope(); PS.toast('Diff scope: files changed by head commit '+HEAD.sha); });
+  function setScope(sha){
+    const c=sha?commitBySha(sha):null;
+    if(c&&!c.files.length) return setScope(null);          /* never blank the diff */
+    const next=c?'head':'all', nextSha=c?c.sha:null;
+    if(diffScope===next&&scopeSha===nextSha) return;
+    diffScope=next; scopeSha=nextSha;
+    applyScope();
+    if(wkOn()) wkRenderAll();
+  }
+  /* widen back to all files, saying why — the reset is surprising once the user has
+     explicitly picked a commit */
+  function widenScope(fid){
+    if(inScope(fid)) return;
+    const was=scopeSha;
+    setScope(null);
+    PS.toast('Scope widened to all files — '+(FD[fid]?FD[fid].short:fid)+' is outside commit '+was);
+  }
+  function setHeadCommit(sha,files,msg){
+    const ex=commitBySha(sha);
+    if(ex){ ex.files=files; if(msg) ex.msg=msg; } else COMMITS.push({sha,msg:msg||'',files});
+    if(scopeSha&&!commitBySha(scopeSha)){ diffScope='all'; scopeSha=null; }
+    applyScope();
+  }
+  $('#scopeAll').addEventListener('click',()=>{ if(diffScope==='all') return; setScope(null); PS.toast('Diff scope: all files in PR #482'); });
+  $('#scopeHead').addEventListener('click',()=>{ if(diffScope==='head'&&scopeSha===HEAD.sha) return; setScope(HEAD.sha); PS.toast('Diff scope: files changed by head commit '+HEAD.sha); });
+  /* commit message → that commit's diff. A button, not an <a href="#files">: a hash
+     write races syncHash and loses the scope. Delegated, so the runtime-appended
+     suggestion commit is covered too. Not gated on isRO() — scoping is navigation. */
+  document.addEventListener('click',e=>{
+    const b=e.target.closest('[data-cscope]'); if(!b) return;
+    const c=commitBySha(b.dataset.cscope); if(!c) return;
+    setScope(c.sha);
+    goTab('files');
+    /* the panel had no layout box while hidden, so measure after it is shown */
+    if(c.files[0]) setTimeout(()=>{ const el=$('#'+c.files[0]); if(el) el.scrollIntoView({block:'start'}); },60);
+    if(wkOn()) wkRenderAll();
+    PS.toast('Diff scoped to '+c.sha+' — '+c.files.length+(c.files.length===1?' file':' files'),null,
+      {label:'Show all files',fn:()=>{ setScope(null); PS.toast('Diff scope: all files in PR #482'); }});
+  });
 
   /* thread → diff jump, and reopening a resolved thread */
   document.addEventListener('click',e=>{
     const v=e.target.closest('[data-viewdiff]'); if(!v||isRO()) return;
     const fid=v.dataset.viewdiff, k=v.dataset.viewline;
-    if(diffScope==='head'&&HEAD.files.indexOf(fid)<0){ diffScope='all'; applyScope(); }
+    widenScope(fid);
     goTab('files');
     history.replaceState(null,'','#'+fid+'-'+k);
     selectLine(fid,k,true);
@@ -4258,10 +4793,9 @@ const PS = (() => {
     return inline+(CONV_CMTS[id]||0);
   }
   function visibleFileIds(){
-    const head=diffScope==='head';
     const q=ftreeQ.trim().toLowerCase();
     return ORDER.filter(id=>{
-      if(head&&HEAD.files.indexOf(id)<0) return false;
+      if(!inScope(id)) return false;
       const f=FD[id];
       if(ftreeStatus!=='all'&&f.status!==ftreeStatus) return false;
       if(q&&!(f.path.toLowerCase().includes(q)||f.short.toLowerCase().includes(q))) return false;
@@ -4295,7 +4829,9 @@ const PS = (() => {
     const body=$('#ftreeBody'); if(!body) return;
     const ids=visibleFileIds();
     if(!ids.length){
-      body.innerHTML='<p class="fempty">No files match this filter</p>';
+      /* name the scope when it is what emptied the tree — blaming the filter sends the
+         user to clear a box that is not the cause */
+      body.innerHTML='<p class="fempty">No files match this filter'+(diffScope==='head'?' within commit '+scopeSha:'')+'</p>';
       return;
     }
     const root=buildDirTree(ids);
@@ -5094,7 +5630,8 @@ const PS = (() => {
     else if(k==='security') go('checks','[data-metric="security-summary"]');
     else if(k==='gate') go('checks','[data-metric="sonar-quality-gate"]');
     else if(k==='gov') location.href='settings.html#rulebooks';
-    else if(k==='impact') goTab('intel');
+    else if(k==='impact'){ goTab('intel'); $('#ciPathsTab')?.click();
+      setTimeout(()=>{ const b=$('#ciBlast'); if(!b) return; b.scrollIntoView({block:'start'}); window.scrollBy(0,-120); },80); }
     /* sidebar cards render only on the Conversation tab — switch there first */
     else if(k==='delivery') go('conversation','#sbDelivery');
     else if(k==='risk') go('conversation','[data-metric="risk-profile"]');
@@ -5319,7 +5856,7 @@ const PS = (() => {
   }
   $('#runTestsBtn').addEventListener('click',function(){ queueRun('4c19d7aa','PR push · manual @dominic',this); });
   $('#deepVerifyBtn2').addEventListener('click',function(){ queueRun('9e02c6f3','deep verify · full suite',this); });
-  $('#copyBranchBtn').addEventListener('click',()=>PS.copy('feat/rate-limit-middleware','Branch copied'));
+  $('#branchCopy').addEventListener('click',()=>PS.copy('feat/rate-limit-middleware','Branch copied'));
   document.addEventListener('click',e=>{
     const c=e.target.closest('.shacopy');
     if(c&&!isRO()) PS.copy(c.dataset.sha+'e91b4d6c72f0a8','Commit SHA copied — '+c.dataset.sha);
@@ -5343,20 +5880,27 @@ const PS = (() => {
         S.verdictStale=true; S.staleRun='b7f31d05'; S.headSha='e5b41d90'; setTimeout(syncAzIntro,0);
         const line=f.L.find(l=>(l[1]||l[0])===t.line); if(line) line[3]=t.neu;
         S.commits++; S.plus++; S.minus++;
-        $('#commitList').insertAdjacentHTML('beforeend',
-          '<div class="crow2"><span class="avatar sm" aria-hidden="true">DA</span><div class="cmain">'+
-          '<p class="cmsg">Apply suggestion from '+t.who+' — clamp sleepFor to maxWait</p>'+
-          '<p class="cmeta"><strong>@dominic</strong> committed <time datetime="'+NOWISO+'">just now</time><span class="label accent">⟳ Verification queued</span><span class="label outline">head</span></p>'+
-          '</div><div class="cright"><span class="sha">e5b41d90</span>'+
-          '<button class="icon-btn act shacopy" aria-label="Copy full SHA for commit e5b41d90" data-sha="e5b41d90" data-tip="Copy SHA"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-copy" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2" ry="2" /> <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" /></svg></button></div></div>');
+        /* the head moved: exactly one row may wear the rail and the head chip */
+        $$('#commitList .crow2.is-head').forEach(r=>r.classList.remove('is-head'));
+        $$('#commitList .cmeta .label.accent').forEach(l=>{ if(l.textContent==='head') l.remove(); });
+        /* insert above .clist-foot — the batch-coverage note is the list's last child */
+        $('#commitList .clist-foot').insertAdjacentHTML('beforebegin',
+          '<div class="crow2 is-head"><span class="avatar sm" aria-hidden="true">DA</span><div class="cmain">'+
+          '<p class="cmsg"><button type="button" class="cmsg-link" data-cscope="e5b41d90">Apply suggestion from '+t.who+' — clamp sleepFor to maxWait</button></p>'+
+          '<p class="cmeta"><span class="label accent">head</span><strong>@dominic</strong> committed <time datetime="'+NOWISO+'" data-abs="time">just now</time><span class="label attention">⟳ Verification queued</span></p>'+
+          '</div><div class="cright">'+
+          '<button class="sha act shacopy" aria-label="Copy full SHA for commit e5b41d90" data-sha="e5b41d90" data-tip="Copy SHA">e5b41d90</button></div></div>');
         PS.hydrateTimes($('#commitList'));
-        $('#commitsNote').innerHTML='<span class="mono">'+S.commits+'</span> commits — the head commit <span class="mono">e5b41d90</span> is waiting on a fresh verdict.';
+        $('#commitsNote').innerHTML='The head commit <span class="mono">e5b41d90</span> is waiting on a fresh verdict — <span class="mono">'+S.commits+'</span> commits on <span class="mono">feat/rate-limit-middleware</span>.';
+        /* the footnote named the old head; it would otherwise still credit 06cb9564 with
+           covering a commit that did not exist when the run executed */
+        $('#commitList .clist-foot').innerHTML='Run <a href="run-details.html" class="mono">06cb9564</a> covers <span class="mono">4a7c9e02</span> through <span class="mono">7e0a93c5</span> — <span class="mono">e5b41d90</span> is not attested by any run yet.';
         $$('#d-limiter .pm, [data-jump="d-limiter"] .pm').forEach(el=>{ el.innerHTML='<span class="plus">+219</span> <span class="minus">−1</span>'; });
         $('#filesSum').innerHTML='<span class="mono">3</span> files changed · <span class="mono plus">+'+S.plus+'</span> <span class="mono minus">−'+S.minus+'</span> — hover a line and press <span class="mono">＋</span> to comment, or click a line number to link to it';
         syncCounts(); renderDiff(fid);
         addTl('commit','','<strong>@dominic</strong> committed a suggestion from <strong>'+t.who+'</strong> — <span class="mono">e5b41d90</span>');
         queueRun('b7f31d05','suggestion commit · @dominic',null);
-        setHeadCommit('e5b41d90',['d-limiter']);
+        setHeadCommit('e5b41d90',['d-limiter'],'Apply suggestion from '+t.who+' — clamp sleepFor to maxWait');
         applyRole();
         PS.toast('Suggestion applied as e5b41d90 — merge is held until run b7f31d05 attests','success');
       }
@@ -5370,7 +5914,7 @@ const PS = (() => {
      Two states, both read-only: healthy (default) and ?atlas=degraded.
      The switch is pure presentation — it never touches S, renderMerge() or the
      verdict chip, which is the whole point of the demo. */
-  const ciPanel=$('#panel-intel'), ciBtn=$('#ciStateBtn');
+  const ciPanel=$('#panel-intel'), ciBtn=$('#ciStateFooterBtn');
 
   function ciSet(mode,announce){
     ciPanel.dataset.atlas=mode;
@@ -5386,17 +5930,174 @@ const PS = (() => {
       ? 'Degraded Atlas run — cross-repo impact unavailable. Verdict 06cb9564 and the merge gate are unchanged.'
       : 'Healthy Atlas run — all index and impact phases completed.','success');
   }
-  ciBtn.addEventListener('click',()=>ciSet(ciPanel.dataset.atlas==='degraded'?'healthy':'degraded',true));
+  ciBtn.addEventListener('click',()=>{
+    /* The footer control is available on every PR tab; make its result visible
+       immediately instead of silently changing a hidden panel. */
+    goTab('intel');
+    ciSet(ciPanel.dataset.atlas==='degraded'?'healthy':'degraded',true);
+  });
 
-  /* "Show all 18" — reveals the 8 context files held back behind the fold */
+  /* Evidence region is collapsed on arrival — the three panels run to ~1800px and
+     the tab should open on the verdict, not the audit. The tab strip stays visible
+     either way, so its counts still summarise what is inside. Picking a tab is an
+     intent to read it, so a tab click opens the region as well as switching it. */
+  const ciEvdTog=$('#ciEvdTog'), ciEvdRegion=$('#ciEvdRegion');
+  function ciEvdSet(open){
+    ciEvdRegion.hidden=!open;
+    ciEvdTog.setAttribute('aria-expanded',String(open));
+    $('.t',ciEvdTog).textContent=open?'Hide evidence':'Show evidence';
+  }
+  ciEvdTog.addEventListener('click',()=>ciEvdSet(ciEvdRegion.hidden));
+  $$('.atl-tabs [role="tab"]').forEach(t=>t.addEventListener('click',()=>ciEvdSet(true)));
+
+  /* "+8 more context files" — reveals the 8 files held back behind the fold */
   const ciMoreBtn=$('#ciMoreBtn'), ciMoreNote=$('#ciMoreNote'), ciHidden=$$('#ciFiles .cimore');
   ciMoreBtn.addEventListener('click',()=>{
     const open=ciMoreBtn.getAttribute('aria-expanded')==='true';
     ciHidden.forEach(li=>{ li.hidden=open; });
     ciMoreBtn.setAttribute('aria-expanded',String(!open));
-    ciMoreBtn.textContent=open?'Show all 18':'Show first 10';
+    ciMoreBtn.textContent=open?'+8 more context files':'Show first 10 only';
     ciMoreNote.textContent=(open?'Showing 10 of 18':'Showing all 18')+' · 3 diff · 6 similarity · 7 graph · 2 dependency';
   });
+
+  /* ---------- Blast radius: in-repo impact graph + evidence rail ----------
+     Ten nodes — the 7 symbols this diff changed plus the 3 in-repo call sites that
+     reach them. Node size is P(fail) from the index; severity mirrors the findings
+     already on this page (AIFIND), so the graph can never disagree with the review. */
+  const CI_RADIUS=[
+    {id:'take', name:'Bucket.Take', sev:'high', p:.61, kind:'New file', file:'internal/ratelimit/limiter.go', fkey:'d-limiter', add:218, del:0,
+     desc:'Allocates a token bucket per client key on the hot ingress path. Atlas ranks it highest in the radius: it is reached by every request the gateway admits, and it is where the open security finding sits.',
+     finds:[{sev:'danger',lbl:'high',line:72,conf:'high confidence',text:'<span class="mono">Take</span> allocates a bucket per client key with no cap and no eviction, so an attacker rotating keys grows the map without bound until the gateway OOMs. Cap the map and LRU-evict cold buckets — rejected clients fall back to the shared bucket.'}],
+     syms:[['Bucket.Take','method'],['newBucket','function'],['bucketMap','type']],
+     code:[['hk','@@ +64,9 @@ func (b *Bucket) Take(key string) bool'],['ad','+\tb.mu.Lock()'],['ad','+\tbuck, ok := b.clients[key]'],['ad','+\tif !ok {'],['ad','+\t\tbuck = newBucket(b.cap, b.step)'],['ad','+\t\tb.clients[key] = buck'],['cm','   // no cap, no eviction — finding af3'],['ad','+\t}']]},
+    {id:'refill', name:'Bucket.Refill', sev:'med', p:.47, kind:'New file', file:'internal/ratelimit/limiter.go', fkey:'d-limiter', add:218, del:0,
+     desc:'Credits tokens against the shared refill clock. Second in the radius because every burst decision reads it, and the refill arithmetic carries an open reliability finding.',
+     finds:[{sev:'attention',lbl:'moderate',line:86,conf:'high confidence',text:'<span class="mono">b.tokens+int(elapsed/b.step)</span> credits every step elapsed since the last call, so a bucket idle for a minute refills to <span class="mono">cap</span> in one hop and admits a full burst on the next tick. Clamp <span class="mono">elapsed</span> before crediting.'}],
+     syms:[['Bucket.Refill','method'],['refillClock','type']],
+     code:[['hk','@@ +82,6 @@ func (b *Bucket) Refill(now time.Time)'],['ad','+\telapsed := now.Sub(b.last)'],['ad','+\tb.tokens = min(b.cap, b.tokens+int(elapsed/b.step))'],['cm','   // elapsed is never clamped — finding af1'],['ad','+\tb.last = now']]},
+    {id:'wire', name:'wire', sev:'med', p:.38, kind:'Modified', file:'cmd/gateway/wiring.go', fkey:'d-wiring', add:30, del:96,
+     desc:'Swaps the legacy fixed-window throttle out of the middleware chain. This is the one edge in the diff that both downstream consumers reach, and this repository’s churn hotspot at 14 commits in 90 days.',
+     finds:[{sev:'neutral',lbl:'low',line:43,conf:'medium confidence',text:'<span class="mono">ratelimit.Middleware</span> is installed before <span class="mono">otel.Tracing</span>, so a request the limiter rejects never reaches the tracing middleware and leaves no span. Install tracing first and rejections stay observable.'}],
+     syms:[['wire','function'],['buildChain','function'],['defaultLimits','constant']],
+     code:[['hk','@@ -38,9 +38,7 @@ func wire(cfg *config.Gateway) http.Handler'],['rm','-\tmux.Use(throttle.FixedWindow(cfg.Limits))'],['rm','-\tmux.Use(otel.Tracing("gateway"))'],['ad','+\tmux.Use(ratelimit.Middleware(limiter))'],['ad','+\tmux.Use(otel.Tracing("gateway"))'],['cm','   // tracing lands after the limiter — finding af2']]},
+    {id:'allow', name:'Limiter.Allow', sev:'low', p:.26, kind:'New file', file:'internal/ratelimit/limiter.go', fkey:'d-limiter', add:218, del:0,
+     desc:'The public admission check the ingress router calls per request. Fully mapped by the suggested tests — 31 of the 86 mapped tests reach it.',
+     finds:[], syms:[['Limiter.Allow','method'],['Limiter','type']],
+     code:[['hk','@@ +12,5 @@ func (l *Limiter) Allow(key string) bool'],['ad','+\tif l == nil {'],['ad','+\t\treturn true'],['ad','+\t}'],['ad','+\treturn l.bucket.Take(key)']]},
+    {id:'clock', name:'newRefillClock', sev:'low', p:.21, kind:'New file', file:'internal/ratelimit/limiter.go', fkey:'d-limiter', add:218, del:0,
+     desc:'Constructs the shared refill clock every bucket reads from. Low P(fail): a single construction path, exercised by the contention suite.',
+     finds:[], syms:[['newRefillClock','function'],['clock.Source','type']],
+     code:[['hk','@@ +98,4 @@ func newRefillClock(step time.Duration) *refillClock'],['ad','+\treturn &refillClock{step: step, now: time.Now}']]},
+    {id:'jitter', name:'withJitter', sev:'low', p:.18, kind:'New file', file:'internal/ratelimit/limiter.go', fkey:'d-limiter', add:218, del:0,
+     desc:'Bounded-jitter backoff applied to retry hints. Pure function, no shared state — the lowest-risk symbol in the changed set.',
+     finds:[], syms:[['withJitter','function']],
+     code:[['hk','@@ +134,3 @@ func withJitter(d time.Duration) time.Duration'],['ad','+\treturn d + time.Duration(rand.Int63n(int64(d/4)))']]},
+    {id:'chain', name:'buildChain', sev:'low', p:.15, kind:'Modified', file:'cmd/gateway/wiring.go', fkey:'d-wiring', add:30, del:96,
+     desc:'Assembles the middleware chain the gateway serves. Changed only to drop the legacy throttle import; ordering is decided in wire.',
+     finds:[], syms:[['buildChain','function']],
+     code:[['hk','@@ -22,6 +22,4 @@ func buildChain(cfg *config.Gateway) *middleware.Chain'],['rm','-\timport "internal/throttle"'],['ad','+\timport "internal/ratelimit"']]},
+    {id:'router', name:'Router.ServeHTTP', sev:'low', p:.12, kind:'Caller', file:'internal/ingress/router.go', fkey:null, add:0, del:0,
+     desc:'Not modified by this diff. Atlas pulled it into the radius because the index records a call edge into ratelimit.Limiter.Allow — it is also the entry point orion-web reaches through POST /v1/ingress.',
+     finds:[], syms:[['Limiter.Allow','calls into']], code:null},
+    {id:'pool', name:'Pool.dispatch', sev:'low', p:.10, kind:'Caller', file:'internal/upstream/pool.go', fkey:null, add:0, del:0,
+     desc:'Not modified by this diff. Indexed call edge into ratelimit.Bucket.Refill, and the path relay-workers reaches through POST /v1/ingress/batch.',
+     finds:[], syms:[['Bucket.Refill','calls into']], code:null},
+    {id:'main', name:'main', sev:'low', p:.08, kind:'Caller', file:'cmd/gateway/main.go', fkey:null, add:0, del:0,
+     desc:'Not modified by this diff. Present in the radius only as an import edge onto internal/ratelimit — it constructs the limiter at boot and never touches the request path.',
+     finds:[], syms:[['internal/ratelimit','imports']], code:null}
+  ];
+  const CI_SEVCLS={high:'sev-high',med:'sev-med',low:'sev-low'};
+  const CI_SEVTXT={high:'High risk',med:'Medium risk',low:'Low risk'};
+  const ciEsc=s=>String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+  const ciSvg=$('#ciRadius'), ciRail=$('#ciRail');
+  let ciFocus='take';
+
+  function ciDrawRadius(){
+    if(!ciSvg) return;
+    const cx=280, cy=238, R=150, NS='http://www.w3.org/2000/svg';
+    let out='<circle class="atl-ring" cx="'+cx+'" cy="'+cy+'" r="'+R+'"/>'
+           +'<circle class="atl-ring" cx="'+cx+'" cy="'+cy+'" r="'+(R-46)+'"/>';
+    const pts=CI_RADIUS.map((n,i)=>{
+      const a=(-90+i*(360/CI_RADIUS.length))*Math.PI/180;
+      return {n:n, x:cx+Math.cos(a)*R, y:cy+Math.sin(a)*R, ca:Math.cos(a), sa:Math.sin(a)};
+    });
+    pts.forEach(p=>{ out+='<line class="atl-spoke" x1="'+(cx+p.ca*38)+'" y1="'+(cy+p.sa*38)+'" x2="'+p.x.toFixed(1)+'" y2="'+p.y.toFixed(1)+'"/>'; });
+    out+='<circle class="atl-hub" cx="'+cx+'" cy="'+cy+'" r="34"/>'
+       + '<text class="atl-hubt" x="'+cx+'" y="'+(cy+5)+'">AZ</text>'
+       + '<text class="atl-cap-t" x="'+cx+'" y="'+(cy+58)+'">changed core</text>';
+    pts.forEach(p=>{
+      const n=p.n, r=(9+n.p*10).toFixed(1), sel=n.id===ciFocus;
+      const lr=R+Number(r)+20, lx=cx+p.ca*lr, ly=cy+p.sa*lr+4;
+      const anchor=Math.abs(p.ca)<.4?'middle':(p.ca>0?'start':'end');
+      out+='<g class="atl-node '+CI_SEVCLS[n.sev]+(sel?' sel':'')+'" data-node="'+n.id+'" tabindex="0" role="button"'
+        +' aria-pressed="'+sel+'" aria-label="'+ciEsc(n.name+' — '+CI_SEVTXT[n.sev]+', P(fail) '+n.p.toFixed(2)+', '+n.file)+'">'
+        +'<circle class="focus-ring" cx="'+p.x.toFixed(1)+'" cy="'+p.y.toFixed(1)+'" r="'+(Number(r)+7).toFixed(1)+'"/>'
+        +'<circle class="focus-ring" cx="'+p.x.toFixed(1)+'" cy="'+p.y.toFixed(1)+'" r="'+(Number(r)+13).toFixed(1)+'"/>'
+        +'<circle class="halo" cx="'+p.x.toFixed(1)+'" cy="'+p.y.toFixed(1)+'" r="'+r+'"/>'
+        +'<circle class="core" cx="'+p.x.toFixed(1)+'" cy="'+p.y.toFixed(1)+'" r="4"/>'
+        +'<text class="nl" x="'+lx.toFixed(1)+'" y="'+ly.toFixed(1)+'" text-anchor="'+anchor+'">'+ciEsc(n.name)+'</text>';
+      if(n.finds.length) out+='<circle class="atl-badge" cx="'+(p.x+Number(r)*.85).toFixed(1)+'" cy="'+(p.y-Number(r)*.85).toFixed(1)+'" r="7"/>'
+        +'<text class="atl-badget" x="'+(p.x+Number(r)*.85).toFixed(1)+'" y="'+(p.y-Number(r)*.85+3).toFixed(1)+'">'+n.finds.length+'</text>';
+      out+='</g>';
+    });
+    ciSvg.innerHTML=out;
+  }
+
+  function ciDrawRail(){
+    if(!ciRail) return;
+    const n=CI_RADIUS.find(x=>x.id===ciFocus)||CI_RADIUS[0];
+    const sevcls=CI_SEVCLS[n.sev], tone=n.sev==='high'?'danger':(n.sev==='med'?'attention':'neutral');
+    let h='<h4 class="atl-sect">In-repo radius</h4>'
+      +'<div class="atl-mgrid">'
+      +'<div class="atl-mstat"><div class="v">3</div><div class="k">Changed files</div></div>'
+      +'<div class="atl-mstat"><div class="v">3</div><div class="k">Open findings</div></div>'
+      +'</div>'
+      +'<h4 class="atl-sect">Focus · file evidence <span class="label '+tone+'">'+CI_SEVTXT[n.sev]+'</span></h4>'
+      +'<div class="atl-focus '+sevcls+'">'
+      +'<div class="atl-fh"><span class="atl-fname">'+ciEsc(n.name)+'</span><span class="label outline">'+ciEsc(n.kind)+'</span></div>'
+      +'<p class="atl-fpath">'+ciEsc(n.file)+'</p>'
+      +'<p class="atl-fdesc">'+n.desc+'</p>';
+    if(n.fkey) h+='<div class="atl-dstats">'
+      +'<div class="atl-dstat add"><b>+'+n.add+'</b><span>Added</span></div>'
+      +'<div class="atl-dstat del"><b>−'+n.del+'</b><span>Removed</span></div>'
+      +'<div class="atl-dstat"><b>'+(n.add+n.del)+'</b><span>Total</span></div>'
+      +'</div>';
+    h+='</div>';
+    h+='<h4 class="atl-sect">Related findings <span class="n">'+n.finds.length+'</span></h4>';
+    h+= n.finds.length
+      ? n.finds.map(f=>'<div class="atl-find"><div class="fh"><span class="label '+f.sev+'">'+f.lbl+'</span>'
+          +'<span class="small subtle mono">line '+f.line+'</span><span class="small subtle">'+f.conf+'</span></div><p>'+f.text+'</p></div>').join('')
+      : '<p class="atl-nodiff">No open review finding maps to this symbol. Silence here is not proof — it means nothing was flagged, not that nothing is wrong.</p>';
+    h+='<h4 class="atl-sect">'+(n.fkey?'Changed symbols':'Graph edges')+'</h4>'
+      +'<div class="atl-syms">'+n.syms.map(s=>'<span class="atl-sym">'+ciEsc(s[0])+' <i>· '+ciEsc(s[1])+'</i></span>').join('')+'</div>';
+    h+='<h4 class="atl-sect">Diff excerpt</h4>';
+    h+= n.code
+      ? '<div class="atl-diff">'+n.code.map(l=>'<span class="'+l[0]+'">'+ciEsc(l[1])+'</span>').join('\n')+'</div>'
+        +'<div class="ci-more"><button type="button" class="btn sm" data-cifile="'+n.fkey+'">Open this file in the diff</button></div>'
+      : '<p class="atl-nodiff">Not modified by this pull request — this node is in the radius through an indexed call or import edge, so there is no diff to show.</p>';
+    ciRail.innerHTML=h;
+  }
+
+  function ciFocusNode(id,announce){
+    if(!CI_RADIUS.some(n=>n.id===id)) return;
+    ciFocus=id; ciDrawRadius(); ciDrawRail();
+    const g=ciSvg && ciSvg.querySelector('.atl-node.sel');
+    if(g && announce) g.focus();
+  }
+
+  if(ciSvg){
+    ciDrawRadius(); ciDrawRail();
+    ciSvg.addEventListener('click',e=>{
+      const g=e.target.closest('.atl-node'); if(g) ciFocusNode(g.dataset.node,true);
+    });
+    ciSvg.addEventListener('keydown',e=>{
+      const g=e.target.closest('.atl-node'); if(!g) return;
+      const i=CI_RADIUS.findIndex(n=>n.id===g.dataset.node);
+      if(e.key==='Enter'||e.key===' '){ e.preventDefault(); ciFocusNode(g.dataset.node,true); }
+      else if(e.key==='ArrowRight'||e.key==='ArrowDown'){ e.preventDefault(); ciFocusNode(CI_RADIUS[(i+1)%CI_RADIUS.length].id,true); }
+      else if(e.key==='ArrowLeft'||e.key==='ArrowUp'){ e.preventDefault(); ciFocusNode(CI_RADIUS[(i-1+CI_RADIUS.length)%CI_RADIUS.length].id,true); }
+    });
+  }
 
   /* path → Files changed tab, scrolled to that diff */
   document.addEventListener('click',e=>{
@@ -5546,7 +6247,7 @@ const PS = (() => {
     const split=S.view==='split';
     let h='';
     ORDER.forEach(fid=>{
-      if(diffScope==='head'&&HEAD.files.indexOf(fid)<0) return;
+      if(!inScope(fid)) return;
       const f=FD[fid];
       const open=(AIFIND[fid]||[]).filter(t=>t.state==='open').length;
       const viewed=$('#'+fid)?.dataset.viewed==='true';
@@ -5581,8 +6282,8 @@ const PS = (() => {
         +'</div>';
     });
     if(diffScope==='head'){
-      const hid=ORDER.filter(id=>HEAD.files.indexOf(id)<0).length;
-      if(hid) h+='<button class="wk-expand" data-wkscopeall>'+hid+' files hidden by scope — show all</button>';
+      const hid=ORDER.filter(id=>!inScope(id)).length;
+      if(hid) h+='<button class="wk-expand" data-wkscopeall>'+hid+' files hidden by commit '+scopeSha+' — show all</button>';
     }
     wkSet($('#wkCode'),h);
   }
@@ -5591,7 +6292,7 @@ const PS = (() => {
     const q=wkFilter.toLowerCase();
     const root={dirs:{},files:[]};
     ORDER.forEach(fid=>{
-      if(diffScope==='head'&&HEAD.files.indexOf(fid)<0) return;
+      if(!inScope(fid)) return;
       const f=FD[fid];
       if(q&&!f.path.toLowerCase().includes(q)) return;
       let node=root;
@@ -5860,8 +6561,12 @@ const PS = (() => {
     const oe=$('#wkOpen');
     oe.textContent=o?o+(o===1?' open finding':' open findings'):'All findings closed';
     oe.classList.toggle('none',o===0);
-    $('#wkScAll').setAttribute('aria-pressed',String(diffScope==='all'));
-    $('#wkScHead').setAttribute('aria-pressed',String(diffScope==='head'));
+    /* mirror of the legacy pills, including the "scoped to some other commit" state */
+    const wkScoped=diffScope==='head', wkAtHead=wkScoped&&scopeSha===HEAD.sha;
+    $('#wkScAll').setAttribute('aria-pressed',String(!wkScoped));
+    $('#wkScHead').setAttribute('aria-pressed',String(wkAtHead));
+    $('#wkScHead').classList.toggle('other',wkScoped&&!wkAtHead);
+    $('#wkScHead').title=wkScoped&&!wkAtHead?'Scoped to commit '+scopeSha+' — click for the latest commit':'Files changed by the head commit';
     $('#wkVU').setAttribute('aria-pressed',String(S.view==='unified'));
     $('#wkVS').setAttribute('aria-pressed',String(S.view==='split'));
   }
@@ -5909,7 +6614,7 @@ const PS = (() => {
   function wkSelect(fid,key){
     wkSel={fid,key}; wkThread=null; wkCompose=null; wkCur=fid;
     const t=findAi(fid,key);
-    if(diffScope==='head'&&HEAD.files.indexOf(fid)<0){ diffScope='all'; applyScope(); }
+    widenScope(fid);
     wkRenderAll(); if(t) wkScrollLine(fid,'L'+t.line);
   }
   function wkSize(){
@@ -5928,7 +6633,7 @@ const PS = (() => {
         :p[0]==='convo'?{type:'convo',cid:p[1],fid:(WKCONVO.find(c=>c.id===p[1])||{}).fid,key:(WKCONVO.find(c=>c.id===p[1])||{}).key}
         :{type:'inline',fid:p[1],key:p[2]};
       if(wkThread.fid){ wkCur=wkThread.fid;
-        if(diffScope==='head'&&HEAD.files.indexOf(wkThread.fid)<0){ diffScope='all'; applyScope(); }
+        widenScope(wkThread.fid);
         wkEnsureLine(wkThread.fid,wkThread.key); }
       wkRenderAll(); if(wkThread.fid&&wkThread.key) wkScrollLine(wkThread.fid,wkThread.key); return; }
     const fo=e.target.closest('[data-wkfolder]');
@@ -6055,7 +6760,7 @@ const PS = (() => {
     if(e.key==='j'){ e.preventDefault(); wkStep(1); }
     if(e.key==='k'){ e.preventDefault(); wkStep(-1); }
     if(e.key==='n'||e.key==='p'){ e.preventDefault();
-      const vis=ORDER.filter(id=>diffScope!=='head'||HEAD.files.indexOf(id)>=0);
+      const vis=ORDER.filter(inScope);
       const i=vis.indexOf(wkCur);
       wkCur=vis[(i+(e.key==='n'?1:-1)+vis.length)%vis.length];
       wkRenderTree(); wkScrollLine(wkCur,null); }
