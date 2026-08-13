@@ -5746,7 +5746,7 @@ const PS = (() => {
       /* unmet gates lead and are never collapsed — an action must not sit behind a
          disclosure. Met gates join, after the blocker, only when disclosed or selected. */
       $('#ckGateList').innerHTML=M.G
-        .filter(g=>ckShowMet||!g.ok||ckSeg===g.k)
+        .filter(g=>ckShowMet||!g.ok)
         .sort((a,b)=>(a.ok?1:0)-(b.ok?1:0))
         .map(g=>{
           const cls=g.ok?'ok':g.wait?'wait':'bad', gl=g.ok?'✓':g.wait?'⏳':'!';
@@ -5766,7 +5766,7 @@ const PS = (() => {
   /* delegated so repaints can never orphan a handler; every target already exists */
   document.addEventListener('click',e=>{
     const m=e.target.closest('#ckMore');
-    if(m){ ckShowMet=!ckShowMet; ckSeg=null; paintGates(); return; }
+    if(m){ ckShowMet=!ckShowMet; paintGates(); return; }
     const b=e.target.closest('[data-ckgo]'); if(!b) return;
     const k=b.dataset.ckgo;
     if(k==='verdict'){ location.href='run-details.html'; }
