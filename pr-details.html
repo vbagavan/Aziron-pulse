@@ -991,16 +991,160 @@ button.sha:hover{border-color:var(--fg-subtle)}
 /* ---- Readiness groups (Checks) · sidebar readiness · Change card ---- */
 .rghd{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
 .rghd .rgnote{flex:1;min-width:180px;margin:0}
-.rgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(228px,1fr));gap:16px;margin-bottom:20px}
+/* Cards keep their own height by default — one card can carry 7 SonarQube conditions
+   while the rest carry 2–4 rows, and stretching all of them to the tallest cost ~1,000px
+   of empty card on a 1280 screen. #panel-checks opts back into row-wise stretch. */
+.rgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;
+  align-items:start;margin-bottom:20px}
 .rcard{border:1px solid var(--border);border-radius:var(--r);background:var(--bg);box-shadow:var(--shadow-sm);padding:12px 14px;min-width:0}
+/* ---------- Check evidence layout ----------
+   An exception-led banner derived from gate state (it can never say "ready to merge" —
+   this section cannot see the approval gate), tiles that jump to a card, a 3+2 grid so
+   one 7-row card stops dictating four card heights, and labelled Current/Target columns
+   so "A · required = A" stops being one ambiguous string. Operates on the real cards,
+   so every ?-definition, link and live renderer keeps working. */
+.ck-comp{margin-bottom:16px}
+/* Evidence cards read as one comparable set, so they share a floor and each row's
+   cards end on the same line. Stretch is per row, not per grid: the 7-condition
+   SonarQube card sits on row 2 and never dictates the height of row 1. */
+#panel-checks .rgrid{grid-template-columns:repeat(3,minmax(0,1fr));align-items:stretch}
+#panel-checks .rcard{display:flex;flex-direction:column;min-height:168px}
+/* the run/provenance line is the card's footnote — it drops to the bottom so a
+   stretched card gains a readable base rather than a dead gap */
+#panel-checks .rcard .sq-foot{margin-top:auto;padding-top:8px}
+@media (max-width:1100px){#panel-checks .rgrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:700px){#panel-checks .rgrid{grid-template-columns:minmax(0,1fr)}}
+
+.ck-ban{display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding:14px 16px;margin-bottom:12px;
+  border:1px solid var(--border);border-left:3px solid var(--fg-subtle);border-radius:var(--r-lg);
+  background:var(--bg);box-shadow:var(--shadow-sm)}
+.ck-ban[data-tone="bad"]{border-left-color:var(--danger);background:var(--danger-subtle);border-color:transparent}
+.ck-ban[data-tone="ok"]{border-left-color:var(--success)}
+.ck-ban .bi{display:flex;align-items:center;justify-content:center;width:34px;height:34px;flex:none;
+  border-radius:50%;background:var(--bg);color:var(--fg-subtle);font:700 15px var(--font-mono)}
+.ck-ban[data-tone="bad"] .bi{background:var(--danger);color:var(--on-fill)}
+.ck-ban[data-tone="ok"] .bi{background:var(--success);color:var(--on-fill)}
+.ck-ban .bt{flex:1 1 240px;min-width:0}
+.ck-ban .bt h3{font:650 15px var(--font-sans);letter-spacing:-.01em;color:var(--fg)}
+.ck-ban[data-tone="bad"] .bt h3{color:var(--danger)}
+.ck-ban .bt p{font-size:12px;color:var(--fg-muted);margin-top:2px;overflow-wrap:anywhere}
+.ck-ban .bm{display:flex;gap:22px;flex-wrap:wrap;padding-left:18px;border-left:1px solid var(--border)}
+.ck-ban[data-tone="bad"] .bm{border-left-color:color-mix(in srgb,var(--danger) 22%,transparent)}
+.ck-ban .bm div{min-width:0}
+.ck-ban .bm .k{font:600 10px var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--fg-muted)}
+.ck-ban .bm .v{font:600 13px var(--font-mono);color:var(--fg);margin-top:2px}
+.ck-ban .bm .v.ok{color:var(--success)}
+.ck-ban .bm .v.bad{color:var(--danger)}
+
+.ck-tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(196px,1fr));gap:10px;margin-bottom:16px}
+.ck-tile{display:flex;align-items:center;gap:10px;min-width:0;padding:10px 12px;text-align:left;cursor:pointer;
+  border:1px solid var(--border);border-radius:var(--r);background:var(--bg);box-shadow:var(--shadow-sm)}
+.ck-tile:hover{border-color:var(--fg-subtle);background:var(--bg-subtle)}
+.ck-tile .ti{display:flex;align-items:center;justify-content:center;width:26px;height:26px;flex:none;
+  border-radius:7px;background:var(--bg-inset);color:var(--fg-muted)}
+.ck-tile.bad .ti{background:var(--danger-subtle);color:var(--danger)}
+.ck-tile.wait .ti{background:var(--attention-subtle);color:var(--attention)}
+.ck-tile.ok .ti{background:var(--success-subtle);color:var(--success)}
+.ck-tile .tt{flex:1;min-width:0}
+.ck-tile .tn,.ck-tile .tv{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ck-tile .tn{font:600 11px var(--font-sans);color:var(--fg-muted)}
+.ck-tile .tv{font:600 13px var(--font-sans);color:var(--fg);margin-top:1px}
+.ck-tile.bad .tv{color:var(--danger)}
+.ck-tile .tc{flex:none;color:var(--fg-subtle)}
+
+/* labelled value columns, only where a threshold exists */
+#panel-checks .ck-colh{display:flex;gap:8px;align-items:baseline;
+  padding:4px 0 5px;border-top:1px solid var(--border-muted);font:600 9px var(--font-sans);
+  letter-spacing:.06em;text-transform:uppercase;color:var(--fg-subtle)}
+#panel-checks .ck-colh .h1{margin-left:auto;width:74px;text-align:right}
+#panel-checks .ck-colh .h2{width:96px;text-align:right}
+/* fixed, non-shrinking so every row's Current/Target lands on the header's axis */
+#panel-checks .split .cdt{display:flex;gap:8px;margin-left:auto;flex:none;width:178px;text-align:right}
+#panel-checks .split .cdt .cv{width:74px;flex:none}
+#panel-checks .split .cdt .ct{width:96px;flex:none;font-weight:400;color:var(--fg-subtle)}
+@media (max-width:520px){
+  #panel-checks .ck-colh{display:none}
+  #panel-checks .split .cdt{display:block}
+  #panel-checks .split .cdt .cv,#panel-checks .split .cdt .ct{width:auto}
+}
 .rcard .rch{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px}
 .rcard .lbl{font:600 13px var(--font-sans);color:var(--fg);display:flex;align-items:center;gap:6px;min-width:0}
 .ckrow{display:flex;align-items:baseline;gap:8px;padding:6px 0;border-top:1px solid var(--border-muted);font-size:12px;min-width:0}
 .ckrow:first-of-type{border-top:none}
 .cgl{flex:none;width:14px;text-align:center;font:700 12px var(--font-mono)}
 .cgl.ok{color:var(--success)} .cgl.pend{color:var(--attention)} .cgl.bad{color:var(--danger)}
-.ckrow .cnm{color:var(--fg-muted);min-width:0;overflow-wrap:anywhere}
+/* break-anywhere split labels mid-syllable ("Improveme/nt plan") because min-width:0 let
+   the label shrink under one word. Floor the label column instead and let the value wrap. */
+.ckrow .cnm{color:var(--fg-muted);flex:1 1 auto;min-width:92px;overflow-wrap:break-word}
 .ckrow .cdt{margin-left:auto;font:600 12px var(--font-mono);color:var(--fg);text-align:right;overflow-wrap:anywhere;min-width:0}
+/* ---- Checks → merge gates (the decision layer above the evidence body) --------
+   Two shapes chosen by whether anything is unmet: every gate met collapses the
+   whole apparatus to one line, because a list of four green ticks is the thing
+   standing between a reader and the finding they came for. Ported from
+   design-lab/checks-tab/final.html. */
+.ck-said{border:1px solid var(--border);border-left:3px solid var(--fg-subtle);border-radius:var(--r-lg);
+  background:var(--bg);box-shadow:var(--shadow-sm);padding:13px 15px;margin-bottom:10px;display:flex;gap:13px;align-items:flex-start}
+.ck-said[data-tone="bad"]{border-left-color:var(--danger)}
+.ck-said[data-tone="warn"]{border-left-color:var(--attention)}
+.ck-said[data-tone="ok"]{border-left-color:var(--success)}
+.ck-said .gr{flex:none}
+.ck-said .tx{flex:1;min-width:0}
+.ck-said .hd{font:600 15px/1.35 var(--font-sans);letter-spacing:-.01em}
+.ck-said .hd em{font-style:normal;color:var(--danger)}
+.ck-said[data-tone="ok"] .hd em{color:var(--success)}
+.ck-said .hd em.okem{color:var(--success)}
+.ck-said .sub{font-size:12px;color:var(--fg-muted);margin-top:3px;max-width:88ch}
+.ck-said .acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;align-items:center}
+/* #ckActs is a repaint target, so it has to stay in the DOM — display:contents keeps its
+   buttons on the parent's flex line, otherwise the first two sit gapless against each other */
+.ck-said .acts>#ckActs{display:contents}
+.ck-gates{margin-bottom:20px}
+/* display:flex would otherwise beat the hidden attribute and show both shapes */
+.ck-lean[hidden],.ck-full[hidden]{display:none}
+.ck-lean{display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  border:1px solid var(--border);border-left:3px solid var(--success);border-radius:var(--r);
+  background:var(--bg);box-shadow:var(--shadow-sm);padding:9px 13px}
+.ck-lean .lg{flex:none;font:700 12px var(--font-mono);color:var(--success)}
+.ck-lean .lf{font:700 12px var(--font-mono);white-space:nowrap}
+.ck-lean .ln{color:var(--fg-subtle);font-size:11px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+.ck-lean .lm{font-weight:600;color:var(--success);white-space:nowrap}
+/* Row 1 — the outcome, not a condition. A lock icon fronts the fraction and the
+   lock sentence; Live/Enforce are demoted to the footer so this line stays a verdict. */
+.ck-sum{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.ck-sum .ck-lock{display:flex;align-items:center;justify-content:center;width:26px;height:26px;flex:none;border-radius:7px;background:var(--attention-subtle);color:var(--attention)}
+.ck-sum .frac{font:700 14px var(--font-mono);white-space:nowrap}
+.ck-sum .cap{font-size:12px;color:var(--fg-muted);flex:1;min-width:120px}
+/* Row 2 — the blocker earns a tinted card; met gates (shown only when disclosed)
+   stay as quiet list rows so the eye lands on what holds the merge. */
+.ck-full .ck-g.bad,.ck-full .ck-g.wait{border-top:0;margin-bottom:8px;padding:11px 12px;border-radius:var(--r)}
+.ck-full .ck-g.bad{background:var(--danger-subtle)}
+.ck-full .ck-g.bad .gn{color:var(--danger)}
+.ck-full .ck-g.wait{background:var(--attention-subtle)}
+.ck-full .ck-g.wait .gn{color:var(--attention)}
+/* Row 3 — quiet disclosure: the met-gate names give the at-a-glance summary the
+   four peer chips used to, without competing with the blocker for weight. */
+.ck-foot{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding-top:10px;border-top:1px solid var(--border-muted)}
+.ck-metnames{font:500 11px var(--font-sans);color:var(--fg-subtle);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+.ck-foot-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-left:auto}
+.ck-more{background:none;border:0;padding:0;font:600 11px var(--font-sans);color:var(--accent);cursor:pointer;white-space:nowrap}
+.ck-more:hover{text-decoration:underline}
+.ck-g{display:grid;grid-template-columns:14px minmax(126px,auto) minmax(150px,1fr) 132px 118px;
+  align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--border-muted);font-size:12px}
+.ck-g .gi{text-align:center;font:700 12px var(--font-mono)}
+.ck-g .gi.ok{color:var(--success)} .ck-g .gi.bad{color:var(--danger)} .ck-g .gi.wait{color:var(--attention)}
+.ck-g .gn{font-weight:600}
+.ck-g .gd{color:var(--fg-muted);min-width:0}
+.ck-g .gq{font:600 11px var(--font-mono);color:var(--fg-subtle);text-align:right;white-space:nowrap}
+.ck-g .ga{justify-self:end}
+.ck-g.met .gn{font-weight:500;color:var(--fg-muted)}
+.ck-g.met .gd{color:var(--fg-subtle)}
+/* the evidence body's correction: advisory cards are a different kind of thing */
+.rcard.adv{background:var(--bg-subtle)}
+.rcard.adv .lbl{color:var(--fg-muted)}
+.ck-kind{font:600 9px var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--fg-subtle);white-space:nowrap}
+.ck-kind.gate{color:var(--accent-chip)}
+@media (max-width:980px){.ck-g{grid-template-columns:14px 1fr}
+  .ck-g .gd,.ck-g .gq,.ck-g .ga{grid-column:2}.ck-g .gq{text-align:left}.ck-g .ga{justify-self:start}}
 .rscore{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px}
 .rscore b{font:700 18px var(--font-mono);color:var(--accent-chip);background:var(--accent-subtle);border:1px solid var(--accent-line);border-radius:var(--r);padding:3px 8px;flex:none}
 .rscore .rsl{font-size:12px;color:var(--fg-muted);flex:1;min-width:120px;overflow-wrap:anywhere}
@@ -1158,14 +1302,24 @@ button.sha:hover{border-color:var(--fg-subtle)}
 .sca-ids{grid-column:1 / -1;display:flex;gap:8px;flex-wrap:wrap;align-items:center;font-size:11px;color:var(--fg-muted)}
 .sca-ids .mono{font-size:11px}
 /* Coverage improvement plan (Checks) */
-.cov-track{position:relative;margin:4px 0 22px}
+.cov-track{position:relative;margin:26px 0 27px}
 .cov-bar{display:flex;height:12px;border-radius:999px;background:var(--bg-inset);border:1px solid var(--border-muted);overflow:hidden}
 .cov-seg{height:100%;flex:none}
 .cov-seg.done{background:var(--success)}
 .cov-seg.add{background:var(--accent);opacity:.7}
 .cov-seg.res{background:repeating-linear-gradient(45deg,var(--border),var(--border) 3px,transparent 3px,transparent 6px)}
+/* Two registers on purpose: the fixed grade thresholds sit BELOW the bar, the
+   projection the reader controls sits ABOVE it. Same row would collide whenever
+   the selection lands the projection near the 90 tick. */
 .cov-tick{position:absolute;top:-3px;height:20px;border-left:1px dashed var(--fg-subtle)}
-.cov-tick em{position:absolute;top:20px;left:-8px;font:500 9px var(--font-sans);font-style:normal;color:var(--fg-subtle);white-space:nowrap}
+.cov-tick::after{content:"";position:absolute;top:18px;left:-2px;width:4px;height:4px;border-radius:50%;background:var(--fg-subtle)}
+.cov-tick em{position:absolute;top:24px;left:-8px;font:500 9px var(--font-sans);font-style:normal;color:var(--fg-subtle);white-space:nowrap}
+.cov-flag{position:absolute;bottom:100%;width:0;margin-bottom:7px;transition:left .18s ease}
+.cov-flag i{position:absolute;bottom:-7px;left:0;width:1px;height:7px;background:var(--accent)}
+.cov-flag em{position:absolute;bottom:0;transform:translateX(-50%);white-space:nowrap;font:600 10px var(--font-sans);font-style:normal;color:var(--accent)}
+/* Past the midpoint the centred label would overhang the card, so anchor its
+   right edge to the marker instead. */
+.cov-flag.end em{transform:translateX(-100%);padding-right:3px}
 .cov-gap{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-top:1px solid var(--border-muted);font-size:12px}
 .cov-gap input{flex:none;margin-top:2px;width:14px;height:14px;accent-color:var(--accent)}
 .cov-gap-main{display:flex;flex-direction:column;gap:3px;min-width:0;flex:1}
@@ -1175,9 +1329,27 @@ button.sha:hover{border-color:var(--fg-subtle)}
 .cov-gap-meta .lnkbtn{font-size:11px}
 .cov-delta{white-space:nowrap}
 .cov-done{flex:none;width:14px;text-align:center;color:var(--success);font:700 12px var(--font-mono)}
+/* Column header for the suggestion list: names what the delta pills measure and
+   carries the select-all. Padding mirrors .cov-gap so the labels line up with the
+   controls they head. */
+.cov-head{display:flex;gap:10px;align-items:center;padding:2px 0 7px;font:600 10px var(--font-sans);text-transform:uppercase;letter-spacing:.06em;color:var(--fg-subtle)}
+.cov-head input{flex:none;width:14px;height:14px;accent-color:var(--accent)}
+.cov-head-t{flex:1;min-width:0}
+.cov-head-u{flex:none}
 .cov-ctas{display:flex;gap:8px;margin-top:10px}
+/* The ladder is the list's result, not fine print — one inset strip terminates
+   the rows and lifts it clear of the two footnotes that follow. */
+.cov-sum{display:flex;align-items:center;gap:8px;margin:10px 0 0;padding:7px 10px;border:1px solid var(--border-muted);border-radius:var(--r);background:var(--bg-subtle)}
+.cov-sum>svg{flex:none;width:13px;height:13px;color:var(--fg-subtle)}
 #covProj{margin:0 0 4px}
-#covLadder{margin:8px 0 6px;color:var(--fg-muted);overflow-wrap:anywhere}
+#covLadder{margin:0;color:var(--fg-muted);overflow-wrap:anywhere}
+/* Narrow: the 80 and 90 ticks close to ~27px apart, so their words overlap, and a
+   row wraps to three lines — which puts the uplift pill under its own heading
+   rather than beside it. Keep the numbers and the select-all, drop the prose. */
+@media (max-width:760px){
+  .cov-tick em span{display:none}
+  .cov-head-u{display:none}
+}
 /* uncovered-range tint when jumping from a plan row into the diff */
 .diff tr.covhl td{background:var(--attention-subtle);box-shadow:inset 2px 0 0 var(--attention)}
 /* 360° strip (header deck): lifecycle spine + grouped dimension pills.
@@ -1517,11 +1689,6 @@ tr.crow:has(.azbot) td{padding:10px 12px}
 .atl-row .v{font:600 12px var(--font-mono);color:var(--accent);flex:none;margin-left:auto;white-space:nowrap}
 .atl-sect{font:600 10px var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--fg-muted);margin:14px 0 8px;display:flex;align-items:center;gap:8px}
 .atl-sect .n{margin-left:auto;font-family:var(--font-mono);font-weight:400;text-transform:none;letter-spacing:0;color:var(--fg-subtle);text-align:right;min-width:0}
-.atl-fchips{list-style:none;display:flex;flex-direction:column;gap:6px;min-width:0}
-.atl-fchips li{display:flex;align-items:center;gap:8px;padding:7px 10px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg-subtle);min-width:0}
-.atl-fchips li[hidden]{display:none}
-.atl-fchips .fp{font:12px var(--font-mono);color:var(--accent-chip);overflow-wrap:anywhere;min-width:0}
-.atl-fchips .ft{margin-left:auto;flex:none}
 
 /* blast radius: diagram left, evidence rail right */
 .atl-br{display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap;min-width:0}
@@ -1596,6 +1763,143 @@ tr.crow:has(.azbot) td{padding:10px 12px}
 .atl-diff .cm{opacity:.62}
 .atl-nodiff{font-size:11.5px;color:var(--fg-subtle);overflow-wrap:anywhere}
 @media (prefers-reduced-motion:reduce){.atl-node,.atl-node *{transition:none!important}}
+
+/* ================= Review context — the retrieval audit =====================
+   Ported from design-lab/review-context/hybrid.html, de-duplicated. The hybrid
+   was drawn as a standalone page, so four of its blocks restate something this
+   tab already says two hundred pixels higher — the page header, the eight-stat
+   band (its eight values ARE the phase rail above it), the rail takeaway (the
+   verdict header's exact sentence) and the Impact-paths card (a sibling
+   sub-tab). What lands is the part no other surface carries: how three changed
+   files became eighteen, and which signal put each one in the bundle.
+
+   Single column, not the drawn two: this panel is ~956px at a 1440px viewport,
+   so the 340px rail left the file table below its own min-width — a permanent
+   sideways scroll on the design's centrepiece. The rail's two surviving cards
+   became the two-up row instead.
+
+   Most of this reuses what the panel already owns — .atl-prail for the journey,
+   .atl-row for the signals, .tblwrap/.tbl for the table, .barrow for the bars.
+   Only the interrogation controls and the gap notice are genuinely new. ---- */
+
+/* The journey is the phase rail's component at a different altitude: the rail
+   above reports ANALYSIS phases, this reports BUNDLE ASSEMBLY. Same language on
+   purpose — a second, differently-drawn strip would read as a rival component. */
+.atl-ph.u .atl-pdot{background:var(--attention)}
+.atl-ph.u .atl-pdot svg{display:none}
+.atl-ph.u .atl-pn{color:var(--attention);font-weight:650}
+.atl-ph.u .atl-pv{font:700 10px var(--font-sans);letter-spacing:.05em;text-transform:uppercase;color:var(--attention)}
+/* the connector LEAVING an unresolved phase goes dashed — everything downstream
+   of the gap is drawn as inferred rather than measured */
+.atl-ph.u .atl-pline{background:repeating-linear-gradient(90deg,var(--border) 0 4px,transparent 4px 8px)}
+
+/* an unresolved signal is stated as absent, never as a zero */
+.atl-row.u .atl-ic{background:var(--attention-subtle);color:var(--attention)}
+.atl-row.u .t b,.atl-row.u .t span{color:var(--attention)}
+.atl-row.u .v{font:700 10px var(--font-sans);letter-spacing:.05em;text-transform:uppercase;color:var(--attention)}
+
+/* ---- interrogation controls: the filter turns a static audit into an instrument */
+.rc-pills{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:11px;min-width:0}
+.rc-pill{font:500 11.5px var(--font-sans);padding:4px 11px;border:1px solid var(--border);border-radius:20px;background:var(--bg);color:var(--fg-muted);cursor:pointer;white-space:nowrap}
+.rc-pill:hover{border-color:var(--accent);color:var(--fg)}
+.rc-pill[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--on-fill)}
+.rc-pill .ct{opacity:.72;margin-left:5px;font:10.5px var(--font-mono)}
+.rc-search{flex:1;min-width:130px;height:auto;padding:5px 11px;border:1px solid var(--border);border-radius:20px;background:var(--bg);color:var(--fg);font:12px var(--font-sans)}
+.rc-search::placeholder{color:var(--fg-subtle)}
+
+/* ---- the file table. .tblwrap/.tbl carry the frame, sticky head and row hover;
+   these only add the columns this table has that the generic one does not. ---- */
+/* table.rc-t, not .rc-t: `table.tbl{min-width:560px}` is element+class and would
+   otherwise out-specify this, letting the five columns crush to 560px */
+table.rc-t{min-width:660px;font-size:12px}
+.rc-t th{font:600 10px var(--font-sans);letter-spacing:.06em;text-transform:uppercase}
+.rc-t td{vertical-align:top}
+.rc-t tr.grp td{background:var(--bg-subtle);font:600 11.5px var(--font-sans);padding:7px 12px}
+.rc-t tr.grp .rt{float:right;font:500 10px var(--font-sans);letter-spacing:.04em;text-transform:uppercase;color:var(--fg-subtle)}
+.rc-t tr.grp:hover td{background:var(--bg-subtle)}
+.rc-t .f{font:11.5px var(--font-mono);color:var(--accent-chip);overflow-wrap:anywhere}
+.rc-t .why{color:var(--fg-muted);min-width:0}
+.rc-t .sc{color:var(--fg-subtle);white-space:nowrap}
+.rc-t .sz{text-align:right;font:11px var(--font-mono);color:var(--fg-subtle);white-space:nowrap}
+.rc-t .none{padding:18px 12px;color:var(--fg-subtle)}
+/* source tags are colour-matched to the signal rows above, so a reader who
+   filtered by "graph" recognises the row that explained what graph means */
+.rc-tag{display:inline-block;font:600 10px var(--font-sans);padding:2px 7px;border-radius:20px;white-space:nowrap}
+.rc-tag.diff{background:var(--accent-subtle);color:var(--accent-chip)}
+.rc-tag.similarity{background:var(--attest-subtle);color:var(--attest)}
+.rc-tag.graph{background:var(--success-subtle);color:var(--success)}
+.rc-tag.dependency{background:var(--attention-subtle);color:var(--attention)}
+.rc-tf{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px;font-size:11.5px;color:var(--fg-subtle)}
+.rc-tf .sp{flex:1}
+
+/* ---- the gap notice. Deliberately NOT a .banner: a banner sits above the
+   content and is the thing a reader scrolls past on the way to the table. In a
+   partial run the bundle still holds 18 files and still looks complete, so the
+   notice has to stand where the reader is about to draw the wrong conclusion. */
+.rc-gap{display:flex;gap:9px;align-items:flex-start;padding:10px 12px;border:1px dashed var(--attention);border-radius:var(--r);background:var(--attention-subtle);color:var(--attention);font-size:12px;margin-bottom:12px}
+.rc-gap svg{flex:none;margin-top:2px}
+.rc-gap b{font-weight:700}
+
+/* ---- the two cards the rail kept, side by side under the table ---- */
+.rc-cmt{border:1px solid var(--border);border-radius:var(--r);padding:11px 12px;background:var(--bg-subtle);min-width:0}
+.rc-cmt .h{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap;font-size:11.5px;color:var(--fg-muted);min-width:0}
+.rc-cmt .h b{color:var(--fg);font-size:12px}
+.rc-cmt .h .sp{flex:1}
+.rc-cmt p{font-size:12px;margin-top:6px;overflow-wrap:anywhere}
+.rc-cmt .m{font-size:11px;color:var(--fg-muted);margin-top:8px;padding-top:8px;border-top:1px solid var(--border-muted);overflow-wrap:anywhere}
+.rc-saved{margin-top:11px;padding:10px 12px;border-radius:var(--r);background:var(--success-subtle);color:var(--success)}
+.rc-saved b{display:block;font:650 14px var(--font-sans)}
+.rc-saved span{display:block;font-size:11.5px;margin-top:2px}
+
+/* ---- composition ------------------------------------------------------------
+   The tokens, type scale and card chrome were already right; what this surface
+   was missing was arrangement. Four moves, and almost no new styling:
+     1 header goes horizontal — title, chips and the four counts share one band
+     2 the legend sits BESIDE the files it explains, not stacked above them
+     3 the audit's three concerns become bordered sub-cards inside one card
+     4 every list keeps the same grammar: icon · name · description · value
+   Hence six rules here and a reuse table everywhere else. ------------------- */
+
+/* 1 · header band */
+.rc-hd{display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap;min-width:0}
+.rc-hd .g{flex:1 1 280px;min-width:0}
+.rc-hd .r{display:flex;flex-direction:column;align-items:flex-end;gap:10px;min-width:0}
+.rc-eyebrow{font:700 10px var(--font-sans);letter-spacing:.09em;text-transform:uppercase;color:var(--fg-subtle)}
+.rc-hd h3{font-size:16px;font-weight:650;letter-spacing:-.012em;margin-top:5px;overflow-wrap:anywhere}
+.rc-hd .sub{font-size:12px;color:var(--fg-muted);margin-top:3px;max-width:88ch;overflow-wrap:anywhere}
+/* the counts ride the header line rather than spanning the card, so .atl-mgrid's
+   full-width auto-fit is wrong here — same .atl-mstat boxes, different container */
+.rc-kpi{display:flex;gap:10px;flex-wrap:wrap;min-width:0}
+.rc-kpi .atl-mstat{flex:0 1 auto;min-width:104px}
+@media (max-width:760px){.rc-hd .r{align-items:flex-start;width:100%}}
+
+/* 2 · legend | data split. Divider is a border on the child, matching
+   .wk-files/.wk-panel and .wk-m:nth-child(odd) elsewhere in this file. */
+.rc-split{display:grid;grid-template-columns:minmax(0,320px) minmax(0,1fr);gap:0;min-width:0}
+.rc-split>.l{min-width:0;padding-right:18px}
+/* --border, not --border-muted: the muted hairline is for rows inside a list and
+   all but disappears against the dark theme's card. This matches .wk-panel. */
+.rc-split>.r{min-width:0;padding-left:18px;border-left:1px solid var(--border)}
+/* One column below 1220px. Measured at the boundary, not guessed: the table's
+   scroll box comes out at roughly (viewport − 559)px, so it falls under the
+   660px min-width at ~1219px. A 1200px breakpoint left a 1201–1218px dead zone
+   where the table side-scrolled — verified at 1210px, short by 9px. */
+@media (max-width:1220px){
+  .rc-split{grid-template-columns:minmax(0,1fr)}
+  .rc-split>.l{padding-right:0;padding-bottom:16px;border-bottom:1px solid var(--border-muted)}
+  .rc-split>.r{padding-left:0;padding-top:16px;border-left:0}
+}
+
+/* 3 · the audit's three concerns, each in its own bordered box */
+.rc-3up{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(290px,100%),1fr));gap:14px;align-items:start;min-width:0}
+.rc-stack{display:flex;flex-direction:column;gap:14px;min-width:0}
+/* the panel behind these is white, so a white sub-card on a white card would be
+   held apart by its border alone — tint the nested level instead, which is the
+   contrast the mockup gets from its grey page background */
+.rc-3up .atl-card{padding:13px 14px;background:var(--bg-subtle)}
+.rc-3up .atl-card .ci-rows li,.rc-3up .atl-card .rc-cmt{background:var(--bg)}
+
+@media (max-width:640px){.rc-search{flex-basis:100%}}
 
 /* Restricted (Analyst) — controls stay hoverable so the tooltip explains why */
 html[data-pstate="restricted"] .act{opacity:.55;cursor:not-allowed;pointer-events:auto!important}
@@ -2186,38 +2490,80 @@ html[data-theme="dark"] .railgrp::before{color:#9aabc6}
           </div>
 
           <div id="panel-checks" role="tabpanel" aria-labelledby="tab-checks" tabindex="0" hidden>
-            <div class="card" style="margin-bottom:16px"><div class="card-b" style="display:flex;gap:16px;align-items:center;flex-wrap:wrap">
-              <span class="grade g-a" role="img" aria-label="Latest grade A">A</span>
-              <div style="flex:1;min-width:220px">
-                <strong>Latest verdict: Passed · attested</strong>
-                <p class="small muted" style="margin-top:2px" data-metric="coverage-delta"><span class="lbl">Coverage delta</span> from run <span class="mono">06cb9564</span>: line <span class="mono">78.4% → 79.1%</span> (<span class="mono plus">+0.7</span>) · branch <span class="mono">71.2% → 71.8%</span> (<span class="mono plus">+0.6</span>)</p>
+            <!-- Decision layer. One statement of merge state, then the four gates that
+                 actually gate (gatesOk): attested verdict, quality gate, 2 approvals, no
+                 requested-changes review. Findings are advisory and live in the evidence
+                 body below — this panel used to file them under "Merge readiness" with a
+                 gate-shaped glyph, which contradicted gatesOk(). -->
+            <div class="ck-said" id="ckSaid" data-tone="bad">
+              <span class="grade g-a gr" id="ckGrade" role="img" aria-label="Latest grade A">A</span>
+              <div class="tx">
+                <p class="hd" id="ckHd">Merge is blocked.</p>
+                <p class="sub" id="ckSubMsg"></p>
+                <!-- static: paintGates never writes here, so the metric's "?" button
+                     (injected once by mountMetricDefs into .lbl) survives every repaint -->
+                <p class="sub" data-metric="coverage-delta"><span class="lbl">Coverage delta</span> from run <span class="mono">06cb9564</span>: line <span class="mono">78.4% → 79.1%</span> (<span class="mono plus">+0.7</span>) · branch <span class="mono">71.2% → 71.8%</span> (<span class="mono plus">+0.6</span>)</p>
+                <div class="acts">
+                  <span id="ckActs"></span>
+                  <!-- static: these two carry unguarded listeners bound once at load, so
+                       they must never sit inside a region paintGates() rewrites -->
+                  <button class="btn act" id="runTestsBtn">Run unit tests</button>
+                  <button class="btn act" id="deepVerifyBtn2">Request deep verify</button>
+                </div>
               </div>
-              <div style="display:flex;gap:8px;flex-wrap:wrap">
-                <button class="btn act" id="runTestsBtn">Run unit tests</button>
-                <button class="btn act" id="deepVerifyBtn2">Request deep verify</button>
+            </div>
+            <section class="ck-gates" data-metric="merge-gates" aria-labelledby="ckGTitle">
+              <h2 id="ckGTitle" class="lbl" style="position:absolute;left:-9999px">Merge gates</h2>
+              <div class="ck-lean" id="ckLean" hidden>
+                <span class="lg" aria-hidden="true">✓</span>
+                <span class="lf" id="ckLeanFrac"></span>
+                <span class="ln" id="ckLeanNames"></span>
+                <span class="livechip">Live · now</span>
+                <span class="lm" id="ckLeanMerge"></span>
               </div>
-            </div></div>
+              <!-- Blocker-first: one outcome line, then only the gate(s) actually holding
+                   the merge. Met gates stay silent behind a disclosure so the unmet one
+                   owns the eye — the inverse of the all-green lean state above. -->
+              <div class="ck-full" id="ckFull" hidden>
+                <div class="ck-sum">
+                  <span class="ck-lock" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span>
+                  <span class="frac" id="ckFrac"></span>
+                  <span class="cap" id="ckCap"></span>
+                </div>
+                <!-- ckGateList, not ckList: the sidebar already owns #ckList and
+                     renderChecks() writes to it -->
+                <div id="ckGateList"></div>
+                <div class="ck-foot">
+                  <button type="button" class="ck-more" id="ckMore" aria-expanded="false"></button>
+                  <span class="ck-metnames" id="ckMetNames"></span>
+                  <span class="ck-foot-meta">
+                    <span class="livechip">Live · now</span>
+                    <span class="label outline" title="A failed gate blocks merge on this Enforce repository">Enforce repository</span>
+                  </span>
+                </div>
+              </div>
+            </section>
             <div class="rghd">
-              <h2>Merge readiness</h2>
-              <span class="livechip">Live · now</span>
-              <p class="small subtle rgnote">Gate state for head commit <span class="mono">7e0a93c5</span> — evaluated on every push, not scoped to the date range above.</p>
+              <h2>Check evidence</h2>
+              <p class="small subtle rgnote">Everything run <span class="mono">06cb9564</span> measured for head commit <span class="mono">7e0a93c5</span> — evaluated on every push, not scoped to the date range above. Gate rows repeat above; the rest is context.</p>
             </div>
             <div class="rgrid">
-              <section class="rcard" data-metric="pr-review-readiness" aria-labelledby="rgPr">
-                <div class="rch"><h3 class="lbl" id="rgPr">PR review</h3></div>
+              <!-- Human approval is NOT repeated here: it is a gate, and the strip above
+                   states it. A sixth card also wraps this grid onto a second row. -->
+              <section class="rcard adv" data-metric="pr-review-readiness" aria-labelledby="rgPr">
+                <div class="rch"><h3 class="lbl" id="rgPr">PR review</h3><span class="ck-kind">Advisory</span></div>
                 <div class="ckrow"><span class="cgl pend" id="glAi" role="img" aria-label="Pending">⏳</span><span class="cnm">Pulse AI review</span><span class="cdt" id="dtAi" aria-live="polite">2 open findings</span></div>
                 <div class="ckrow"><span class="cgl ok" role="img" aria-label="Pass">✓</span><span class="cnm">Traceability</span><span class="cdt">AZ-892 linked</span></div>
-                <div class="ckrow"><span class="cgl pend" id="glAppr" role="img" aria-label="Pending">⏳</span><span class="cnm">Human approval</span><span class="cdt" id="dtAppr" aria-live="polite">1 of 2</span></div>
               </section>
-              <section class="rcard" data-metric="ut-readiness" aria-labelledby="rgUt">
-                <div class="rch"><h3 class="lbl" id="rgUt">Unit tests</h3></div>
+              <section class="rcard adv" data-metric="ut-readiness" aria-labelledby="rgUt">
+                <div class="rch"><h3 class="lbl" id="rgUt">Unit tests</h3><span class="ck-kind">Verdict evidence</span></div>
                 <div class="ckrow"><span class="cgl ok" role="img" aria-label="Pass">✓</span><span class="cnm">Selected tests</span><span class="cdt">18 of 18 passed</span></div>
                 <div class="ckrow"><span class="cgl ok" role="img" aria-label="Pass" id="utCovGl">✓</span><span class="cnm">Changed-line coverage</span><span class="cdt" id="utCovDt">86.0% · B</span></div>
                 <div class="ckrow"><span class="cgl ok" role="img" aria-label="Pass">✓</span><span class="cnm">Flake confidence</span><span class="cdt">0.94</span></div>
                 <div class="ckrow"><span class="cgl pend" role="img" aria-label="Improvement available">↗</span><span class="cnm">Improvement plan</span><span class="cdt">3 tests · up to 98.7% <button type="button" class="lnkbtn" data-covdetails>View plan →</button></span></div>
               </section>
-              <section class="rcard" data-metric="security-readiness" aria-labelledby="rgSec">
-                <div class="rch"><h3 class="lbl" id="rgSec">Security</h3></div>
+              <section class="rcard adv" data-metric="security-readiness" aria-labelledby="rgSec">
+                <div class="rch"><h3 class="lbl" id="rgSec">Security</h3><span class="ck-kind">Verdict evidence</span></div>
                 <div class="ckrow"><span class="cgl ok" role="img" aria-label="Pass" id="secRowGl">✓</span><span class="cnm">Pulse SAST</span><span class="cdt" id="secRowDt">0 new</span></div>
                 <div class="ckrow"><span class="cgl ok" role="img" aria-label="Pass" id="sqRowGl">✓</span><span class="cnm">SonarQube</span><span class="cdt" id="sqRowDt">Quality gate passed</span></div>
                 <div class="ckrow"><span class="cgl ok" role="img" aria-label="Pass">✓</span><span class="cnm">Secrets</span><span class="cdt">No findings</span></div>
@@ -2226,15 +2572,15 @@ html[data-theme="dark"] .railgrp::before{color:#9aabc6}
                    Blocking per the code-scanning integration setting on this Enforce repo. -->
               <section class="rcard" data-metric="sonar-quality-gate" aria-labelledby="rgSq">
                 <div class="rch"><h3 class="lbl" id="rgSq"><span class="sq-mark" aria-hidden="true">SQ</span>SonarQube quality gate</h3>
-                  <span class="label success" id="sqGateChip">✓ Passed · Sonar way</span>
-                  <span class="label outline" title="A failed gate blocks merge on this Enforce repository">Blocking</span></div>
+                  <span class="ck-kind gate">Gates merge</span>
+                  <span class="label success" id="sqGateChip">✓ Passed · Sonar way</span></div>
                 <div id="sqRows"><!-- rendered from SONAR.conditions --></div>
                 <p class="small subtle sq-foot" id="sqProv">Conditions evaluate new code only (Clean as You Code) · project <span class="mono">aziro_gateway-api</span> · analysis <span class="mono">AQ4x82c9</span> · analyzed Aug 3, 09:40 · <a href="settings.html#code-scanning">Open in SonarQube ↗</a></p>
               </section>
               <!-- Benchmarks are executed in the run (attestation story) — this puts
                    data behind the PR's "perf" label. All within budget by default. -->
-              <section class="rcard" data-metric="perf-bench" aria-labelledby="rgPf">
-                <div class="rch"><h3 class="lbl" id="rgPf">Performance (benchmarks)</h3><span class="label success">✓ Within budgets</span></div>
+              <section class="rcard adv" data-metric="perf-bench" aria-labelledby="rgPf">
+                <div class="rch"><h3 class="lbl" id="rgPf">Performance (benchmarks)</h3><span class="ck-kind">Verdict evidence</span><span class="label success">✓ Within budgets</span></div>
                 <div class="ckrow"><span class="cgl ok" role="img" aria-label="Pass">✓</span><span class="cnm">BenchmarkTake p50</span><span class="cdt">+0.8µs · budget ≤ +5µs</span></div>
                 <div class="ckrow"><span class="cgl ok" role="img" aria-label="Pass">✓</span><span class="cnm">Allocations/op (hot path)</span><span class="cdt">1 → 1 · no new allocs</span></div>
                 <div class="ckrow"><span class="cgl ok" role="img" aria-label="Pass">✓</span><span class="cnm">Ingress throughput (replay)</span><span class="cdt">−0.4% · budget ≥ −2%</span></div>
@@ -2269,14 +2615,23 @@ html[data-theme="dark"] .railgrp::before{color:#9aabc6}
                 <span class="label outline" id="covPoss" title="If every suggested test below is added">98.7% · A possible</span></div>
               <div class="card-b">
                 <div class="cov-track">
+                  <span class="cov-flag" id="covFlag" aria-hidden="true"><i></i><em></em></span>
                   <div class="cov-bar" id="covBar" role="img"></div>
-                  <i class="cov-tick" style="left:80%"><em>80 · gate</em></i>
-                  <i class="cov-tick" style="left:90%"><em>90 · A</em></i>
+                  <i class="cov-tick" style="left:80%"><em>80<span> · gate</span></em></i>
+                  <i class="cov-tick" style="left:90%"><em>90<span> · A</span></em></i>
                 </div>
                 <p class="small" id="covProj" aria-live="polite"></p>
+                <div class="cov-head" id="covHead">
+                  <input type="checkbox" id="covAll" aria-label="Select every suggested test">
+                  <span class="cov-head-t">Recommended tests</span>
+                  <span class="cov-head-u">Expected uplift</span>
+                </div>
                 <div id="covRows"><!-- rendered from COVPLAN by renderCovPlan --></div>
-                <p class="small" id="covLadder"></p>
-                <p class="small subtle">3 uncovered lines are defensive panics — excluded from suggestions (low value to cover).</p>
+                <div class="cov-sum">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="3 17 9 11 13 15 21 7"/><polyline points="15 7 21 7 21 13"/></svg>
+                  <p class="small" id="covLadder"></p>
+                </div>
+                <p class="small subtle" style="margin-top:8px">3 uncovered lines are defensive panics — excluded from suggestions (low value to cover).</p>
                 <div class="cov-ctas" id="covCtas">
                   <button type="button" class="btn sm act" id="covGen" data-covgen>Generate these tests</button>
                   <button type="button" class="btn sm act" data-covcopy>Copy test plan</button>
@@ -2608,129 +2963,179 @@ html[data-theme="dark"] .railgrp::before{color:#9aabc6}
 
               <!-- ===== Atlas evidence tabs ===== -->
               <div class="atl-tabs" role="tablist" aria-label="Atlas evidence">
-                <button type="button" role="tab" id="ciCtxTab" data-tab="context" aria-controls="ciCtxPanel" aria-selected="false"><span class="atl-dt"><b>Review context</b><span>Diff files, retrieved context, and comment mapping</span></span><span class="atl-dcount">18 files</span></button>
-                <button type="button" role="tab" id="ciPathsTab" data-tab="impact" aria-controls="ciPathsPanel" aria-selected="true"><span class="atl-dt"><b>Impact paths</b><span>Repository graph, API contracts, call sites, and related pull requests</span></span><span class="atl-dcount ci-ok">2 repos · 2 contracts</span><span class="atl-dcount ci-deg">2 phases unresolved</span></button>
+                <button type="button" role="tab" id="ciCtxTab" data-tab="context" aria-controls="ciCtxPanel" aria-selected="true"><span class="atl-dt"><b>Review context</b><span>Diff files, retrieved context, and comment mapping</span></span><span class="atl-dcount">18 files</span></button>
+                <button type="button" role="tab" id="ciPathsTab" data-tab="impact" aria-controls="ciPathsPanel" aria-selected="false"><span class="atl-dt"><b>Impact paths</b><span>Repository graph, API contracts, call sites, and related pull requests</span></span><span class="atl-dcount ci-ok">2 repos · 2 contracts</span><span class="atl-dcount ci-deg">2 phases unresolved</span></button>
                 <button type="button" role="tab" id="ciProvTab" data-tab="provenance" aria-controls="ciProvPanel" aria-selected="false"><span class="atl-dt"><b>Technical provenance</b><span>Snapshot identity, commit freshness, degraded phases, and phase timings</span></span><span class="atl-dcount ci-ok">8 phases · all ok</span><span class="atl-dcount ci-deg">8 phases · 1 failed</span></button>
               </div>
 
               <!-- ===== Review context details ===== -->
-              <!-- Evidence is opt-in: the three panels run to ~1800px, and arriving at this tab
-                   should show the verdict, not the audit. The tab strip stays visible either way,
-                   so its three counts still act as the summary the drawers used to give. -->
-              <button type="button" class="atl-evdtog" id="ciEvdTog" aria-expanded="false" aria-controls="ciEvdRegion">
+              <!-- Review context opens by default. The strip keeps its counts visible either
+                   way, and Hide evidence still collapses the panel body when the reader
+                   wants the verdict alone. -->
+              <button type="button" class="atl-evdtog" id="ciEvdTog" aria-expanded="true" aria-controls="ciEvdRegion">
                 <svg class="atl-evdchev" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
-                <span class="t">Show evidence</span>
+                <span class="t">Hide evidence</span>
               </button>
-              <div id="ciEvdRegion" hidden>
-              <div class="atl-tabpanel az-dd ci-dd" id="ciCtxPanel" role="tabpanel" aria-labelledby="ciCtxTab" hidden tabindex="0">
+              <div id="ciEvdRegion">
+              <div class="atl-tabpanel az-dd ci-dd" id="ciCtxPanel" role="tabpanel" aria-labelledby="ciCtxTab" tabindex="0">
+                  <!-- 1 · header band. Title, provenance chips and the four counts
+                       share one line; the journey sits directly under the numbers it
+                       explains (3 changed → 18 context) rather than floating alone. -->
                   <section class="atl-card">
-                    <div class="atl-ch">
-                      <span class="atl-ic sm accent" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v5h5"/><path d="M8 13h8M8 17h5"/></svg></span>
-                      <div class="t">
-                        <h3>PR review context audit</h3>
-                        <p>diff files, retrieved context, and GitHub comment mapping from the posted review payload</p>
+                    <div class="rc-hd">
+                      <div class="g">
+                        <div style="display:flex;align-items:center;gap:9px;min-width:0">
+                          <span class="atl-ic sm accent" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v5h5"/><path d="M8 13h8M8 17h5"/></svg></span>
+                          <div style="min-width:0">
+                            <div class="rc-eyebrow">Pull request context</div>
+                            <h3>PR review context audit</h3>
+                          </div>
+                        </div>
+                        <p class="sub">diff files, retrieved context, and GitHub comment mapping from the posted review payload</p>
                       </div>
-                      <div class="pills"><span class="label attest ci-engine">bundle · 86d69837</span><span class="label accent">~2.1k ctx tokens</span></div>
+                      <div class="r">
+                        <div class="pills"><span class="label attest ci-engine">bundle · 86d69837</span><span class="label accent">~2.1k ctx tokens</span></div>
+                        <!-- static: these four are properties of the bundle, not of the
+                             run state, so no repaint ever touches them -->
+                        <div class="rc-kpi">
+                          <div class="atl-mstat"><div class="v">3</div><div class="k">Changed diff files</div></div>
+                          <div class="atl-mstat"><div class="v">18</div><div class="k">Context files</div></div>
+                          <div class="atl-mstat"><div class="v">15</div><div class="k">Retrieved extras</div></div>
+                          <div class="atl-mstat"><div class="v">1</div><div class="k">Inline comments</div></div>
+                        </div>
+                      </div>
                     </div>
-                    <div class="atl-mgrid">
-                      <div class="atl-mstat"><div class="v">3</div><div class="k">Changed diff files</div></div>
-                      <div class="atl-mstat"><div class="v">18</div><div class="k">Context files</div></div>
-                      <div class="atl-mstat"><div class="v">15</div><div class="k">Retrieved extras</div></div>
-                      <div class="atl-mstat"><div class="v">1</div><div class="k">Inline comments</div></div>
+                    <div data-metric="rc-bundle-journey">
+                      <h4 class="atl-sect"><span class="lbl">How this bundle was built</span><span class="n">each stage added the evidence named under it</span></h4>
+                      <ol class="atl-prail" id="rcJourney" aria-label="How the review bundle was assembled"><!-- rcPaint --></ol>
                     </div>
                   </section>
 
+                  <!-- 2 · the legend sits beside the files it explains. Stacking these
+                       breaks the association the card exists to make. -->
                   <section class="atl-card">
                     <div class="atl-ch">
-                      <span class="atl-ic sm" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 2 9 5-9 5-9-5 9-5Z"/><path d="m3 12 9 5 9-5"/><path d="m3 17 9 5 9-5"/></svg></span>
+                      <span class="atl-ic sm accent" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 2 9 5-9 5-9-5 9-5Z"/><path d="m3 12 9 5 9-5"/><path d="m3 17 9 5 9-5"/></svg></span>
                       <div class="t">
                         <h3>Context enrichment — signal map</h3>
                         <p>every file in the bundle, traced back to the signal that put it there</p>
                       </div>
                       <div class="pills"><span class="label success">✓ changed files kept</span><span class="label accent">+15 retrieved</span></div>
                     </div>
-                    <ul class="atl-rows">
-                      <li class="atl-row"><span class="atl-ic sm accent" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4 3 20h18Z"/></svg></span><span class="t"><b>PR diff files</b><span>changed files from the GitHub pull-request diff</span></span><span class="v">3 files</span></li>
-                      <li class="atl-row"><span class="atl-ic sm accent" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.6-3.6"/></svg></span><span class="t"><b>Similarity retrieval</b><span>BM25 + vector fusion over the symbol index</span></span><span class="v">+6</span></li>
-                      <li class="atl-row"><span class="atl-ic sm accent" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="5" cy="6" r="2.5"/><circle cx="19" cy="6" r="2.5"/><circle cx="12" cy="18" r="2.5"/><path d="M7 7.5 10.5 16M17 7.5 13.5 16"/></svg></span><span class="t"><b>Graph blast radius</b><span>callers and callees of the matched symbols</span></span><span class="v">+7</span></li>
-                      <li class="atl-row"><span class="atl-ic sm accent" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 8 4.5v9L12 21l-8-4.5v-9Z"/><path d="M12 12v9M4 7.5l8 4.5 8-4.5"/></svg></span><span class="t"><b>Dependency signals</b><span>imports, edges and external packages Pulse resolved</span></span><span class="v">+2</span></li>
-                      <li class="atl-row"><span class="atl-ic sm accent" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h15l-3.5-3.5"/><path d="M20 16H5l3.5 3.5"/></svg></span><span class="t"><b>GitHub comment mapping</b><span>review findings mapped back onto pull-request diff lines</span></span><span class="v">1 inline</span></li>
-                    </ul>
-                    <h4 class="atl-sect">Context files <span class="n small subtle" id="ciMoreNote" aria-live="polite">Showing 10 of 18 · 3 diff · 6 similarity · 7 graph · 2 dependency</span></h4>
-                    <ul class="atl-fchips" id="ciFiles">
-                      <li><span class="fp">internal/ratelimit/limiter.go</span><span class="label accent ft">diff</span></li>
-                      <li><span class="fp">internal/ratelimit/limiter_test.go</span><span class="label accent ft">diff</span></li>
-                      <li><span class="fp">cmd/gateway/wiring.go</span><span class="label accent ft">diff</span></li>
-                      <li><span class="fp">internal/ratelimit/bucket.go</span><span class="label neutral ft">similarity</span></li>
-                      <li><span class="fp">internal/ratelimit/clock.go</span><span class="label neutral ft">similarity</span></li>
-                      <li><span class="fp">internal/ratelimit/options.go</span><span class="label neutral ft">similarity</span></li>
-                      <li><span class="fp">internal/throttle/fixedwindow.go</span><span class="label neutral ft">similarity</span></li>
-                      <li><span class="fp">internal/middleware/chain.go</span><span class="label neutral ft">similarity</span></li>
-                      <li><span class="fp">internal/ratelimit/doc.go</span><span class="label neutral ft">similarity</span></li>
-                      <li><span class="fp">internal/ingress/router.go</span><span class="label outline ft">graph</span></li>
-                      <li hidden class="cimore"><span class="fp">internal/ingress/handler.go</span><span class="label outline ft">graph</span></li>
-                      <li hidden class="cimore"><span class="fp">internal/ingress/middleware_test.go</span><span class="label outline ft">graph</span></li>
-                      <li hidden class="cimore"><span class="fp">internal/upstream/pool.go</span><span class="label outline ft">graph</span></li>
-                      <li hidden class="cimore"><span class="fp">internal/upstream/client.go</span><span class="label outline ft">graph</span></li>
-                      <li hidden class="cimore"><span class="fp">internal/telemetry/otel.go</span><span class="label outline ft">graph</span></li>
-                      <li hidden class="cimore"><span class="fp">internal/config/gateway.go</span><span class="label outline ft">graph</span></li>
-                      <li hidden class="cimore"><span class="fp">cmd/gateway/main.go</span><span class="label attest ft">dependency</span></li>
-                      <li hidden class="cimore"><span class="fp">go.mod</span><span class="label attest ft">dependency</span></li>
-                    </ul>
-                    <div class="ci-more"><button type="button" class="btn sm" id="ciMoreBtn" aria-expanded="false" aria-controls="ciFiles">+8 more context files</button></div>
+                    <div class="rc-split">
+                      <div class="l" data-metric="rc-selection-signals">
+                        <h4 class="atl-sect" style="margin-top:0"><span class="lbl">Retrieval sources</span></h4>
+                        <ul class="atl-rows" id="rcSignals"><!-- rcPaint --></ul>
+                        <!-- the comment is the evidence for the "GitHub comment mapping ·
+                             1 inline" row immediately above it, so it belongs here -->
+                        <h4 class="atl-sect"><span class="lbl">Mapped review comment</span><span class="n">1 inline</span></h4>
+                        <div class="rc-cmt">
+                          <div class="h"><b>@jdoe</b> · 1h ago <span class="sp"></span> <span class="mono">limiter.go · L73</span></div>
+                          <p>Consider using a monotonic clock source here to avoid time-skew issues.</p>
+                          <div class="m">Mapped to <span class="mono">internal/ratelimit/clock.go</span> via similarity retrieval — which is why that file is in the bundle.</div>
+                        </div>
+                      </div>
+                      <div class="r" data-metric="rc-included-context">
+                        <h4 class="atl-sect" style="margin-top:0"><span class="lbl">Context files</span><b id="rcCount" style="font:600 11.5px var(--font-sans);text-transform:none;letter-spacing:0;color:var(--fg)"></b><span class="n">3 diff · 6 similarity · 7 graph · 2 dependency</span></h4>
+                        <!-- inside the table's column, not above the panel: a banner is
+                             the thing a reader scrolls past on the way to the table -->
+                        <div class="rc-gap" id="rcGap" role="note" hidden><!-- rcPaint --></div>
+                        <!-- static: counts are per-signal and never move, and keeping the
+                             controls out of every repaint is what preserves search focus -->
+                        <div class="rc-pills" role="group" aria-label="Filter included files by signal">
+                          <button type="button" class="rc-pill" data-rcf="all" aria-pressed="true">All<span class="ct">18</span></button>
+                          <button type="button" class="rc-pill" data-rcf="diff" aria-pressed="false">Diff<span class="ct">3</span></button>
+                          <button type="button" class="rc-pill" data-rcf="similarity" aria-pressed="false">Similarity<span class="ct">6</span></button>
+                          <button type="button" class="rc-pill" data-rcf="graph" aria-pressed="false">Graph<span class="ct">7</span></button>
+                          <button type="button" class="rc-pill" data-rcf="dependency" aria-pressed="false">Dependency<span class="ct">2</span></button>
+                          <!-- deliberately NOT .act: narrowing evidence is a read, and the
+                               Analyst banner promises evidence stays fully readable -->
+                          <input type="search" class="rc-search" id="rcQ" placeholder="Search path or reason…" aria-label="Search included files by path or reason" aria-controls="rcRows" autocomplete="off">
+                        </div>
+                        <div class="tblwrap">
+                          <table class="tbl rc-t">
+                            <thead><tr><th scope="col">File</th><th scope="col">Source</th><th scope="col">Why included</th><th scope="col">Scope</th><th scope="col" style="text-align:right">Size</th></tr></thead>
+                            <tbody id="rcRows"><!-- rcRows --></tbody>
+                          </table>
+                        </div>
+                        <div class="rc-tf">
+                          <span>Every row states why it is present.</span>
+                          <span class="sp"></span>
+                          <button type="button" class="rc-pill" id="rcClear" hidden>Clear filter</button>
+                          <span id="rcSay" aria-live="polite" class="visually-hidden" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)"></span>
+                        </div>
+                      </div>
+                    </div>
                   </section>
 
+                  <!-- 3 · three concerns, three bordered boxes. Token savings is
+                       reported here and nowhere else — five of the six source mockups
+                       printed it twice, once as a card and again in the audit. -->
                   <section class="atl-card">
                     <div class="atl-ch">
-                      <span class="atl-ic sm" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 14 8.5 9.5"/><circle cx="12" cy="14" r="8"/><path d="M12 6V3M3.5 9 2 8M20.5 9 22 8"/></svg></span>
+                      <span class="atl-ic sm" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-8 9-4.5-1.5-8-4-8-9V5l8-3 8 3Z"/></svg></span>
                       <div class="t">
                         <h3>Index &amp; budget audit</h3>
-                        <p>phase timings, repository index size and the token budget this review actually spent</p>
+                        <p>phase timings, repository index size, and the token budget this review actually spent</p>
                       </div>
                       <div class="pills"><span class="label outline ci-engine">INDEX c1a7b930</span></div>
                     </div>
-
-                    <section class="ci-sub">
-                      <h3>Code index — phase audit</h3>
-                      <div class="barrow"><span class="blbl">git sync + worktree</span><span class="btrack"><i class="bar" style="width:1%"></i></span><span class="bval">0.1s</span></div>
-                      <div class="barrow"><span class="blbl">snapshot save (pg)</span><span class="btrack"><i class="bar" style="width:100%"></i></span><span class="bval">14s</span></div>
-                      <div class="barrow"><span class="blbl">semantic embed</span><span class="btrack"><i class="bar async" style="width:100%"></i></span><span class="bval">async</span></div>
-                      <p>Embeddings continue in the background; existing vectors stay live until the new set is upserted.</p>
-                    </section>
-
-                    <section class="ci-sub" style="margin-top:18px">
-                      <h3>Advanced code index <span class="label outline">graph + lexical + semantic</span></h3>
-                      <ul class="ci-rows">
-                        <li><span class="rn">Files indexed</span><span class="rd">Whole repository snapshot at commit <span class="mono">7e0a93c5</span></span><span class="rv">1,842</span></li>
-                        <li><span class="rn">Symbols indexed</span><span class="rd">Functions, methods, types and package-level values</span><span class="rv">28,410</span></li>
-                        <li><span class="rn">Symbols in diff</span><span class="rd">Symbols added or modified by this pull request</span><span class="rv">7</span></li>
-                        <li><span class="rn">Dependency edges</span><span class="rd">Call and import edges in the symbol graph</span><span class="rv">141,220</span></li>
-                        <li><span class="rn">Packages</span><span class="rd">External packages resolved for this diff</span><span class="rv">0</span></li>
-                      </ul>
-                    </section>
-
-                    <section class="ci-sub" style="margin-top:18px">
-                      <h3>Dependency signals in bundle <span class="label outline">3 edges</span></h3>
-                      <ul class="ci-edges">
-                        <li><span class="label neutral">calls</span><span class="ep">internal/ingress/router.go</span><span class="et">→ ratelimit.Limiter.Allow</span></li>
-                        <li><span class="label neutral">calls</span><span class="ep">internal/upstream/pool.go</span><span class="et">→ ratelimit.Bucket.Refill</span></li>
-                        <li><span class="label neutral">imports</span><span class="ep">cmd/gateway/main.go</span><span class="et">→ internal/ratelimit</span></li>
-                      </ul>
-                      <p>Edges are read from the index, not from the diff — they say what <em>could</em> reach the change, never what did.</p>
-                    </section>
-
-                    <section class="ci-sub" style="margin-top:18px">
-                      <h3>Token savings — context engine <span class="label success">~98% input tokens</span></h3>
-                      <div class="barrow"><span class="blbl">Whole-file (naive)</span><span class="btrack"><i class="bar naive" style="width:100%"></i></span><span class="bval">128.6K</span></div>
-                      <div class="barrow"><span class="blbl">Enriched bundle</span><span class="btrack"><i class="bar" style="width:1.6%"></i></span><span class="bval">2.1K</span></div>
-                      <p><span class="mono">126.5K</span> tokens saved on this review — the bundle carries the 18 files the signal map kept, not the 1,842 the index holds.</p>
-                    </section>
+                    <div class="rc-3up">
+                      <div class="rc-stack">
+                        <section class="atl-card">
+                          <div class="atl-ch">
+                            <span class="atl-ic sm accent" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 14 8.5 9.5"/><circle cx="12" cy="14" r="8"/><path d="M12 6V3M3.5 9 2 8M20.5 9 22 8"/></svg></span>
+                            <div class="t"><h3>Code index — phase audit</h3><p>freshness and indexing execution</p></div>
+                          </div>
+                          <div id="rcPhases"><!-- rcPaint --></div>
+                          <p class="small subtle" style="margin-top:8px">Embeddings continue in the background; existing vectors stay live until the new set is upserted.</p>
+                        </section>
+                        <section class="atl-card" data-metric="rc-token-savings">
+                          <div class="atl-ch">
+                            <span class="atl-ic sm accent" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5"/><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg></span>
+                            <div class="t"><h3 class="lbl">Token savings — context engine</h3></div>
+                            <div class="pills"><span class="label success">~98% input tokens</span></div>
+                          </div>
+                          <div class="barrow"><span class="blbl">Whole repository</span><span class="btrack"><i class="bar naive" style="width:100%"></i></span><span class="bval">128.6K</span></div>
+                          <div class="barrow"><span class="blbl">This bundle</span><span class="btrack"><i class="bar" style="width:1.6%"></i></span><span class="bval">2.1K</span></div>
+                          <div class="rc-saved"><b>126.5K tokens saved</b><span>The bundle carries the 18 files the signal map kept, not the 1,842 the index holds.</span></div>
+                        </section>
+                      </div>
+                      <section class="atl-card">
+                        <div class="atl-ch">
+                          <span class="atl-ic sm accent" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5"/><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg></span>
+                          <div class="t"><h3>Advanced code index</h3></div>
+                          <div class="pills"><span class="label outline">graph + lexical + semantic</span></div>
+                        </div>
+                        <ul class="ci-rows">
+                          <li><span class="rn">Files indexed</span><span class="rd">Whole repository snapshot at commit <span class="mono">7e0a93c5</span></span><span class="rv">1,842</span></li>
+                          <li><span class="rn">Symbols indexed</span><span class="rd">Functions, methods, types and package-level values</span><span class="rv">28,410</span></li>
+                          <li><span class="rn">Symbols in diff</span><span class="rd">Symbols added or modified by this pull request</span><span class="rv">7</span></li>
+                          <li><span class="rn">Dependency edges</span><span class="rd">Call and import edges in the symbol graph</span><span class="rv">141,220</span></li>
+                          <li><span class="rn">Retrieval</span><span class="rd">How the bundle was assembled from the index</span><span class="rv">BM25 + vector + graph</span></li>
+                          <li class="tot"><span class="rn">Phases resolved</span><span class="rd">Retrieval stages that completed on this run</span><span class="rv" id="rcPhaseCt">6 of 6</span></li>
+                        </ul>
+                      </section>
+                      <section class="atl-card">
+                        <div class="atl-ch">
+                          <span class="atl-ic sm accent" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="19" r="3"/><circle cx="18" cy="5" r="3"/><path d="M9 19h4a4 4 0 0 0 4-4V9"/></svg></span>
+                          <div class="t"><h3>Dependency signals in bundle</h3></div>
+                          <div class="pills"><span class="label outline">3 edges</span></div>
+                        </div>
+                        <ul class="ci-edges">
+                          <li><span class="label neutral">calls</span><span class="ep">internal/ingress/router.go</span><span class="et">→ ratelimit.Limiter.Allow</span></li>
+                          <li><span class="label neutral">calls</span><span class="ep">internal/upstream/pool.go</span><span class="et">→ ratelimit.Bucket.Refill</span></li>
+                          <li><span class="label neutral">imports</span><span class="ep">cmd/gateway/main.go</span><span class="et">→ internal/ratelimit</span></li>
+                        </ul>
+                        <p class="small subtle" style="margin-top:8px">Edges are read from the index, not from the diff — they say what <em>could</em> reach the change, never what did.</p>
+                      </section>
+                    </div>
                   </section>
 
               </div>
 
               <!-- ===== Impact paths ===== -->
-              <div class="atl-tabpanel az-dd ci-dd" id="ciPathsPanel" role="tabpanel" aria-labelledby="ciPathsTab" tabindex="0">
+              <div class="atl-tabpanel az-dd ci-dd" id="ciPathsPanel" role="tabpanel" aria-labelledby="ciPathsTab" tabindex="0" hidden>
 
                   <section class="atl-card" id="ciBlast">
                     <div class="atl-ch">
@@ -3403,7 +3808,9 @@ const PS = (() => {
     const activate = t=>{
       tabs.forEach(x=>{ x.setAttribute('aria-selected', String(x===t)); x.tabIndex = x===t?0:-1;
         const p = document.getElementById(x.getAttribute('aria-controls')); if(p) p.hidden = x!==t; });
-      if(tl.dataset.tabsHash) history.replaceState(null,'','#'+t.dataset.tab);
+      /* keep the query string: a bare '#tab' resolves against the base URL and silently
+         drops ?atlas= before the module that reads it ever runs */
+      if(tl.dataset.tabsHash) history.replaceState(null,'',location.pathname+location.search+'#'+t.dataset.tab);
     };
     tabs.forEach(t=>{ t.addEventListener('click',()=>activate(t));
       t.addEventListener('keydown',e=>{ const i=tabs.indexOf(t); let next=-1;
@@ -3762,6 +4169,54 @@ const PS = (() => {
   /* 360° strip idempotence cache — up here with S: render360() runs via
      applyRole → renderMerge during composer mounting, mid-file (TDZ rule, 4th proof). */
   let p360Cache='';
+  /* Review-context state — up here for the same reason (TDZ rule, 5th proof).
+     rcPaint() is reached from ciSet(), and ciSet() is called at init; declaring
+     these next to the module below only works while every call site happens to
+     sit lower in the file. rcFilter is the dangerous one: read as `undefined`
+     it fails the `!=='all'` test and renders a silently EMPTY table rather than
+     crashing, which is the kind of bug that ships. */
+  let rcFilter='all', rcQuery='';
+  let rcSayT=0;
+  /* Review-context data — hoisted with rcFilter above; see the TDZ note there. */
+  const RC_FILES=[
+    {g:'diff',p:'internal/ratelimit/limiter.go',w:'Core rate-limit decision flow',s:'Full file',z:'2.1 KB'},
+    {g:'diff',p:'internal/ratelimit/limiter_test.go',w:'Tests the changed limiter behaviour',s:'Full file',z:'3.4 KB'},
+    {g:'diff',p:'cmd/gateway/wiring.go',w:'Wires the middleware into the gateway',s:'Full file',z:'1.6 KB'},
+    {g:'similarity',p:'internal/ratelimit/bucket.go',w:'Related token-bucket implementation',s:'Top 20%',z:'2.7 KB'},
+    {g:'similarity',p:'internal/ratelimit/clock.go',w:'Time source used by the limiter',s:'Top 20%',z:'1.1 KB'},
+    {g:'similarity',p:'internal/ratelimit/options.go',w:'Limiter configuration and defaults',s:'Top 20%',z:'1.3 KB'},
+    {g:'similarity',p:'internal/throttle/fixedwindow.go',w:'Alternate rate-limit strategy',s:'Top 20%',z:'2.2 KB'},
+    {g:'similarity',p:'internal/ratelimit/window.go',w:'Sliding-window comparison',s:'Top 20%',z:'1.9 KB'},
+    {g:'similarity',p:'internal/ratelimit/metrics.go',w:'Limiter instrumentation',s:'Top 20%',z:'0.9 KB'},
+    {g:'graph',p:'internal/ingress/router.go',w:'Calls the modified limiter on the ingress path',s:'Call path',z:'2.8 KB'},
+    {g:'graph',p:'internal/upstream/pool.go',w:'Downstream refill dependency',s:'Call path',z:'3.6 KB'},
+    {g:'graph',p:'internal/middleware/chain.go',w:'Middleware chain that mounts the limiter',s:'Call path',z:'1.4 KB'},
+    {g:'graph',p:'internal/ratelimit/refill.go',w:'Callee of Bucket.Refill',s:'Call path',z:'1.2 KB'},
+    {g:'graph',p:'cmd/gateway/main.go',w:'Imports the ratelimit package',s:'Import',z:'0.8 KB'},
+    {g:'graph',p:'internal/ingress/handler.go',w:'Handler behind the rate-limited route',s:'Call path',z:'2.3 KB'},
+    {g:'graph',p:'internal/observability/metrics.go',w:'Records limiter rejections',s:'Call path',z:'1.1 KB'},
+    /* not files in this repository, but they ARE in the bundle — so Scope reads
+       Import and Size has to be blank. If a third exception appears the table
+       wants a Kind column rather than more blanks. */
+    {g:'dependency',p:'golang.org/x/time/rate',w:'External limiter primitives',s:'Import',z:'—'},
+    {g:'dependency',p:'github.com/cespare/xxhash/v2',w:'Hashing utility used by bucket',s:'Import',z:'—'}
+  ];
+  const RC_GROUPS=[
+    {k:'diff',t:'Changed files',r:'Direct pull-request scope'},
+    {k:'similarity',t:'Similarity retrieval',r:'BM25 + vector fusion'},
+    {k:'graph',t:'Graph-linked files',r:'Callers, callees and imports'},
+    {k:'dependency',t:'Dependency signals',r:'Imports and external packages'}
+  ];
+  const RC_ICON={
+    file:'<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v5h5"/>',
+    find:'<circle cx="11" cy="11" r="7"/><path d="m20 20-3.6-3.6"/>',
+    graph:'<circle cx="5" cy="6" r="2.5"/><circle cx="19" cy="6" r="2.5"/><circle cx="12" cy="18" r="2.5"/><path d="M7 7.5 10.5 16M17 7.5 13.5 16"/>',
+    link:'<path d="m12 3 8 4.5v9L12 21l-8-4.5v-9Z"/><path d="M12 12v9M4 7.5l8 4.5 8-4.5"/>',
+    flask:'<path d="M9 3h6M10 3v6L5 19a2 2 0 0 0 1.8 3h10.4A2 2 0 0 0 19 19l-5-10V3"/>',
+    box:'<path d="m12 2 9 5v10l-9 5-9-5V7l9-5Z"/><path d="m3 7 9 5 9-5M12 12v10"/>',
+    warn:'<path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/><path d="M12 9v4M12 17h.01"/>',
+    map:'<path d="M4 8h15l-3.5-3.5"/><path d="M20 16H5l3.5 3.5"/>'
+  };
   /* Pill icons (lucide paths). Same reason as p360Cache — the render graph reads
      this mid-file, so it cannot be declared next to render360(). */
   const P360_IC={
@@ -4124,6 +4579,31 @@ const PS = (() => {
 
   /* metric definitions — every metric card on this page has one (PS.mountMetricDefs adds the ?) */
   window.METRIC_DEFS={
+    'rc-bundle-journey':{title:'How this bundle was built',
+      formula:'The six retrieval stages that turned the 3 changed files into the 18-file review bundle: the diff itself, similarity retrieval, graph expansion, dependency resolution, test selection, and the final bundle. Each stage reports what it added, not a running total.',
+      source:'Atlas bundle 86d69837 · snapshot index c1a7b930',
+      scope:'PR #482 · head commit 7e0a93c5 · aziron/gateway-api',
+      caveat:'On a degraded run a stage reports what it could reach rather than a zero — "in-repo only" means the cross-repo phase did not run, not that no consumers exist. The connector leaving an unresolved stage is drawn dashed for the same reason.'},
+    'rc-selection-signals':{title:'Why this context was selected',
+      formula:'Each file in the bundle attributed to the one signal that placed it there: the PR diff, similarity retrieval (BM25 + vector fusion), graph blast radius (callers and callees), dependency resolution, or GitHub comment mapping. The counts sum to the 18-file bundle.',
+      source:'run 06cb9564 · Atlas retrieval phases',
+      scope:'PR #482 · 18 bundle files',
+      caveat:'A signal that never ran is listed as unresolved rather than omitted — an absent consumer set is indistinguishable from no consumer set, so it is stated in words rather than left to a count.'},
+    'rc-included-context':{title:'Included context',
+      formula:'Every file Atlas sent to the review, with the signal that selected it, the reason it was kept, how much of it was included (full file, top 20% by similarity, call path, or import) and its size.',
+      source:'Atlas context bundle 86d69837',
+      scope:'PR #482 · 18 files · 3 diff, 6 similarity, 7 graph, 2 dependency',
+      caveat:'The two dependency rows are packages, not files in this repository. They are genuinely in the bundle, so Scope reads Import and Size is blank rather than zero. Filtering and search narrow the view only — they never change what was sent.'},
+    'rc-token-savings':{title:'Token savings',
+      formula:'Input tokens for the focused bundle measured against sending the whole repository snapshot: 128.6K for all 1,842 indexed files versus 2.1K for the 18 the signal map kept.',
+      source:'Atlas context engine · bundle 86d69837',
+      scope:'PR #482 · this review only',
+      caveat:'Reported once, here. Earlier drafts of this surface printed the same figure again inside the index audit; the audit footer now points back to this card instead.'},
+    'merge-gates':{title:'Merge gates',
+      formula:'The four conditions in gatesOk(): a Passed verdict covering the head commit, the SonarQube quality gate, 2 of 2 required approvals, and no open requested-changes review. The fraction counts how many are met; Merge unlocks only when all four are.',
+      source:'live PR state — run 06cb9564 · SonarQube analysis AQ4x82c9 · repository policy',
+      scope:'PR #482 · head commit 7e0a93c5 · aziron/gateway-api',
+      caveat:'Review findings are NOT a gate on this repository — an open finding holds the review, not the merge. They are listed as Advisory in the evidence below. A draft PR, a closed PR and a merged PR each short-circuit the gate evaluation.'},
     'security-summary':{title:'Security summary',
       formula:'New security issues on this PR by severity, rolled up from four sources: Pulse SAST findings (cat security), SonarQube security hotspots, dependency advisories (SCA), and secret detection. SCA advisories count into the severity strip alongside SAST findings; a source row is green only when it contributes zero open items.',
       source:'run 06cb9564 · pulse-sast · gitleaks · sonar-security',
@@ -5180,6 +5660,127 @@ const PS = (() => {
       $('#gvSub').innerHTML='Passed · run <a class="mono" href="run-details.html">06cb9564</a> · grade A';
     }
   }
+  /* ---- Checks → merge gates ------------------------------------------------
+     One model, mirroring gatesOk() field for field so the two can never disagree,
+     and one painter. Function declarations (not const) because this file's render
+     graph runs mid-script during composer mounting — a late const is a TDZ crash.
+     Findings are deliberately absent from the gate list: aiOpen() is not in
+     gatesOk(), so a finding holds the review, not the merge. */
+  function gateModel(){
+    const open=aiOpen(), stale=!!S.verdictStale, sqBad=SONAR.status==='ERROR';
+    const G=[
+      {k:'verdict',ok:!stale,wait:stale,n:'Attested verdict',
+       d:stale?('Run '+(S.staleRun||'')+' re-analyzing head '+(S.headSha||''))
+              :'Run 06cb9564 · grade A · covers head '+(S.headSha||'7e0a93c5'),
+       q:'required = Passed',act:'View run'},
+      {k:'quality',ok:!sqBad,wait:false,n:'Quality gate',
+       d:sqBad?('SonarQube failed — '+((SONAR.conditions.find(c=>!c.ok)||{}).metric||'a blocking condition').toLowerCase())
+              :'SonarQube passed · '+SONAR.conditions.length+' of '+SONAR.conditions.length+' conditions',
+       q:'required = Passed',act:'Open gate'},
+      {k:'approval',ok:S.approvals>=2,wait:false,n:'Human approval',
+       d:S.approvals+' of 2 required approvals'+(S.approvals?' · @priyar approved':''),
+       q:'required ≥ 2',act:'Request approval'},
+      {k:'changes',ok:!S.changesRequested,wait:false,n:'No requested changes',
+       d:S.changesRequested?'@mwebb requested changes':'No open requested-changes review',
+       q:'required = none',act:'View review'}
+    ];
+    const met=G.filter(g=>g.ok).length, all=met===G.length, fail=G.filter(g=>!g.ok);
+    /* the coverage delta is a static line in the markup so its metric "?" survives
+       repaints — the model only supplies the state message that sits above it */
+    let hd,sub,tone,acts;
+    if(S.merged){ tone='ok'; hd='Merged to <em class="okem">main</em>.';
+      sub='Verdict 06cb9564 was attested against the result.'; acts=''; }
+    else if(S.closed){ tone='warn'; hd='Closed without merging.';
+      sub='Verdict 06cb9564 is retained in the ledger.'; acts=''; }
+    else if(fail.length){
+      tone=(fail.length===1&&fail[0].wait)?'warn':'bad';
+      hd='Merge is blocked by <em>'+fail.map(g=>
+        g.k==='approval'?((2-S.approvals)+' outstanding approval'):
+        g.k==='verdict'?'a verdict re-analysis':
+        g.k==='quality'?'the quality gate':'a requested-changes review').join('</em> and <em>')+'</em>.';
+      /* conditional on purpose — must not appear when no findings are open */
+      sub=(open?'<b>'+open+' review finding'+(open===1?' is':'s are')+' also open</b> — advisory on this repository, so they hold the review, not the gate.':'');
+      acts='<button type="button" class="btn primary act" data-ckgo="'+fail[0].k+'">'+fail[0].act+'</button>'
+        +(open?'<button type="button" class="btn act" data-ckgo="findings">Review '+open+' finding'+(open===1?'':'s')+'</button>':'');
+    } else if(open){
+      tone='warn';
+      hd='Merge is <em class="okem">available</em> — '+open+' review finding'+(open===1?'':'s')+' still open.';
+      sub='All four gates are green. Findings are advisory here, so merging now is a judgement call, not a policy breach.';
+      acts='<button type="button" class="btn primary act" data-ckgo="findings">Review '+open+' finding'+(open===1?'':'s')+'</button>';
+    } else {
+      tone='ok'; hd='Ready to merge — <em>every gate is green</em>.';
+      sub='Verdict 06cb9564 attests head commit '+(S.headSha||'7e0a93c5')+', both approvals are in, no findings open.';
+      acts='';
+    }
+    return {G,met,all,fail,hd,sub,tone,acts,
+      grade:stale?'—':'A', gradeCls:stale?'g-none':'g-a',
+      lock:all?'Unlocked — squash and merge available'
+              :'Locked until '+(G.length-met===1?'the remaining gate clears':'the '+(G.length-met)+' remaining gates clear')};
+  }
+  /* var, not let: renderMerge() runs at line ~3945, long before this line executes.
+     A let would be in the temporal dead zone at that point and paintGates would throw
+     — which also aborts the rest of the first render pass. var hoists to undefined,
+     which is the falsy default this wants anyway. */
+  var ckShowMet=false;
+  function paintGates(){
+    const said=$('#ckSaid'); if(!said) return;      /* other pages reuse this script */
+    const M=gateModel(), done=S.merged||S.closed;
+    /* the decision this component makes: how much UI does this state deserve? */
+    const lean=M.all&&!done;
+    $('#ckLean').hidden=!lean; $('#ckFull').hidden=lean||done;
+    if(lean){
+      $('#ckLeanFrac').textContent=M.met+' of '+M.G.length+' gates met';
+      $('#ckLeanNames').innerHTML=M.G.map(g=>'<span title="'+escA(g.n+' — '+g.d+' · '+g.q)+'">'+esc(g.n)+'</span>').join(' · ');
+      $('#ckLeanMerge').textContent='Merge unlocked';
+    } else if(!done){
+      $('#ckFrac').textContent=M.met+' of '+M.G.length;
+      $('#ckCap').textContent='gates met · '+M.lock.toLowerCase();
+      const more=$('#ckMore');
+      more.hidden=!M.met;
+      more.textContent=ckShowMet?'Hide met gates':'Show '+M.met+' met gate'+(M.met===1?'':'s');
+      more.setAttribute('aria-expanded',String(ckShowMet));
+      /* met-gate names are the at-a-glance summary the peer chips used to give; they
+         collapse away once the reader expands the rows so the label isn't said twice */
+      const metNames=$('#ckMetNames');
+      if(metNames) metNames.textContent=(!ckShowMet&&M.met)?M.G.filter(g=>g.ok).map(g=>g.n).join(' · '):'';
+      /* unmet gates lead and are never collapsed — an action must not sit behind a
+         disclosure. Met gates join, after the blocker, only when disclosed or selected. */
+      $('#ckGateList').innerHTML=M.G
+        .filter(g=>ckShowMet||!g.ok||ckSeg===g.k)
+        .sort((a,b)=>(a.ok?1:0)-(b.ok?1:0))
+        .map(g=>{
+          const cls=g.ok?'ok':g.wait?'wait':'bad', gl=g.ok?'✓':g.wait?'⏳':'!';
+          return '<div class="ck-g'+(g.ok?' met':'')+'"><span class="gi '+cls+'" aria-hidden="true">'+gl+'</span>'
+            +'<span class="gn">'+esc(g.n)+'</span><span class="gd">'+g.d+'</span><span class="gq">'+g.q+'</span>'
+            +'<span class="ga">'+(g.ok?'':'<button type="button" class="btn sm act" data-ckgo="'+g.k+'">'+g.act+'</button>')+'</span></div>';
+        }).join('');
+    }
+    said.dataset.tone=M.tone;
+    $('#ckHd').innerHTML=M.hd;
+    $('#ckSubMsg').innerHTML=M.sub;
+    $('#ckSubMsg').hidden=!M.sub;
+    $('#ckActs').innerHTML=M.acts;
+    $('#ckGrade').className='grade gr '+M.gradeCls;
+    $('#ckGrade').textContent=M.grade;
+  }
+  /* delegated so repaints can never orphan a handler; every target already exists */
+  document.addEventListener('click',e=>{
+    const m=e.target.closest('#ckMore');
+    if(m){ ckShowMet=!ckShowMet; ckSeg=null; paintGates(); return; }
+    const b=e.target.closest('[data-ckgo]'); if(!b) return;
+    const k=b.dataset.ckgo;
+    if(k==='verdict'){ location.href='run-details.html'; }
+    else if(k==='quality'){ $('[data-metric="sonar-quality-gate"]')?.scrollIntoView({block:'center'}); }
+    else if(k==='approval'){
+      const tog=$('[data-sbsec="reviewers"]');
+      if(tog){ if(tog.getAttribute('aria-expanded')!=='true') tog.click();
+        tog.closest('.sb-sec')?.scrollIntoView({block:'center'}); }
+      PS.toast('Request a second approval from the People card — ＋ adds a reviewer');
+    }
+    else if(k==='changes'){ goTab('conversation'); }
+    else if(k==='findings'){ goTab('files'); }
+  });
+
   /* Single writer for every SonarQube surface: sidebar gate row, Checks chip +
      security summary row, and the provenance footnote. An analysis covers exactly one
      head commit, so a moved head (S.verdictStale) sends the gate pending too. */
@@ -5333,6 +5934,20 @@ const PS = (() => {
       ? '<strong>Applied: 98.7% · grade A</strong> <span class="subtle">(simulation — all suggested tests added)</span>'
       : '<strong>Projected: '+proj.toFixed(1)+'% (+'+Math.max(0,proj-pct).toFixed(1)+') · grade '+covBand(proj)+'</strong>'
         +(pct<80&&proj>=80?' <span class="subtle">· clears the 80% quality gate</span>':'');
+    /* Projected marker rides above the bar at whatever the current selection lands
+       on. Hidden once applied — the projection and the live number are the same
+       figure then, and the header label already states it. */
+    const flag=$('#covFlag');
+    if(flag){
+      flag.hidden=applied;
+      flag.style.left=proj.toFixed(2)+'%';
+      flag.classList.toggle('end',proj>=50);
+      flag.querySelector('em').textContent=proj.toFixed(1)+'% projected';
+    }
+    const head=$('#covHead'); if(head) head.hidden=applied;
+    const all=$('#covAll');
+    if(all){ all.checked=sel.length===gaps.length;
+             all.indeterminate=sel.length>0&&sel.length<gaps.length; }
     $('#covRows').innerHTML=gaps.map(g=>{
       const on=applied||covSel.has(g.id);
       return '<div class="cov-gap'+(applied?' is-done':'')+'">'
@@ -5347,7 +5962,11 @@ const PS = (() => {
         +(applied?'<span class="label success">Added</span>'
                  :'<span class="label '+(on?'success':'outline')+' cov-delta">+'+(g.n/total*100).toFixed(1)+'%</span>')
         +'</div>';}).join('');
-    let run=base, parts=[pct.toFixed(1)+' '+band], lb=band;
+    /* Once the plan is applied its gaps are already inside pct, so walking them
+       again from there ladders past 100%. Start from the pre-plan covered count
+       instead — the strip then shows the path that was actually taken. */
+    const lbase=applied?COVPLAN.covered:base, lpct=applied?COVPLAN.covered/total*100:pct;
+    let run=lbase, parts=[lpct.toFixed(1)+' '+covBand(lpct)], lb=covBand(lpct);
     sel.forEach(g=>{ run+=g.n; const p=run/total*100, b2=covBand(p);
       parts.push(p.toFixed(1)+(b2!==lb?' '+b2:'')); lb=b2; });
     $('#covLadder').innerHTML=parts.length>1
@@ -5657,6 +6276,9 @@ const PS = (() => {
     if(a){ setScaSim(a.value==='adv'); return; }
     const cv=e.target.closest('input[name="covsim"]');
     if(cv){ setCovSim(cv.value==='improved'); return; }
+    const ca=e.target.closest('#covAll');
+    if(ca){ covGaps().forEach(g=>ca.checked?covSel.add(g.id):covSel.delete(g.id));
+            renderCovPlan(); return; }
     const cs=e.target.closest('input[data-covsel]');
     if(cs){ cs.checked?covSel.add(cs.dataset.covsel):covSel.delete(cs.dataset.covsel); renderCovPlan(); }
   });
@@ -5694,6 +6316,9 @@ const PS = (() => {
   }
   function renderMerge(){
     syncReadiness();
+    /* at the top, not the end: this function returns early for merged/closed, and
+       the gates panel has something to say in those states too */
+    paintGates();
     $('#mergeLive').hidden = S.merged || S.closed;
     $('#mergeDone').hidden = !S.merged;
     $('#mergeClosed').hidden = !S.closed;
@@ -5929,6 +6554,9 @@ const PS = (() => {
     if(announce) PS.toast(deg
       ? 'Degraded Atlas run — cross-repo impact unavailable. Verdict 06cb9564 and the merge gate are unchanged.'
       : 'Healthy Atlas run — all index and impact phases completed.','success');
+    /* the Review context sub-tab reads data-atlas rather than keeping its own copy,
+       so it repaints from the same switch the rest of the panel already obeys */
+    rcPaint();
   }
   ciBtn.addEventListener('click',()=>{
     /* The footer control is available on every PR tab; make its result visible
@@ -5937,27 +6565,156 @@ const PS = (() => {
     ciSet(ciPanel.dataset.atlas==='degraded'?'healthy':'degraded',true);
   });
 
-  /* Evidence region is collapsed on arrival — the three panels run to ~1800px and
-     the tab should open on the verdict, not the audit. The tab strip stays visible
-     either way, so its counts still summarise what is inside. Picking a tab is an
-     intent to read it, so a tab click opens the region as well as switching it. */
+  /* Review context is open on arrival. The strip stays visible either way, so its
+     counts still summarise what is inside. Picking a tab is an intent to read it,
+     so a tab click opens the region as well as switching it. */
   const ciEvdTog=$('#ciEvdTog'), ciEvdRegion=$('#ciEvdRegion');
   function ciEvdSet(open){
     ciEvdRegion.hidden=!open;
     ciEvdTog.setAttribute('aria-expanded',String(open));
     $('.t',ciEvdTog).textContent=open?'Hide evidence':'Show evidence';
   }
+  ciEvdSet(true);
   ciEvdTog.addEventListener('click',()=>ciEvdSet(ciEvdRegion.hidden));
   $$('.atl-tabs [role="tab"]').forEach(t=>t.addEventListener('click',()=>ciEvdSet(true)));
 
-  /* "+8 more context files" — reveals the 8 files held back behind the fold */
-  const ciMoreBtn=$('#ciMoreBtn'), ciMoreNote=$('#ciMoreNote'), ciHidden=$$('#ciFiles .cimore');
-  ciMoreBtn.addEventListener('click',()=>{
-    const open=ciMoreBtn.getAttribute('aria-expanded')==='true';
-    ciHidden.forEach(li=>{ li.hidden=open; });
-    ciMoreBtn.setAttribute('aria-expanded',String(!open));
-    ciMoreBtn.textContent=open?'+8 more context files':'Show first 10 only';
-    ciMoreNote.textContent=(open?'Showing 10 of 18':'Showing all 18')+' · 3 diff · 6 similarity · 7 graph · 2 dependency';
+  /* ---------- Review context: the retrieval audit ----------------------------
+     Ported from design-lab/review-context/hybrid.html. The lab file carried its
+     own complete/partial switcher; here the panel's data-atlas IS the state, so
+     rcPaint() reads it and ciSet() calls it — one source, and the sub-tab can
+     never disagree with the verdict header above it.
+
+     Two repaint targets on purpose. rcPaint() rewrites the state-dependent
+     regions (journey, signals, gap notice, phase bars); rcRows() rewrites only
+     the tbody. That split is what lets the search box keep focus and caret
+     across a keystroke — #rcQ is never inside a region that repaints.
+     Data and filter state are declared up with S, per this file’s TDZ rule. */
+  function rcSvg(k,sz){
+    return '<svg xmlns="http://www.w3.org/2000/svg" width="'+sz+'" height="'+sz+'" viewBox="0 0 24 24" fill="none" '
+      +'stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+RC_ICON[k]+'</svg>';
+  }
+  /* The bundle still holds 18 files on a degraded run and still LOOKS complete —
+     an absent consumer set is indistinguishable from no consumer set. No count
+     can express that, so the gap is stated in words, in the two places a reader
+     would otherwise draw the wrong conclusion: the journey and the table. */
+  function rcModel(){
+    var deg=ciPanel.dataset.atlas==='degraded';
+    return {
+      deg:deg,
+      journey:[
+        {n:'Diff',ic:'file',v:'3 files',c:'changed in this pull request'},
+        {n:'Similarity',ic:'find',v:'6 matches',c:'BM25 + vector fusion'},
+        deg?{n:'Graph',ic:'graph',v:'in-repo only',c:'cross-repo phase timed out',u:true}
+           :{n:'Graph',ic:'graph',v:'7 links',c:'callers, callees and imports'},
+        {n:'Dependencies',ic:'link',v:'2 signals',c:'external packages resolved'},
+        {n:'Tests',ic:'flask',v:'86 selected',c:'cover the affected behaviour'},
+        {n:'Bundle',ic:'box',v:'2.1K',c:'context tokens sent'}
+      ],
+      sigs:[
+        {ic:'file',t:'PR diff files',d:'Changed directly in the pull-request diff',v:'3 files'},
+        {ic:'find',t:'Similarity retrieval',d:'BM25 + vector fusion over the symbol index',v:'+6'},
+        {ic:'graph',t:'Graph blast radius',d:deg?'Callers and callees inside this repository only':'Callers and callees of the matched symbols',v:'+7'},
+        {ic:'link',t:'Dependency signals',d:'Imports and external packages Pulse resolved',v:'+2'},
+        {ic:'map',t:'GitHub comment mapping',d:'Review findings mapped back onto diff lines',v:'1 inline'}
+      ].concat(deg?[{ic:'warn',u:true,t:'Cross-repo consumers',d:'Consumer repositories were never searched on this run',v:'unresolved'}]:[]),
+      gap:deg?'This bundle is complete <b>for this repository only</b>. The cross-repo phase timed out after 30s, so files from consumer repositories are absent — because the phase that finds them did not run, not because none exist. Every row below is still fully traced.':'',
+      phases:[
+        {n:'git sync + worktree',w:1,v:'0.1s'},
+        {n:'snapshot save (pg)',w:100,v:'14s'},
+        {n:'semantic embed',w:100,v:'async',async:true}
+      ].concat(deg?[{n:'cross-repo graph',w:100,v:'30s ✕',u:true}]:[]),
+      phaseCt:deg?'5 of 6':'6 of 6'
+    };
+  }
+  /* Only the tbody. The pills, the search box and the footer are static — the
+     footer's Clear button is toggled with .hidden, never re-created — so a
+     keystroke can never destroy the element the caret is in. */
+  function rcRows(){
+    var body=$('#rcRows'); if(!body) return;      /* other pages reuse this script */
+    var shown=RC_FILES.filter(function(f){
+      if(rcFilter!=='all' && f.g!==rcFilter) return false;
+      if(rcQuery && (f.p+' '+f.w).toLowerCase().indexOf(rcQuery)<0) return false;
+      return true;
+    });
+    var h='';
+    RC_GROUPS.forEach(function(g){
+      var rows=shown.filter(function(f){return f.g===g.k});
+      if(!rows.length) return;
+      h+='<tr class="grp"><td colspan="5">'+esc(g.t)+' ('+rows.length+')<span class="rt">'+esc(g.r)+'</span></td></tr>';
+      h+=rows.map(function(f){
+        return '<tr><td class="f">'+esc(f.p)+'</td>'
+          +'<td><span class="rc-tag '+esc(f.g)+'">'+esc(f.g)+'</span></td>'
+          +'<td class="why">'+esc(f.w)+'</td>'
+          +'<td class="sc">'+esc(f.s)+'</td>'
+          +'<td class="sz">'+esc(f.z)+'</td></tr>';
+      }).join('');
+    });
+    body.innerHTML=h||'<tr><td colspan="5" class="none">No file matches that filter.</td></tr>';
+    var filtered=rcFilter!=='all'||!!rcQuery;
+    /* short form: this now sits in the column's section label beside the source
+       breakdown, so the explanatory clause lives in the static footer instead */
+    $('#rcCount').textContent='Showing '+shown.length+' of '+RC_FILES.length;
+    $('#rcClear').hidden=!filtered;
+    $$('.rc-pills [data-rcf]').forEach(function(b){
+      b.setAttribute('aria-pressed',String(b.dataset.rcf===rcFilter));
+    });
+    /* The visible count updates on every keystroke, but announcing it that often
+       queues one message per character — typing "limiter" would read out seven
+       counts. The live region is separate and settles first, so a screen reader
+       hears the result once the typing stops. */
+    clearTimeout(rcSayT);
+    rcSayT=setTimeout(function(){
+      var live=$('#rcSay'); if(!live) return;
+      live.textContent=shown.length
+        ? shown.length+' of '+RC_FILES.length+' files shown'
+        : 'No file matches that filter';
+    },600);
+  }
+  function rcPaint(){
+    var j=$('#rcJourney'); if(!j) return;
+    var M=rcModel();
+    j.innerHTML=M.journey.map(function(s){
+      return '<li class="atl-ph'+(s.u?' u':'')+'">'
+        +'<span class="atl-pline" aria-hidden="true"></span>'
+        +'<span class="atl-pdot" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>'
+        +'<span class="atl-pn">'+esc(s.n)+'</span>'
+        +'<span class="atl-pv">'+esc(s.v)+'</span>'
+        +'<span class="atl-pc">'+esc(s.c)+'</span></li>';
+    }).join('');
+    $('#rcSignals').innerHTML=M.sigs.map(function(s){
+      return '<li class="atl-row'+(s.u?' u':'')+'">'
+        +'<span class="atl-ic sm accent" aria-hidden="true">'+rcSvg(s.ic,12)+'</span>'
+        +'<span class="t"><b>'+esc(s.t)+'</b><span>'+esc(s.d)+'</span></span>'
+        +'<span class="v">'+esc(s.v)+'</span></li>';
+    }).join('');
+    var gap=$('#rcGap');
+    gap.hidden=!M.gap;
+    gap.innerHTML=M.gap?rcSvg('warn',14)+'<span>'+M.gap+'</span>':'';
+    $('#rcPhases').innerHTML=M.phases.map(function(p){
+      return '<div class="barrow"><span class="blbl"'+(p.u?' style="color:var(--attention)"':'')+'>'+esc(p.n)+'</span>'
+        +'<span class="btrack"><i class="bar'+(p.async?' async':'')+'" style="width:'+p.w+'%'
+        +(p.u?';background:var(--attention)':'')+'"></i></span>'
+        +'<span class="bval"'+(p.u?' style="color:var(--attention)"':'')+'>'+esc(p.v)+'</span></div>';
+    }).join('');
+    $('#rcPhaseCt').textContent=M.phaseCt;
+    rcRows();
+  }
+  /* Delegated per house rule, not because these targets move: the pills, the
+     search box and #rcClear are all static markup and outlive every repaint. */
+  document.addEventListener('click',function(e){
+    var p=e.target.closest('.rc-pills [data-rcf]');
+    if(p){ rcFilter=p.dataset.rcf; rcRows(); return; }
+    if(e.target.closest('#rcClear')){
+      rcFilter='all'; rcQuery=''; $('#rcQ').value=''; rcRows();
+      /* the button hides itself the moment the filter clears — without this a
+         keyboard user is dropped on <body> and loses their place entirely */
+      $('#rcQ').focus();
+    }
+  });
+  document.addEventListener('input',function(e){
+    if(e.target.id!=='rcQ') return;
+    rcQuery=e.target.value.toLowerCase().trim();
+    rcRows();
   });
 
   /* ---------- Blast radius: in-repo impact graph + evidence rail ----------
@@ -6831,6 +7588,171 @@ const PS = (() => {
   syncViewed();
   syncCounts();
   renderPending();
+  /* ================= PROTOTYPE · exceptions-first check evidence =================
+     A/B for the evidence grid: "all rows" (today) vs "only what needs attention", where
+     each card keeps a ✓ N passed chip that reopens it. Presentation only — it reads the
+     glyph classes the existing renderers already set, and writes nothing they read, so
+     syncCoverage()/renderSecSummary()/renderSonarCard() stay the source of truth. */
+  /* ================= Check evidence layout =================
+     Banner + tiles above the readiness cards, and Current/Target columns inside the two
+     cards that carry thresholds. Everything is read from the DOM the existing renderers
+     own (glyph classes, .cdt text, the gate strip), so this can never state a number the
+     cards below it disagree with. It transforms the real cards — never clones — so the
+     ?-definitions, View plan and Open in SonarQube links keep their handlers. */
+  function ckEvidenceInit(){
+    const panel=$('#panel-checks'), grid=$('.rgrid');
+    if(!panel||!grid) return;
+    let painting=false, obs=null;
+
+    const compBox=document.createElement('div');
+    compBox.className='ck-comp';
+    grid.before(compBox);
+
+    const ICON={
+      'pr-review-readiness':'<path d="M6 3v12"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="6" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/>',
+      'ut-readiness':'<path d="M9 3v6l-5 9a2 2 0 0 0 2 3h12a2 2 0 0 0 2-3l-5-9V3"/><path d="M8 3h8"/>',
+      'security-readiness':'<path d="M20 13c0 5-3.5 7.5-8 9-4.5-1.5-8-4-8-9V5l8-3 8 3Z"/>',
+      'sonar-quality-gate':'<path d="M3 12a9 9 0 0 1 9-9"/><path d="M7 12a5 5 0 0 1 5-5"/><circle cx="12" cy="12" r="1.6"/>',
+      'perf-bench':'<path d="M12 14 8.5 9.5"/><circle cx="12" cy="14" r="8"/><path d="M12 6V3"/>'
+    };
+    const svg=d=>'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" '
+      +'stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+d+'</svg>';
+
+    /* "↗ Improvement available" is an opportunity, not an unmet check — it must not colour
+       a tile amber or inflate the pending count, or the page reads as failing when it isn't */
+    const isWait=r=>{
+      const g=r.querySelector('.cgl.pend');
+      return !!g && g.getAttribute('aria-label')!=='Improvement available';
+    };
+    /* read the pre-split text, since the column split rewrites .cdt into two spans */
+    const rawVal=r=>{
+      const c=r.querySelector('.cdt'); if(!c) return '';
+      return (c.dataset.raw!==undefined?c.dataset.raw:c.textContent).replace(/View plan.*$/,'').trim();
+    };
+
+    /* a card with nothing wrong reads better as its own verdict chip than as its first row */
+    function tileFor(card){
+      const rows=$$('.ckrow',card);
+      const bad=rows.find(r=>r.querySelector('.cgl.bad'));
+      const wait=rows.find(isWait);
+      const tone=bad?'bad':(wait?'wait':'ok');
+      if(!bad&&!wait){
+        const chip=card.querySelector('.rch .label, .rch .sq-verdict, .sq-verdict');
+        if(chip) return {tone, value:chip.textContent.replace(/^✓\s*/,'').trim()};
+      }
+      const lead=bad||wait||rows[0];
+      return {tone, value:lead?rawVal(lead):'—'};
+    }
+
+    function paintHead(){
+      const m=(($('.ck-sum .frac')||{}).textContent||'').match(/(\d+)\s*of\s*(\d+)/);
+      const met=m?+m[1]:0, total=m?+m[2]:0, unmet=Math.max(0,total-met);
+      const cards=$$('.rcard',grid);
+      const bads=[], waits=[];
+      cards.forEach(c=>$$('.ckrow',c).forEach(r=>{
+        if(r.querySelector('.cgl.bad')) bads.push(r); else if(isWait(r)) waits.push(r);
+      }));
+      /* this section cannot see the approval gate, so it never claims the merge is ready */
+      const tone=(unmet||bads.length)?'bad':(waits.length?'wait':'ok');
+      const title=unmet?'Needs attention':(bads.length?'Open issues in the evidence':'All checks passed');
+      const bits=[];
+      if(total) bits.push('<strong>'+met+' of '+total+'</strong> gates met');
+      if(bads.length) bits.push('<strong>'+bads.length+'</strong> failing check'+(bads.length>1?'s':''));
+      if(waits.length) bits.push('<strong>'+waits.length+'</strong> pending');
+      const sub=bits.join(' · ')+(unmet
+        ? ' — the remaining gate is stated in the strip above; this section does not gate the merge.'
+        : ' — evidence only; the merge gate is the attested verdict plus the approval policy.');
+
+      const metric=(k,sel,cls)=>{
+        const el=$(sel); if(!el) return '';
+        return '<div><div class="k">'+k+'</div><div class="v '+(cls||'')+'">'+el.textContent.trim()+'</div></div>';
+      };
+      const ban='<span class="bi" aria-hidden="true">'+(tone==='ok'?'✓':'!')+'</span>'
+        +'<div class="bt"><h3>'+title+'</h3><p>'+sub+'</p></div>'
+        +'<div class="bm">'
+        +metric('Unit tests','[data-metric="ut-readiness"] .ckrow .cdt','ok')
+        +metric('Quality gate','[data-metric="sonar-quality-gate"] .rch .label,'
+          +'[data-metric="sonar-quality-gate"] .sq-verdict','')
+        +'</div>';
+      let banEl=$('.ck-ban',compBox);
+      if(!banEl){ banEl=document.createElement('div'); banEl.className='ck-ban'; compBox.appendChild(banEl); }
+      banEl.dataset.tone=tone;
+      if(banEl.innerHTML!==ban) banEl.innerHTML=ban;
+
+      let tiles=$('.ck-tiles',compBox);
+      if(!tiles){
+        tiles=document.createElement('div');
+        tiles.className='ck-tiles';
+        tiles.setAttribute('role','group');
+        tiles.setAttribute('aria-label','Jump to evidence');
+        tiles.addEventListener('click',e=>{
+          const b=e.target.closest('.ck-tile'); if(!b) return;
+          const t=$('.rcard[data-metric="'+b.dataset.tile+'"]',grid);
+          if(!t) return;
+          t.scrollIntoView({block:'center'});
+          t.classList.remove('p360-flash'); void t.offsetWidth; t.classList.add('p360-flash');
+          setTimeout(()=>t.classList.remove('p360-flash'),1700);
+        });
+        compBox.appendChild(tiles);
+      }
+      const html=cards.map(c=>{
+        const k=c.dataset.metric, t=tileFor(c);
+        const lc=c.querySelector('.lbl').cloneNode(true);
+        $$('.mdef,.sq-mark',lc).forEach(n=>n.remove());
+        return '<button type="button" class="ck-tile '+t.tone+'" data-tile="'+k+'">'
+          +'<span class="ti" aria-hidden="true">'+svg(ICON[k]||'')+'</span>'
+          +'<span class="tt"><span class="tn">'+lc.textContent.trim()+'</span>'
+          +'<span class="tv">'+t.value+'</span></span>'
+          +'<span class="tc" aria-hidden="true">›</span></button>';
+      }).join('');
+      if(tiles.innerHTML!==html) tiles.innerHTML=html;
+    }
+
+    /* "0 · required = 0" is one ambiguous string; split it under Current/Target headers.
+       Idempotent, because renderSonarCard() rewrites these rows wholesale on every repaint. */
+    const SPLIT={'sonar-quality-gate':['Current','Target'],'perf-bench':['Result','Budget']};
+    function splitCols(){
+      Object.keys(SPLIT).forEach(k=>{
+        const card=$('.rcard[data-metric="'+k+'"]',grid); if(!card) return;
+        if(!$('.ck-colh',card)){
+          const head=document.createElement('div');
+          head.className='ck-colh';
+          head.innerHTML='<span>Check</span><span class="h1">'+SPLIT[k][0]
+            +'</span><span class="h2">'+SPLIT[k][1]+'</span>';
+          const first=$('.ckrow',card);
+          if(first) first.parentNode.insertBefore(head,first);
+        }
+        $$('.ckrow',card).forEach(row=>{
+          const cdt=row.querySelector('.cdt'); if(!cdt) return;
+          if(cdt.dataset.raw===undefined) cdt.dataset.raw=cdt.textContent;
+          const parts=cdt.dataset.raw.split(' · ');
+          if(parts.length!==2) return;
+          /* the column header now carries the noun, so drop it from every cell */
+          const tgt=parts[1].trim().replace(/^(required|budget)\s+/,'');
+          const want='<span class="cv">'+parts[0].trim()+'</span><span class="ct">'+tgt+'</span>';
+          if(cdt.innerHTML!==want) cdt.innerHTML=want;
+          row.classList.add('split');
+        });
+      });
+    }
+
+    /* paint() writes into the tree the observer watches, so it detaches first and only
+       writes values that actually changed — otherwise each paint schedules the next one */
+    function paint(){
+      if(painting) return;
+      painting=true;
+      if(obs) obs.disconnect();
+      splitCols();
+      paintHead();
+      if(obs) obs.observe(grid,{subtree:true,childList:true,characterData:true,attributeFilter:['class']});
+      painting=false;
+    }
+
+    obs=new MutationObserver(()=>{ if(!painting) paint(); });
+    obs.observe(grid,{subtree:true,childList:true,characterData:true,attributeFilter:['class']});
+    paint();
+  }
+
   applyScope();
   applyRole();
   renderSonarCard();
@@ -6843,6 +7765,7 @@ const PS = (() => {
   syncHash();
   wsInit();
   syncAzIntro();
+  ckEvidenceInit();
 })();
 </script>
 </body>
